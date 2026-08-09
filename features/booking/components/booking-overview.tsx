@@ -77,16 +77,7 @@ export async function BookingSettings() {
   return <BookingSettingsForm settings={settings} />;
 }
 
-export function BookingLinkDetailsSkeleton() {
-  return (
-    <div className="pt-1">
-      <div className="bg-divider/70 dark:bg-divider-dark h-4 w-44 rounded-full" />
-      <div className="bg-divider/60 dark:bg-divider-dark mt-3 h-3 w-64 max-w-full rounded-full" />
-    </div>
-  );
-}
-
-export function BookingSettingsSkeleton() {
+export function BookingSectionSkeleton() {
   return (
     <div className="pt-1">
       <div className="bg-divider/70 dark:bg-divider-dark h-4 w-44 rounded-full" />

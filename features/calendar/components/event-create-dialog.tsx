@@ -9,15 +9,12 @@ import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
-import { DURATION_OPTIONS } from '../utils/grid';
 import { CalendarPicker } from './calendar-picker';
+import { EventFields } from './event-fields';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
-const disabledTimeBlock =
-  'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
 const controlHeight = 'h-12';
-const titlePattern = '.*\\S.*';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const weekdayLabel = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'long' });
@@ -32,23 +29,8 @@ type FormValues = {
   title: string;
 };
 
-type State = { error?: string; key?: number; values?: FormValues };
-
 function optimisticEventId(day: string, values: Pick<FormValues, 'start' | 'title'>) {
   return `optimistic:${day}:${values.start}:${values.title}:${Date.now()}`;
-}
-
-function durationLabel(minutes: number) {
-  if (minutes < 60) return `${minutes} minutes`;
-  if (minutes === 60) return '1 hour';
-  if (minutes % 60 === 0) return `${minutes / 60} hours`;
-  return `${Math.floor(minutes / 60)} hr ${minutes % 60} min`;
-}
-
-function durationOptions(value: string) {
-  const current = Number(value);
-  const options = Number.isFinite(current) ? [...DURATION_OPTIONS, current] : DURATION_OPTIONS;
-  return [...new Set(options)].sort((a, b) => a - b);
 }
 
 export function EventCreateDialog({
@@ -79,7 +61,7 @@ export function EventCreateDialog({
   const writableCalendarId =
     defaultCalendarId ?? (calendarOptions.find(calendar => !calendar.isDemo) ?? calendarOptions[0])?.id;
 
-  const [state, formAction] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
+  const [, formAction] = useActionState(async (_prev: null, formData: FormData) => {
     const repeat = String(formData.get('repeat'));
     const allDay = formData.get('allDay') === 'on';
     const values = {
@@ -127,19 +109,19 @@ export function EventCreateDialog({
     if (result.error) {
       if (tempId) onCreateFailed?.(tempId);
       toast.error(result.error);
-      return {};
+      return null;
     }
     const created = result.data;
     if (!created) {
       if (tempId) onCreateFailed?.(tempId);
       toast.error('Event was saved, but the response was empty.');
-      return {};
+      return null;
     }
     toast.success('Event added to your calendar.');
-    return {};
-  }, {});
+    return null;
+  }, null);
 
-  const values = state.values ?? {
+  const values = {
     allDay: defaultAllDay,
     calendarId: writableCalendarId ?? '',
     description: '',
@@ -189,75 +171,15 @@ export function EventCreateDialog({
           action={formAction}
           className="mt-3 space-y-3"
           data-calendar-editing
-          key={state.key ?? 'new-event'}
           onKeyDown={handleSubmitShortcut}
         >
-          <label className="block">
-            <span className={fieldLabel}>Title</span>
-            <input
-              autoFocus
-              defaultValue={values.title}
-              name="title"
-              onInput={event => event.currentTarget.setCustomValidity('')}
-              onInvalid={event => event.currentTarget.setCustomValidity('Add a title before saving the event.')}
-              pattern={titlePattern}
-              placeholder="What's happening?"
-              required
-              className={controlHeight}
-            />
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              checked={allDay}
-              className="size-4 w-auto"
-              name="allDay"
-              onChange={event => setAllDay(event.target.checked)}
-              type="checkbox"
-            />
-            All day
-          </label>
-          <div
-            aria-disabled={allDay}
-            className={`${calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'} ${allDay ? disabledTimeBlock : ''}`}
-          >
-            <label className="block">
-              <span className={fieldLabel}>Starts at</span>
-              <input
-                className={controlHeight}
-                defaultValue={values.start}
-                disabled={allDay}
-                name={allDay ? undefined : 'start'}
-                type="time"
-              />
-              {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
-            </label>
-            <label className="block">
-              <span className={fieldLabel}>Duration</span>
-              <select
-                className={controlHeight}
-                defaultValue={values.duration}
-                disabled={allDay}
-                name={allDay ? undefined : 'duration'}
-              >
-                {durationOptions(values.duration).map(duration => (
-                  <option key={duration} value={duration}>
-                    {durationLabel(duration)}
-                  </option>
-                ))}
-              </select>
-              {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
-            </label>
-          </div>
-          {allDay ? <p className="text-muted -mt-1 text-xs">This event will fill the all-day row.</p> : null}
-          <label className="block">
-            <span className={fieldLabel}>Description</span>
-            <textarea
-              defaultValue={values.description}
-              name="description"
-              placeholder="Add notes, links, or context"
-              rows={2}
-            />
-          </label>
+          <EventFields
+            allDay={allDay}
+            controlHeight={controlHeight}
+            onAllDayChange={setAllDay}
+            titleInvalidMessage="Add a title before saving the event."
+            values={values}
+          />
           <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
             {calendarOptions.length > 0 ? (
               <div className="block">
@@ -278,7 +200,6 @@ export function EventCreateDialog({
               </select>
             </label>
           </div>
-          {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
           <div className="mt-4 flex justify-end gap-2">
             <Button render={<Ariakit.PopoverDismiss />} variant="ghost">
               Cancel

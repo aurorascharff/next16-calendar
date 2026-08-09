@@ -22,19 +22,19 @@ export function isCalendarColor(value: string): value is CalendarColor {
 type Variants = { darkBg: string; darkText: string; lightBg: string; lightText: string };
 
 const VARIANTS: Record<CalendarColor, Variants> = {
-  amber: { darkBg: '#c99a45', darkText: '#111114', lightBg: '#a86f12', lightText: '#ffffff' },
-  blue: { darkBg: '#6f8fe5', darkText: '#111114', lightBg: '#4f6ee6', lightText: '#ffffff' },
-  cyan: { darkBg: '#52a8ba', darkText: '#111114', lightBg: '#267f95', lightText: '#ffffff' },
-  fuchsia: { darkBg: '#c06bb9', darkText: '#111114', lightBg: '#aa3d9d', lightText: '#ffffff' },
-  green: { darkBg: '#5aaa74', darkText: '#111114', lightBg: '#2d8750', lightText: '#ffffff' },
-  indigo: { darkBg: '#8580db', darkText: '#111114', lightBg: '#595bc9', lightText: '#ffffff' },
-  magenta: { darkBg: '#c16ba7', darkText: '#111114', lightBg: '#aa3f88', lightText: '#ffffff' },
-  orange: { darkBg: '#d27f51', darkText: '#111114', lightBg: '#bd5b2b', lightText: '#ffffff' },
-  pink: { darkBg: '#cd7295', darkText: '#111114', lightBg: '#ba4374', lightText: '#ffffff' },
-  rose: { darkBg: '#d87391', darkText: '#111114', lightBg: '#c04468', lightText: '#ffffff' },
-  sky: { darkBg: '#61a1cf', darkText: '#111114', lightBg: '#2f78aa', lightText: '#ffffff' },
-  teal: { darkBg: '#50aaa0', darkText: '#111114', lightBg: '#238078', lightText: '#ffffff' },
-  violet: { darkBg: '#9c78d0', darkText: '#111114', lightBg: '#7651b9', lightText: '#ffffff' },
+  amber: { darkBg: '#e2b84f', darkText: '#111114', lightBg: '#bc8617', lightText: '#ffffff' },
+  blue: { darkBg: '#83a0e8', darkText: '#111114', lightBg: '#5876d9', lightText: '#ffffff' },
+  cyan: { darkBg: '#65bad0', darkText: '#111114', lightBg: '#278ba7', lightText: '#ffffff' },
+  fuchsia: { darkBg: '#d681ca', darkText: '#111114', lightBg: '#b24ca5', lightText: '#ffffff' },
+  green: { darkBg: '#67bd96', darkText: '#111114', lightBg: '#318d67', lightText: '#ffffff' },
+  indigo: { darkBg: '#8f91e8', darkText: '#111114', lightBg: '#6264cf', lightText: '#ffffff' },
+  magenta: { darkBg: '#d47fbb', darkText: '#111114', lightBg: '#b44991', lightText: '#ffffff' },
+  orange: { darkBg: '#e59368', darkText: '#111114', lightBg: '#c86539', lightText: '#ffffff' },
+  pink: { darkBg: '#dc7dac', darkText: '#111114', lightBg: '#c74d86', lightText: '#ffffff' },
+  rose: { darkBg: '#e47f9f', darkText: '#111114', lightBg: '#cc4f72', lightText: '#ffffff' },
+  sky: { darkBg: '#76afe0', darkText: '#111114', lightBg: '#3e82bb', lightText: '#ffffff' },
+  teal: { darkBg: '#60bcb3', darkText: '#111114', lightBg: '#298d84', lightText: '#ffffff' },
+  violet: { darkBg: '#a88cde', darkText: '#111114', lightBg: '#7752c7', lightText: '#ffffff' },
 };
 
 export const CALENDAR_HEX = Object.fromEntries(

@@ -3,10 +3,9 @@ import { Crossfade } from '@/components/ui/crossfade';
 import {
   BookingLinkCard,
   BookingLinkDetails,
-  BookingLinkDetailsSkeleton,
+  BookingSectionSkeleton,
   BookingSettings,
   BookingSettingsCard,
-  BookingSettingsSkeleton,
 } from '@/features/booking/components/booking-overview';
 import type { Metadata } from 'next';
 
@@ -25,14 +24,14 @@ export default function BookingPage() {
       </header>
       <section className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6">
         <BookingLinkCard>
-          <Suspense fallback={<BookingLinkDetailsSkeleton />}>
+          <Suspense fallback={<BookingSectionSkeleton />}>
             <Crossfade>
               <BookingLinkDetails />
             </Crossfade>
           </Suspense>
         </BookingLinkCard>
         <BookingSettingsCard>
-          <Suspense fallback={<BookingSettingsSkeleton />}>
+          <Suspense fallback={<BookingSectionSkeleton />}>
             <Crossfade>
               <BookingSettings />
             </Crossfade>

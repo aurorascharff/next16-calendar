@@ -42,7 +42,7 @@ export function DatePicker({ date, view }: { date: string; view: CalendarView })
 
   return (
     <Ariakit.PopoverProvider store={store}>
-      <Ariakit.PopoverDisclosure className="text-muted hover:bg-card dark:hover:bg-card-dark flex h-8 items-center gap-1.5 rounded px-2 text-sm font-medium tabular-nums transition-colors hover:text-black dark:hover:text-white">
+      <Ariakit.PopoverDisclosure className="text-muted hover:bg-card dark:hover:bg-card-dark flex h-8 w-[7.5rem] shrink-0 items-center justify-center rounded px-2 text-sm font-medium tabular-nums transition-colors hover:text-black dark:hover:text-white">
         {triggerLabel.format(selected)}
       </Ariakit.PopoverDisclosure>
       <Ariakit.Popover

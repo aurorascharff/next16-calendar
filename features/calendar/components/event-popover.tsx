@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { deleteEvent, updateEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
 import { colorStyle } from '../utils/colors';
-import { DURATION_OPTIONS } from '../utils/grid';
+import { EventFields, formatDuration } from './event-fields';
 import type { Calendar, CalendarEvent } from '../types/calendar';
 
 type EventPopoverProps = {
@@ -34,24 +34,7 @@ type FormValues = {
 
 type FormState = { key?: number; values?: FormValues };
 
-const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
-const disabledTimeBlock =
-  'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
 const controlHeight = 'h-10';
-const titlePattern = '.*\\S.*';
-
-function durationLabel(minutes: number) {
-  if (minutes < 60) return `${minutes} minutes`;
-  if (minutes === 60) return '1 hour';
-  if (minutes % 60 === 0) return `${minutes / 60} hours`;
-  return `${Math.floor(minutes / 60)} hr ${minutes % 60} min`;
-}
-
-function durationOptions(value: string) {
-  const current = Number(value);
-  const options = Number.isFinite(current) ? [...DURATION_OPTIONS, current] : DURATION_OPTIONS;
-  return [...new Set(options)].sort((a, b) => a - b);
-}
 
 export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, onUpdated }: EventPopoverProps) {
   const formId = useId();
@@ -237,7 +220,7 @@ function EventDetails({ calendar, event }: { calendar?: Calendar; event: Calenda
         <div>
           <p>{formatDay(event.day)}</p>
           <p className="text-muted mt-0.5">
-            {event.allDay ? 'All day' : `${event.start} · ${durationLabel(event.duration)}`}
+            {event.allDay ? 'All day' : `${event.start} · ${formatDuration(event.duration)}`}
           </p>
         </div>
         <span className="mt-1 size-2.5 rounded-full" style={colorStyle(event.color)} />
@@ -283,70 +266,14 @@ function EventEditForm({
       key={state.key ?? 'event-edit'}
     >
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto p-4 sm:flex-none sm:overflow-visible">
-        <label className="block">
-          <span className={fieldLabel}>Title</span>
-          <input
-            autoFocus
-            className={controlHeight}
-            defaultValue={values.title}
-            name="title"
-            onInput={event => event.currentTarget.setCustomValidity('')}
-            onInvalid={event => event.currentTarget.setCustomValidity('Add a title before saving.')}
-            pattern={titlePattern}
-            required
-          />
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            checked={allDay}
-            className="size-4 w-auto"
-            disabled={busy}
-            name="allDay"
-            onChange={event => onAllDayChange(event.target.checked)}
-            type="checkbox"
-          />
-          All day
-        </label>
-        <div aria-disabled={allDay} className={`grid grid-cols-2 gap-3 ${allDay ? disabledTimeBlock : ''}`}>
-          <label className="block">
-            <span className={fieldLabel}>Starts at</span>
-            <input
-              className={controlHeight}
-              defaultValue={values.start}
-              disabled={allDay || busy}
-              name={allDay ? undefined : 'start'}
-              type="time"
-            />
-            {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
-          </label>
-          <label className="block">
-            <span className={fieldLabel}>Duration</span>
-            <select
-              className={controlHeight}
-              defaultValue={values.duration}
-              disabled={allDay || busy}
-              name={allDay ? undefined : 'duration'}
-            >
-              {durationOptions(values.duration).map(duration => (
-                <option key={duration} value={duration}>
-                  {durationLabel(duration)}
-                </option>
-              ))}
-            </select>
-            {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
-          </label>
-        </div>
-        {allDay ? <p className="text-muted -mt-1 text-xs">This event will fill the all-day row.</p> : null}
-        <label className="block">
-          <span className={fieldLabel}>Description</span>
-          <textarea
-            defaultValue={values.description}
-            disabled={busy}
-            name="description"
-            placeholder="Add notes, links, or context"
-            rows={2}
-          />
-        </label>
+        <EventFields
+          allDay={allDay}
+          busy={busy}
+          controlHeight={controlHeight}
+          onAllDayChange={onAllDayChange}
+          titleInvalidMessage="Add a title before saving."
+          values={values}
+        />
       </div>
     </form>
   );

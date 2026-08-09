@@ -5,12 +5,12 @@ import { Plus, Repeat } from 'lucide-react';
 import { useOptimistic, useState, useTransition } from 'react';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { useCalendarVisibility } from './calendar-visibility';
-import { EventCreateDialog } from './event-create-dialog';
-import { EventPopover } from './event-popover';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
 import { applyEventAction, expandOptimisticEvent } from '../utils/event-optimistic-reducer';
+import { useCalendarVisibility } from './calendar-visibility';
+import { EventCreateDialog } from './event-create-dialog';
+import { EventPopover } from './event-popover';
 import type { Calendar, CalendarEvent } from '../types/calendar';
 import type { EventAction } from '../utils/event-optimistic-reducer';
 
