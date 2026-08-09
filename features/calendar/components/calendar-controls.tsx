@@ -13,7 +13,15 @@ import { useTodayKey } from '../hooks/use-now';
 import { DatePicker } from './date-picker';
 import type { CalendarView } from '../types/calendar';
 
-export function CalendarControls({ date, view }: { date: string; view: CalendarView }) {
+export function CalendarControls({
+  date,
+  showDatePicker = true,
+  view,
+}: {
+  date: string;
+  showDatePicker?: boolean;
+  view: CalendarView;
+}) {
   const today = useTodayKey();
   const previous = view === 'month' ? shiftMonth(date, -1) : shiftWeek(date, -1);
   const next = view === 'month' ? shiftMonth(date, 1) : shiftWeek(date, 1);
@@ -45,7 +53,7 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
             <ChevronRight className="size-4.5" />
           </IconButton>
         </div>
-        <DatePicker date={date} view={view} />
+        {showDatePicker ? <DatePicker date={date} view={view} /> : null}
       </div>
     </Boundary>
   );
@@ -100,7 +108,8 @@ export function CalendarViewShortcuts({ date, view }: { date: string; view: Cale
 export function ViewToggle({ date, view }: { date: string; view: CalendarView }) {
   const [optimisticView, setOptimisticView] = useOptimistic(view);
   const [, startTransition] = useTransition();
-  const item = 'inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-sm font-medium transition-colors';
+  const item =
+    'inline-flex size-8 items-center justify-center gap-1.5 rounded-sm text-sm font-medium transition-colors sm:h-auto sm:w-auto sm:px-2.5 sm:py-1';
   const active = 'bg-card dark:bg-card-dark text-black dark:text-white';
   const inactive = 'text-muted hover:text-black dark:hover:text-white';
 
@@ -124,7 +133,8 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
           prefetch
           transitionTypes={['nav-crossfade']}
         >
-          Week
+          <span className="sm:hidden">W</span>
+          <span className="hidden sm:inline">Week</span>
         </Link>
         <Link
           aria-keyshortcuts="M"
@@ -135,7 +145,8 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
           prefetch
           transitionTypes={['nav-crossfade']}
         >
-          Month
+          <span className="sm:hidden">M</span>
+          <span className="hidden sm:inline">Month</span>
         </Link>
       </div>
     </Boundary>

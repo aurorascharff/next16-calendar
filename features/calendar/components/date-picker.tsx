@@ -36,14 +36,20 @@ function monthGrid(year: number, month: number) {
   });
 }
 
-export function DatePicker({ date, view }: { date: string; view: CalendarView }) {
+export function DatePicker({ date, label = 'date', view }: { date: string; label?: 'date' | 'month'; view: CalendarView }) {
   const selected = fromKey(date);
   const store = Ariakit.usePopoverStore();
 
   return (
     <Ariakit.PopoverProvider store={store}>
-      <Ariakit.PopoverDisclosure className="text-muted hover:bg-card dark:hover:bg-card-dark flex h-8 w-[7.5rem] shrink-0 items-center justify-center rounded px-2 text-sm font-medium tabular-nums transition-colors hover:text-black dark:hover:text-white">
-        {triggerLabel.format(selected)}
+      <Ariakit.PopoverDisclosure
+        aria-label="Choose a date"
+        className={cn(
+          'hover:bg-card dark:hover:bg-card-dark flex h-8 shrink-0 items-center justify-center rounded px-2 font-medium tabular-nums transition-colors hover:text-black dark:hover:text-white',
+          label === 'month' ? 'text-lg font-semibold tracking-tight sm:hidden' : 'text-muted w-[7.5rem] text-sm',
+        )}
+      >
+        {label === 'month' ? monthLabel.format(selected) : triggerLabel.format(selected)}
       </Ariakit.PopoverDisclosure>
       <Ariakit.Popover
         gutter={8}
@@ -85,9 +91,13 @@ function DatePickerCalendar({
         <IconButton label="Previous month" onClick={() => shiftMonth(-1)} size="sm">
           <ChevronLeft className="size-4" />
         </IconButton>
-        <span className="text-sm font-semibold">
+        <HoverPrefetchLink
+          className="hover:text-accent text-sm font-semibold transition-colors"
+          href={calendarHref(dateKey(new Date(Date.UTC(visibleMonth.year, visibleMonth.month, 1))), 'month')}
+          onNavigate={onPick}
+        >
           {monthLabel.format(new Date(Date.UTC(visibleMonth.year, visibleMonth.month, 1)))}
-        </span>
+        </HoverPrefetchLink>
         <IconButton label="Next month" onClick={() => shiftMonth(1)} size="sm">
           <ChevronRight className="size-4" />
         </IconButton>

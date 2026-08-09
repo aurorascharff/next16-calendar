@@ -18,11 +18,7 @@ export function CalendarViewFallback() {
   return (
     <CalendarBoardViewport>
       <div className="grid min-h-0 flex-1 place-items-center" role="status" aria-label="Loading calendar view">
-        <FlowMark
-          animated
-          gradient
-          className="size-24 opacity-90 drop-shadow-[0_12px_28px_rgb(91_100_230/0.18)]"
-        />
+        <FlowMark animated className="size-28 opacity-70 drop-shadow-[0_12px_28px_rgb(27_80_255/0.16)]" />
       </div>
     </CalendarBoardViewport>
   );

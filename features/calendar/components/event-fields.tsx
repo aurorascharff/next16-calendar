@@ -70,11 +70,14 @@ export function EventFields({
         />
         All day
       </label>
-      <div aria-disabled={allDay} className={`grid grid-cols-2 gap-3 ${allDay ? disabledTimeBlock : ''}`}>
-        <label className="block">
+      <div
+        aria-disabled={allDay}
+        className={`grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 ${allDay ? disabledTimeBlock : ''}`}
+      >
+        <label className="min-w-0">
           <span className={fieldLabel}>Starts at</span>
           <input
-            className={controlHeight}
+            className={`${controlHeight} min-w-0`}
             defaultValue={values.start}
             disabled={allDay || busy}
             name={allDay ? undefined : 'start'}
@@ -82,10 +85,10 @@ export function EventFields({
           />
           {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
         </label>
-        <label className="block">
+        <label className="min-w-0">
           <span className={fieldLabel}>Duration</span>
           <select
-            className={controlHeight}
+            className={`${controlHeight} min-w-0`}
             defaultValue={values.duration}
             disabled={allDay || busy}
             name={allDay ? undefined : 'duration'}

@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
-import { deleteSessionCookies, SESSION_COOKIE, SESSION_COOKIE_MAX_AGE, STALE_SESSION_COOKIES } from './session';
+import { deleteSessionCookies, SESSION_COOKIE, SESSION_COOKIE_MAX_AGE } from './session';
 
 type SignInState = { error?: string } | null;
 
@@ -30,7 +30,6 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
   }
 
   const store = await cookies();
-  for (const name of STALE_SESSION_COOKIES) store.delete(name);
   store.set(SESSION_COOKIE, userId, { maxAge: SESSION_COOKIE_MAX_AGE, path: '/', sameSite: 'lax' });
   redirect('/');
 }

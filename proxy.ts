@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { SESSION_COOKIE, STALE_SESSION_COOKIES } from '@/features/user/session';
+import { SESSION_COOKIE } from '@/features/user/session';
 import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
@@ -7,14 +7,7 @@ export function proxy(request: NextRequest) {
   const isPublic = pathname === '/login' || pathname === '/logout' || pathname.startsWith('/book');
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
-  const response =
-    !hasSession && !isPublic ? NextResponse.redirect(new URL('/login', request.url)) : NextResponse.next();
-
-  for (const name of STALE_SESSION_COOKIES) {
-    if (request.cookies.has(name)) response.cookies.delete(name);
-  }
-
-  return response;
+  return !hasSession && !isPublic ? NextResponse.redirect(new URL('/login', request.url)) : NextResponse.next();
 }
 
 export const config = {

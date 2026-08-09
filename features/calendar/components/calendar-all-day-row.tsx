@@ -52,7 +52,7 @@ export function CalendarAllDayRow({
               {hiddenEventCount > 0 ? (
                 <span
                   aria-label={`${hiddenEventCount} more all-day events on ${formatDay(day)}`}
-                  className="text-muted h-6 shrink-0 px-1 text-[11px] leading-6 font-semibold group-open:hidden"
+                  className="text-muted hidden h-6 shrink-0 px-1 text-[11px] leading-6 font-semibold group-open:hidden sm:inline"
                 >
                   +{hiddenEventCount}
                 </span>

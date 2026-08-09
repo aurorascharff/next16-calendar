@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
+import { cn } from '@/lib/utils';
 import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
 import { CalendarPicker } from './calendar-picker';
@@ -150,10 +151,18 @@ export function EventCreateDialog({
         portal
         getAnchorRect={anchorRect ? () => anchorRect : undefined}
         gutter={10}
-        className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border p-4 shadow-2xl outline-none"
+        wrapperProps={{
+          className:
+            'event-popover-wrapper max-sm:!inset-0 max-sm:!h-dvh max-sm:!w-screen max-sm:!max-h-none max-sm:!max-w-none',
+        }}
+        backdrop={<div className="fixed inset-0 z-40 bg-black/40 sm:hidden" />}
+        className={cn(
+          'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 flex max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border shadow-2xl outline-none',
+          'max-sm:!inset-0 max-sm:!h-dvh max-sm:!max-h-dvh max-sm:!w-full max-sm:!max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-none max-sm:border-0',
+        )}
         style={{ viewTransitionName: 'dialog' }}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-4 border-b px-4 py-3">
           <div className="min-w-0">
             <Ariakit.PopoverHeading className="text-base font-semibold tracking-tight">
               New event
@@ -168,38 +177,40 @@ export function EventCreateDialog({
         </div>
         <form
           action={submitAction}
-          className="mt-3 space-y-3"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden sm:flex-none"
           data-calendar-editing
           onKeyDown={handleSubmitShortcut}
         >
-          <EventFields
-            allDay={allDay}
-            controlHeight={controlHeight}
-            onAllDayChange={setAllDay}
-            titleInvalidMessage="Add a title before saving the event."
-            values={values}
-          />
-          <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
-            {calendarOptions.length > 0 ? (
-              <div className="block">
-                <span className={fieldLabel}>Calendar</span>
-                <CalendarPicker
-                  calendars={calendarOptions}
-                  defaultValue={values.calendarId || writableCalendarId}
-                  name="calendarId"
-                />
-              </div>
-            ) : null}
-            <label className="block">
-              <span className={fieldLabel}>Repeat</span>
-              <select defaultValue={values.repeat} name="repeat">
-                <option value="">Does not repeat</option>
-                <option value="weekly">Weekly on {weekdayLabel.format(new Date(`${day}T00:00:00.000Z`))}</option>
-                <option value="weekday">Every weekday</option>
-              </select>
-            </label>
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:flex-none sm:overflow-visible">
+            <EventFields
+              allDay={allDay}
+              controlHeight={controlHeight}
+              onAllDayChange={setAllDay}
+              titleInvalidMessage="Add a title before saving the event."
+              values={values}
+            />
+            <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
+              {calendarOptions.length > 0 ? (
+                <div className="min-w-0">
+                  <span className={fieldLabel}>Calendar</span>
+                  <CalendarPicker
+                    calendars={calendarOptions}
+                    defaultValue={values.calendarId || writableCalendarId}
+                    name="calendarId"
+                  />
+                </div>
+              ) : null}
+              <label className="min-w-0">
+                <span className={fieldLabel}>Repeat</span>
+                <select defaultValue={values.repeat} name="repeat">
+                  <option value="">Does not repeat</option>
+                  <option value="weekly">Weekly on {weekdayLabel.format(new Date(`${day}T00:00:00.000Z`))}</option>
+                  <option value="weekday">Every weekday</option>
+                </select>
+              </label>
+            </div>
           </div>
-          <div className="mt-4 flex justify-end gap-2">
+          <div className="border-divider dark:border-divider-dark flex justify-end gap-2 border-t px-4 py-3">
             <Button render={<Ariakit.PopoverDismiss />} variant="ghost">
               Cancel
             </Button>

@@ -103,9 +103,13 @@ function MiniMonthCalendar({
     <Boundary label="MiniMonth" asChild>
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-semibold">
+          <HoverPrefetchLink
+            className="hover:text-accent text-sm font-semibold transition-colors"
+            href={calendarHref(dateKey(new Date(Date.UTC(view.year, view.month, 1))), 'month')}
+            transitionTypes={['nav-crossfade']}
+          >
             {monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}
-          </span>
+          </HoverPrefetchLink>
           <div className="flex items-center gap-0.5">
             <IconButton label="Previous month" onClick={() => shiftMonth(-1)} size="sm">
               <ChevronLeft className="size-4" />

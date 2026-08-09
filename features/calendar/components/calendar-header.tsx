@@ -2,6 +2,7 @@ import { FlowMark } from '@/components/ui/flow-mark';
 import { Spinner } from '@/components/ui/spinner';
 import { formatMonth } from '../calendar-utils';
 import { CalendarControls, CalendarViewShortcuts, ViewToggle } from './calendar-controls';
+import { DatePicker } from './date-picker';
 import { NewEventButton } from './new-event-button';
 import type { CalendarView } from '../types/calendar';
 
@@ -13,7 +14,8 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <div className="flex min-w-0 items-center gap-2.5 sm:w-52">
             <FlowMark className="size-8 shrink-0 sm:hidden" />
-            <h1 className="truncate text-lg font-semibold tracking-tight">{formatMonth(date)}</h1>
+            <h1 className="hidden truncate text-lg font-semibold tracking-tight sm:block">{formatMonth(date)}</h1>
+            <DatePicker date={date} label="month" view={view} />
           </div>
           <div className="hidden items-center gap-2 sm:flex">
             <CalendarControls date={date} view={view} />
@@ -26,7 +28,7 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
         </div>
       </header>
       <div className="border-divider dark:border-divider-dark flex items-center justify-between gap-2 border-b px-4 py-2 sm:hidden">
-        <CalendarControls date={date} view={view} />
+        <CalendarControls date={date} showDatePicker={false} view={view} />
         <ViewToggle date={date} view={view} />
       </div>
     </>

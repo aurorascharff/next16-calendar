@@ -50,7 +50,7 @@ export function MobileWorkspaceNavigation() {
     <ViewTransition name="mobile-nav" default="none">
       <nav
         aria-label="Primary"
-        className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark fixed inset-x-0 bottom-0 z-30 flex border-t pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark after:bg-surface dark:after:bg-surface-dark fixed inset-x-0 bottom-0 z-30 flex border-t pb-[env(safe-area-inset-bottom)] after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-dvh md:hidden"
       >
         <CalendarHomeNavLink className={mobileTab}>
           <CalendarDays className="size-5" />
