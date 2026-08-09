@@ -2,23 +2,33 @@ import { timeToMinutes } from '../calendar-utils';
 import type { CalendarEvent } from '../types/calendar';
 
 export const HOUR_HEIGHT = 72;
-export const START_HOUR = 0;
-export const HOURS = Array.from({ length: 24 }, (_, index) => START_HOUR + index);
-export const END_MINUTES = 24 * 60;
+export const START_HOUR = 6;
+export const HOURS = Array.from({ length: 24 }, (_, index) => (START_HOUR + index) % 24);
+export const START_MINUTES = START_HOUR * 60;
+export const END_MINUTES = (24 + START_HOUR) * 60;
 export const GRID_HEIGHT = HOURS.length * HOUR_HEIGHT;
-export const DEFAULT_SCROLL_HOUR = 7;
-export const DEFAULT_SCROLL_TOP = (DEFAULT_SCROLL_HOUR - START_HOUR) * HOUR_HEIGHT;
+export const DEFAULT_SCROLL_HOUR = START_HOUR;
+export const DEFAULT_SCROLL_TOP = (DEFAULT_SCROLL_HOUR * 60 - START_MINUTES) * (HOUR_HEIGHT / 60);
 export const SNAP_MINUTES = 15;
 export const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120];
+const MIN_PACK_DURATION = Math.ceil((25 / HOUR_HEIGHT) * 60);
 
 export type Placement = { col: number; cols: number };
+
+export function displayMinutes(minutes: number) {
+  return minutes < START_MINUTES ? minutes + 24 * 60 : minutes;
+}
+
+export function eventStartMinutes(start: string) {
+  return displayMinutes(timeToMinutes(start));
+}
 
 export function packDay(events: CalendarEvent[]): Map<string, Placement> {
   const items = events
     .map(event => ({
-      end: timeToMinutes(event.start) + event.duration,
+      end: eventStartMinutes(event.start) + Math.max(event.duration, MIN_PACK_DURATION),
       event,
-      start: timeToMinutes(event.start),
+      start: eventStartMinutes(event.start),
     }))
     .sort((a, b) => a.start - b.start || a.end - b.end);
 
@@ -59,13 +69,14 @@ export function packDay(events: CalendarEvent[]): Map<string, Placement> {
 
 export function snapMinutes(clientY: number, boundsTop: number) {
   const offset = Math.max(0, Math.min(GRID_HEIGHT, clientY - boundsTop));
-  const raw = START_HOUR * 60 + (offset / HOUR_HEIGHT) * 60;
+  const raw = START_MINUTES + (offset / HOUR_HEIGHT) * 60;
   const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES;
-  return Math.max(START_HOUR * 60, Math.min(END_MINUTES, snapped));
+  return Math.max(START_MINUTES, Math.min(END_MINUTES, snapped));
 }
 
 export function minutesToTime(minutes: number) {
-  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+  const wrapped = ((minutes % (24 * 60)) + 24 * 60) % (24 * 60);
+  return `${String(Math.floor(wrapped / 60)).padStart(2, '0')}:${String(wrapped % 60).padStart(2, '0')}`;
 }
 
 export function nearestDuration(minutes: number) {
@@ -75,5 +86,5 @@ export function nearestDuration(minutes: number) {
 }
 
 export function topFor(minutes: number) {
-  return ((minutes - START_HOUR * 60) / 60) * HOUR_HEIGHT;
+  return ((displayMinutes(minutes) - START_MINUTES) / 60) * HOUR_HEIGHT;
 }

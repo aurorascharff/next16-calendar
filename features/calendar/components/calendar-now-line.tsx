@@ -1,14 +1,15 @@
 'use client';
 
-import { END_MINUTES, HOUR_HEIGHT, START_HOUR } from '../utils/grid';
+import { displayMinutes, END_MINUTES, HOUR_HEIGHT, START_MINUTES } from '../utils/grid';
 
 export function NowLine({ minutes }: { minutes: number }) {
-  if (minutes < START_HOUR * 60 || minutes > END_MINUTES) return null;
+  const display = displayMinutes(minutes);
+  if (display < START_MINUTES || display > END_MINUTES) return null;
   return (
     <div
       aria-hidden
       className="pointer-events-none absolute inset-x-0 z-30"
-      style={{ top: ((minutes - START_HOUR * 60) / 60) * HOUR_HEIGHT }}
+      style={{ top: ((display - START_MINUTES) / 60) * HOUR_HEIGHT }}
       suppressHydrationWarning
     >
       <div className="bg-dayline relative h-px">

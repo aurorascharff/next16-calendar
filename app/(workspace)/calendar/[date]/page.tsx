@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header';
-import { CalendarWeek, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week';
+import { CalendarWeek, CalendarWeekScroll, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week';
 import type { CalendarView } from '@/features/calendar/types/calendar';
 
 function toView(view: string | string[] | undefined): CalendarView {
@@ -13,14 +13,22 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
       <Suspense fallback={<CalendarHeaderSkeleton />}>
         {params.then(({ date }) => searchParams.then(({ view }) => <CalendarHeader date={date} view={toView(view)} />))}
       </Suspense>
-      <Suspense fallback={<CalendarWeekSkeleton />}>
+      <Suspense
+        fallback={
+          <CalendarWeekScroll view="week">
+            <CalendarWeekSkeleton />
+          </CalendarWeekScroll>
+        }
+      >
         {params.then(({ date }) =>
           searchParams.then(({ view }) => {
             const calendarView = toView(view);
             return (
-              <Suspense fallback={<CalendarWeekSkeleton date={date} view={calendarView} />}>
-                <CalendarWeek date={date} view={calendarView} />
-              </Suspense>
+              <CalendarWeekScroll date={date} view={calendarView}>
+                <Suspense fallback={<CalendarWeekSkeleton date={date} view={calendarView} />}>
+                  <CalendarWeek date={date} view={calendarView} />
+                </Suspense>
+              </CalendarWeekScroll>
             );
           }),
         )}

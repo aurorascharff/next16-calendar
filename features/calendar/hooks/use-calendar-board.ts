@@ -4,17 +4,18 @@ import * as Ariakit from '@ariakit/react';
 import { useOptimistic, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { moveEvent, resizeEvent } from '../calendar-actions';
-import { dateKey, timeToMinutes } from '../calendar-utils';
+import { dateKey } from '../calendar-utils';
 import { useCalendarVisibility } from '../components/calendar-visibility';
 import { applyEventAction } from '../utils/event-optimistic-reducer';
 import {
   END_MINUTES,
+  eventStartMinutes,
   HOUR_HEIGHT,
   minutesToTime,
   nearestDuration,
   SNAP_MINUTES,
   snapMinutes,
-  START_HOUR,
+  START_MINUTES,
 } from '../utils/grid';
 import { useNow } from './use-now';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarView } from '../types/calendar';
@@ -117,9 +118,9 @@ export function useCalendarBoard({
 
   function pointToMinutes(clientY: number) {
     const grid = gridRef.current;
-    if (!grid) return START_HOUR * 60;
+    if (!grid) return START_MINUTES;
     const rect = grid.getBoundingClientRect();
-    return START_HOUR * 60 + ((clientY - rect.top - 12) / HOUR_HEIGHT) * 60;
+    return START_MINUTES + ((clientY - rect.top - 12) / HOUR_HEIGHT) * 60;
   }
 
   function effectiveDay(event: CalendarEvent) {
@@ -133,7 +134,7 @@ export function useCalendarBoard({
     pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
     moveRef.current = {
       duration: calendarEvent.duration,
-      grabOffsetMin: pointToMinutes(pointerEvent.clientY) - timeToMinutes(calendarEvent.start),
+      grabOffsetMin: pointToMinutes(pointerEvent.clientY) - eventStartMinutes(calendarEvent.start),
       id: calendarEvent.id,
       moved: false,
       sourceId: calendarEvent.sourceId,
@@ -146,7 +147,7 @@ export function useCalendarBoard({
     const day = days[pointToDayIndex(pointerEvent.clientX)];
     const raw = pointToMinutes(pointerEvent.clientY) - origin.grabOffsetMin;
     const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES;
-    const startMin = Math.max(START_HOUR * 60, Math.min(END_MINUTES - origin.duration, snapped));
+    const startMin = Math.max(START_MINUTES, Math.min(END_MINUTES - origin.duration, snapped));
     return { day, id: origin.id, startMin };
   }
 
@@ -168,7 +169,10 @@ export function useCalendarBoard({
     try {
       pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId);
     } catch {}
-    const target = origin?.moved ? targetMoveFromPointer(origin, pointerEvent) : dragMoveRef.current;
+    if (origin && !origin.moved) {
+      origin.moved = Math.abs(pointerEvent.clientX - origin.x0) >= 4 || Math.abs(pointerEvent.clientY - origin.y0) >= 4;
+    }
+    const target = origin?.moved ? (dragMoveRef.current ?? targetMoveFromPointer(origin, pointerEvent)) : null;
     dragMoveRef.current = null;
     setDragMove(null);
     if (!origin || !origin.moved || !target) return;
@@ -200,7 +204,7 @@ export function useCalendarBoard({
     const column = (pointerEvent.currentTarget as HTMLElement).closest('[data-day-column]');
     resizeColTopRef.current = column ? column.getBoundingClientRect().top : 0;
     pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
-    const startMin = timeToMinutes(event.start);
+    const startMin = eventStartMinutes(event.start);
     setResize({ endMin: startMin + event.duration, sourceId: event.sourceId, startMin });
   }
 

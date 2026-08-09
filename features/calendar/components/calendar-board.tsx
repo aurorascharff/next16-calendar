@@ -89,7 +89,13 @@ export function CalendarBoard({
       <div className="grid" ref={gridRef} style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
         <div className="border-divider dark:border-divider-dark border-r">
           {HOURS.map(hour => (
-            <div className="relative h-[72px] pr-3 text-right" key={hour}>
+            <div
+              className={cn(
+                'relative h-[72px] pr-3 text-right',
+                hour === 0 && 'border-divider dark:border-divider-dark border-t',
+              )}
+              key={hour}
+            >
               <span className="text-muted absolute top-1.5 right-3 text-xs tabular-nums">
                 {String(hour).padStart(2, '0')}:00
               </span>
@@ -151,7 +157,12 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
   const gridTemplate = `4.5rem repeat(${dayKeys.length}, minmax(0, 1fr))`;
   const minWidth = dayKeys.length > 1 ? 760 : undefined;
   return (
-    <div>
+    <div className="relative">
+      <div
+        aria-hidden
+        className="from-surface via-surface/60 dark:from-surface-dark dark:via-surface-dark/60 pointer-events-none absolute inset-x-0 top-[4.85rem] bottom-0 z-20 bg-gradient-to-b to-transparent opacity-70"
+        style={{ minWidth }}
+      />
       <div className="sticky top-0 z-30" style={{ minWidth }}>
         <div
           className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark grid border-b"
@@ -192,7 +203,13 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
       <div className="grid" style={{ gridTemplateColumns: gridTemplate, minWidth }}>
         <div className="border-divider dark:border-divider-dark border-r">
           {HOURS.map(hour => (
-            <div className="relative h-[72px] pr-3 text-right" key={hour}>
+            <div
+              className={cn(
+                'relative h-[72px] pr-3 text-right',
+                hour === 0 && 'border-divider dark:border-divider-dark border-t',
+              )}
+              key={hour}
+            >
               <span className="text-muted absolute top-1.5 right-3 text-xs tabular-nums">
                 {String(hour).padStart(2, '0')}:00
               </span>
@@ -201,12 +218,18 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
         </div>
         {dayKeys.map((_, dayIndex) => (
           <div
-            className="border-divider dark:border-divider-dark border-r"
+            className="border-divider dark:border-divider-dark relative border-r"
             key={dayIndex}
             style={{ height: GRID_HEIGHT }}
           >
             {HOURS.map(hour => (
-              <div className="border-divider/60 dark:border-divider-dark/60 h-[72px] border-b" key={hour} />
+              <div
+                className={cn(
+                  'border-divider/60 dark:border-divider-dark/60 h-[72px] border-b',
+                  hour === 0 && 'border-t',
+                )}
+                key={hour}
+              />
             ))}
           </div>
         ))}

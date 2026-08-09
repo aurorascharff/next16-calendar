@@ -46,8 +46,10 @@ export function EventChip({
     <button
       className={cn(
         'cal-chip group focus-visible:ring-accent pointer-events-auto absolute flex touch-none flex-col overflow-hidden rounded-[5px] px-2 py-1 text-left ring-1 transition-shadow ring-inset focus-visible:ring-2 focus-visible:outline-none',
+        event.isBooking && 'cal-chip-booking',
         isDragging || isResizing ? 'z-30 cursor-grabbing shadow-lg' : 'z-10 cursor-grab hover:z-20 hover:shadow-md',
       )}
+      data-booking={event.isBooking || undefined}
       data-event-chip
       onClick={event => onSelect(event.currentTarget.getBoundingClientRect())}
       onPointerCancel={onMoveCancel}

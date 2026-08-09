@@ -37,10 +37,7 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
       </header>
       <div className="border-divider dark:border-divider-dark flex items-center justify-between gap-2 border-b px-4 py-2 sm:hidden">
         <CalendarControls date={date} view={view} />
-        <div className="flex items-center gap-2">
-          <ViewToggle date={date} view={view} />
-          <WorkspaceHeaderActions />
-        </div>
+        <ViewToggle date={date} view={view} />
       </div>
     </>
   );

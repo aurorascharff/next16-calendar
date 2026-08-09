@@ -27,6 +27,16 @@ type StoredEvent = {
   recurrence: string | null;
   start: string;
   title: string;
+  userId: string | null;
+};
+
+type BookingMatch = {
+  bookingPage: {
+    duration: number;
+    title: string;
+    userId: string;
+  };
+  startsAt: Date;
 };
 
 async function getCurrentUserId() {
@@ -73,23 +83,68 @@ async function getCalendarWeekForUser(date: string, userId: string | null, slow:
   cacheTag(calendarCache.tag, calendarCache.weekTag(start));
 
   await delay(650, slow);
-  const rows = await prisma.calendarEvent.findMany({
-    include: { calendar: { select: { color: true } } },
-    orderBy: [{ start: 'asc' }, { title: 'asc' }],
-    where: { OR: [{ userId }, { userId: null }] },
-  });
+  const [rows, bookingRows] = await Promise.all([
+    prisma.calendarEvent.findMany({
+      include: { calendar: { select: { color: true } } },
+      orderBy: [{ start: 'asc' }, { title: 'asc' }],
+      where: { OR: [{ userId }, { userId: null }] },
+    }),
+    userId
+      ? prisma.booking.findMany({
+          include: { bookingPage: { select: { duration: true, title: true, userId: true } } },
+          where: {
+            bookingPage: { userId },
+            startsAt: {
+              gte: new Date(`${days[0]}T00:00:00.000Z`),
+              lt: new Date(`${days.at(-1)}T23:59:59.999Z`),
+            },
+          },
+        })
+      : [],
+  ]);
+  const bookingMatches = createBookingMatches(bookingRows);
 
   return {
     days,
-    events: rows.flatMap(event => expandEvent(event, days)),
+    events: rows.flatMap(event => expandEvent(event, days, bookingMatches)),
     start,
   };
 }
 
-function expandEvent(event: StoredEvent, days: string[]): CalendarEvent[] {
+function bookingKey({
+  day,
+  duration,
+  start,
+  title,
+  userId,
+}: {
+  day: string;
+  duration: number;
+  start: string;
+  title: string;
+  userId: string | null;
+}) {
+  return `${userId ?? ''}:${day}:${start}:${duration}:${title}`;
+}
+
+function createBookingMatches(bookings: BookingMatch[]) {
+  return new Set(
+    bookings.map(booking =>
+      bookingKey({
+        day: dateKey(booking.startsAt),
+        duration: booking.bookingPage.duration,
+        start: `${String(booking.startsAt.getUTCHours()).padStart(2, '0')}:${String(booking.startsAt.getUTCMinutes()).padStart(2, '0')}`,
+        title: booking.bookingPage.title,
+        userId: booking.bookingPage.userId,
+      }),
+    ),
+  );
+}
+
+function expandEvent(event: StoredEvent, days: string[], bookingMatches: Set<string>): CalendarEvent[] {
   if (!event.recurrence) {
     const day = dateKey(event.day);
-    return days.includes(day) ? [toCalendarEvent(event, day)] : [];
+    return days.includes(day) ? [toCalendarEvent(event, day, bookingMatches)] : [];
   }
 
   const recurrence = event.recurrence;
@@ -98,7 +153,7 @@ function expandEvent(event: StoredEvent, days: string[]): CalendarEvent[] {
     matchesRecurrence(recurrence, day)
       ? [
           {
-            ...toCalendarEvent(event, day),
+            ...toCalendarEvent(event, day, bookingMatches),
             id: `${event.id}:${day}`,
             recurring: true,
           },
@@ -114,7 +169,7 @@ function matchesRecurrence(recurrence: string, day: string) {
     : recurrence === ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][weekday];
 }
 
-function toCalendarEvent(event: StoredEvent, day: string): CalendarEvent {
+function toCalendarEvent(event: StoredEvent, day: string, bookingMatches: Set<string>): CalendarEvent {
   return {
     calendarId: event.calendarId,
     allDay: event.allDay,
@@ -123,6 +178,9 @@ function toCalendarEvent(event: StoredEvent, day: string): CalendarEvent {
     description: event.description,
     duration: event.duration,
     id: event.id,
+    isBooking: bookingMatches.has(
+      bookingKey({ day, duration: event.duration, start: event.start, title: event.title, userId: event.userId }),
+    ),
     isDemo: event.demo,
     recurrence: event.recurrence,
     sourceId: event.id,

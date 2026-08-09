@@ -30,6 +30,7 @@ export type CalendarEvent = {
   duration: number;
   id: string;
   isDemo: boolean;
+  isBooking?: boolean;
   recurrence?: string | null;
   recurring?: boolean;
   sourceId: string;

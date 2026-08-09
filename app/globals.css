@@ -92,6 +92,18 @@
   --tw-ring-color: rgb(255 255 255 / 0.08);
 }
 
+.cal-chip-booking {
+  background-color: color-mix(in srgb, var(--cal-lb) 20%, transparent);
+  color: var(--cal-lt);
+  --tw-ring-color: color-mix(in srgb, var(--cal-lb) 70%, transparent);
+}
+
+.dark .cal-chip-booking {
+  background-color: color-mix(in srgb, var(--cal-db) 22%, transparent);
+  color: var(--cal-dt);
+  --tw-ring-color: color-mix(in srgb, var(--cal-dt) 55%, transparent);
+}
+
 .skeleton-animation {
   --skeleton-base: rgb(0 0 0 / 0.055);
   --skeleton-shine: rgb(0 0 0 / 0.1);

@@ -1,9 +1,17 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { timeToMinutes } from '../calendar-utils';
 import { chipStyle } from '../utils/colors';
-import { GRID_HEIGHT, HOUR_HEIGHT, HOURS, minutesToTime, packDay, SNAP_MINUTES, START_HOUR } from '../utils/grid';
+import {
+  eventStartMinutes,
+  GRID_HEIGHT,
+  HOUR_HEIGHT,
+  HOURS,
+  minutesToTime,
+  packDay,
+  SNAP_MINUTES,
+  topFor,
+} from '../utils/grid';
 import { EventChip } from './calendar-event-chip';
 import { NowLine } from './calendar-now-line';
 import type { CalendarBoardInteractions } from '../hooks/use-calendar-board';
@@ -26,7 +34,7 @@ function CalendarEventLayer({
     <div className="pointer-events-none absolute inset-0 z-10">
       {events.map(event => {
         const startMin =
-          interaction.dragMove?.id === event.id ? interaction.dragMove.startMin : timeToMinutes(event.start);
+          interaction.dragMove?.id === event.id ? interaction.dragMove.startMin : eventStartMinutes(event.start);
         const isResizing = interaction.resize?.sourceId === event.sourceId;
         const isDragging = interaction.dragMove?.id === event.id;
         const displayDuration = isResizing ? interaction.resize!.endMin - interaction.resize!.startMin : event.duration;
@@ -52,7 +60,7 @@ function CalendarEventLayer({
             timeLabel={
               height >= 46 ? (isResizing ? minutesToTime(interaction.resize!.endMin) : minutesToTime(startMin)) : null
             }
-            top={((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT}
+            top={topFor(startMin)}
             width={`calc(${widthPct}% - 4px)`}
           />
         );
@@ -93,7 +101,10 @@ export function DayColumn({
     >
       <CalendarEventLayer events={events} interaction={interaction} />
       {HOURS.map(hour => (
-        <div className="border-divider/60 dark:border-divider-dark/60 h-[72px] border-b" key={hour} />
+        <div
+          className={cn('border-divider/60 dark:border-divider-dark/60 h-[72px] border-b', hour === 0 && 'border-t')}
+          key={hour}
+        />
       ))}
       {showNow ? <NowLine minutes={nowMinutes} /> : null}
       {selection ? (
@@ -103,7 +114,7 @@ export function DayColumn({
           style={{
             ...chipStyle(interaction.selectionColor),
             height: eventHeight(Math.max(SNAP_MINUTES, selection.hi - selection.lo)),
-            top: ((selection.lo - START_HOUR * 60) / 60) * HOUR_HEIGHT,
+            top: topFor(selection.lo),
           }}
         >
           <span className="text-xs leading-tight font-semibold">New event</span>

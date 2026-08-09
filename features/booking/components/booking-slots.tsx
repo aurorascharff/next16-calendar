@@ -103,7 +103,7 @@ export function BookingSlots({
             <input autoComplete="name" name="guestName" placeholder="Name" required />
           </label>
           <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
-          <div className="min-h-0 [scrollbar-gutter:stable] overflow-y-auto pr-1 sm:h-80">
+          <div className="dark:bg-surface-dark min-h-0 [scrollbar-gutter:stable] overflow-y-auto rounded-lg bg-white pr-1 sm:h-80">
             {allTaken ? (
               <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm sm:h-full sm:min-h-0">
                 No open {duration}-minute slots on this day. Try another date.
@@ -114,7 +114,7 @@ export function BookingSlots({
                   slot.taken ? (
                     <div
                       aria-disabled="true"
-                      className="border-divider text-muted/50 dark:border-divider-dark rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums line-through"
+                      className="border-divider bg-card/35 text-muted/50 dark:border-divider-dark dark:bg-card-dark/35 rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums line-through"
                       key={slot.time}
                     >
                       {slot.time}
@@ -124,10 +124,10 @@ export function BookingSlots({
                     <button
                       aria-pressed={selectedSlot?.day === day && selectedSlot.time === slot.time}
                       className={cn(
-                        'focus-visible:ring-primary/30 dark:bg-surface-dark rounded-md border bg-white px-4 py-3 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100',
+                        'focus-visible:ring-primary/25 rounded-md border bg-transparent px-4 py-3 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100',
                         selectedSlot?.day === day && selectedSlot.time === slot.time
                           ? 'border-primary text-black shadow-[inset_0_0_0_1px_var(--color-primary)] dark:text-white'
-                          : 'border-divider text-muted hover:border-gray/45 dark:border-divider-dark dark:hover:border-gray/35 hover:text-black dark:hover:text-white',
+                          : 'border-divider text-muted hover:border-primary/45 dark:border-divider-dark dark:hover:border-primary/60 hover:text-black dark:hover:text-white',
                       )}
                       key={slot.time}
                       onClick={() => setSelectedSlot({ day, time: slot.time })}
