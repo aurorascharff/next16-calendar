@@ -1,10 +1,9 @@
 'use client';
 
 import * as Ariakit from '@ariakit/react';
-import { AlignLeft, CalendarDays, Pencil, Repeat2, Trash2, X } from 'lucide-react';
+import { AlignLeft, ArrowLeft, CalendarDays, Check, Pencil, Repeat2, Trash2, X } from 'lucide-react';
 import { useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { deleteEvent, updateEvent } from '../calendar-actions';
@@ -37,7 +36,7 @@ type State = { error?: string; key?: number; values?: FormValues };
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 const disabledTimeBlock =
   'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
-const controlHeight = 'h-12';
+const controlHeight = 'h-10';
 const titlePattern = '.*\\S.*';
 
 function durationLabel(minutes: number) {
@@ -58,7 +57,7 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
   const [mode, setMode] = useState<'details' | 'edit'>('details');
   const store = Ariakit.usePopoverStore({
     defaultOpen: true,
-    placement: 'top-start',
+    placement: 'right-start',
     setOpen(open) {
       if (!open) onClose();
     },
@@ -127,7 +126,7 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
       unmountOnHide
       fixed
       fitViewport
-      overlap
+      flip="left-start"
       overflowPadding={16}
       portal
       getAnchorRect={anchorRect ? () => anchorRect : undefined}
@@ -140,29 +139,63 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
       }}
       backdrop={<div className="fixed inset-0 z-40 bg-black/40 sm:hidden" />}
       className={cn(
-        'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 flex max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border shadow-2xl outline-none',
+        'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 flex max-h-[calc(100dvh-2rem)] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border shadow-2xl outline-none',
         'max-sm:!inset-0 max-sm:!h-dvh max-sm:!max-h-dvh max-sm:!w-full max-sm:!max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-none max-sm:border-0',
       )}
       style={{ viewTransitionName: 'dialog' }}
     >
-      <div className="flex items-start justify-between gap-4 px-4 pt-4 pb-2">
+      <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-3 border-b px-4 py-3">
         <div className="min-w-0">
           <Ariakit.PopoverHeading className="truncate text-base font-semibold tracking-tight">
-            {mode === 'details' ? event.title : 'Edit event'}
+            {event.title}
           </Ariakit.PopoverHeading>
           <Ariakit.PopoverDescription className="text-muted mt-0.5 text-sm">
             {formatDay(event.day)}
             {event.allDay ? ' · All day' : ` · ${event.start}`}
           </Ariakit.PopoverDescription>
         </div>
-        <IconButton className="-mr-1" label="Close" render={<Ariakit.PopoverDismiss disabled={busy} />} size="sm">
-          <X className="size-4" />
-        </IconButton>
+        <div className="-mr-1 flex shrink-0 items-center gap-0.5">
+          {mode === 'details' ? (
+            <>
+              <IconButton disabled={busy} label="Edit event" onClick={() => setMode('edit')} size="sm">
+                <Pencil className="size-4" />
+              </IconButton>
+              <IconButton
+                className="text-danger hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger"
+                disabled={busy}
+                label="Delete event"
+                onClick={remove}
+                size="sm"
+              >
+                <Trash2 className="size-4" />
+              </IconButton>
+            </>
+          ) : (
+            <>
+              <IconButton disabled={busy} label="Back to event details" onClick={() => setMode('details')} size="sm">
+                <ArrowLeft className="size-4" />
+              </IconButton>
+              <IconButton
+                className="text-accent hover:bg-accent/10 hover:text-accent dark:hover:bg-accent/10 dark:hover:text-accent"
+                disabled={busy}
+                form={`edit-event-${event.sourceId}`}
+                label="Save changes"
+                size="sm"
+                type="submit"
+              >
+                <Check className="size-4" />
+              </IconButton>
+            </>
+          )}
+          <IconButton label="Close" render={<Ariakit.PopoverDismiss disabled={busy} />} size="sm">
+            <X className="size-4" />
+          </IconButton>
+        </div>
       </div>
 
       {mode === 'details' ? (
         <>
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-2 sm:flex-none">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:flex-none">
             <div className="grid grid-cols-[1rem_minmax(0,1fr)] gap-x-3 gap-y-3 text-sm">
               <CalendarDays className="text-muted mt-0.5 size-4" />
               <div>
@@ -185,28 +218,16 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
               </p>
             </div>
           </div>
-          <div className="border-divider dark:border-divider-dark mt-auto flex items-center justify-end gap-1 border-t p-3">
-            <IconButton
-              className="text-danger hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger"
-              disabled={busy}
-              label="Delete event"
-              onClick={remove}
-            >
-              <Trash2 className="size-4" />
-            </IconButton>
-            <IconButton label="Edit event" onClick={() => setMode('edit')}>
-              <Pencil className="size-4" />
-            </IconButton>
-          </div>
         </>
       ) : (
         <form
           action={formAction}
           className="flex min-h-0 flex-1 flex-col overflow-hidden sm:flex-none"
           data-calendar-editing
+          id={`edit-event-${event.sourceId}`}
           key={state.key ?? event.id}
         >
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-2 sm:flex-none sm:overflow-visible">
+          <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto p-4 sm:flex-none sm:overflow-visible">
             <label className="block">
               <span className={fieldLabel}>Title</span>
               <input
@@ -270,14 +291,6 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
               />
             </label>
             {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
-          </div>
-          <div className="border-divider dark:border-divider-dark mt-auto flex justify-end gap-2 border-t p-3">
-            <Button disabled={busy} onClick={() => setMode('details')} variant="ghost">
-              Cancel
-            </Button>
-            <Button disabled={busy} type="submit">
-              Save changes
-            </Button>
           </div>
         </form>
       )}

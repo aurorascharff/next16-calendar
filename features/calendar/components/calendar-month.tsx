@@ -8,11 +8,7 @@ import { CalendarMonthBoard } from './calendar-month-board';
 export async function CalendarMonth({ date }: { date: string }) {
   const [calendarMonth, calendars] = await Promise.all([getCalendarMonth(date), getCalendars()]);
 
-  return (
-    <DirectionalSlide key={`month:${calendarMonth.start}`} name="calendar-board">
-      <CalendarMonthBoard calendars={calendars} date={date} days={calendarMonth.days} events={calendarMonth.events} />
-    </DirectionalSlide>
-  );
+  return <CalendarMonthBoard calendars={calendars} date={date} days={calendarMonth.days} events={calendarMonth.events} />;
 }
 
 export function CalendarMonthSkeleton({ date }: { date?: string }) {
@@ -52,6 +48,10 @@ export function CalendarMonthSkeleton({ date }: { date?: string }) {
   );
 }
 
-export function CalendarMonthScroll({ children }: { children: ReactNode }) {
-  return <section className="min-h-0 flex-1 overflow-auto [overflow-anchor:none]">{children}</section>;
+export function CalendarMonthScroll({ children, date }: { children: ReactNode; date?: string }) {
+  return (
+    <DirectionalSlide key={date ? `month:${date.slice(0, 7)}` : 'loading:month'} name="calendar-board">
+      <section className="min-h-0 flex-1 overflow-auto [overflow-anchor:none]">{children}</section>
+    </DirectionalSlide>
+  );
 }

@@ -38,7 +38,7 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
         {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
           const calendarView = toView(view);
           return calendarView === 'month' ? (
-            <CalendarMonthScroll>
+            <CalendarMonthScroll date={date}>
               <Suspense fallback={<CalendarMonthSkeleton date={date} />}>
                 <CalendarMonth date={date} />
               </Suspense>

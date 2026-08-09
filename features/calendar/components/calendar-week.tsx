@@ -8,11 +8,7 @@ import { CalendarScrollSection } from './calendar-scroll-section';
 export async function CalendarWeek({ date }: { date: string }) {
   const [week, calendars] = await Promise.all([getCalendarWeek(date), getCalendars()]);
 
-  return (
-    <DirectionalSlide key={`week:${week.days.join(',')}`} name="calendar-board">
-      <CalendarBoard calendars={calendars} days={week.days} events={week.events} />
-    </DirectionalSlide>
-  );
+  return <CalendarBoard calendars={calendars} days={week.days} events={week.events} />;
 }
 
 export function CalendarWeekSkeleton({ date }: { date?: string }) {
@@ -25,8 +21,10 @@ export function CalendarWeekScroll({ children, date }: { children: ReactNode; da
   const days = date ? getWeekDays(date) : undefined;
 
   return (
-    <CalendarScrollSection scrollKey={days ? `week:${days.join(',')}` : 'loading:week'}>
-      {children}
-    </CalendarScrollSection>
+    <DirectionalSlide key={days ? `week:${days.join(',')}` : 'loading:week'} name="calendar-board">
+      <CalendarScrollSection scrollKey={days ? `week:${days.join(',')}` : 'loading:week'}>
+        {children}
+      </CalendarScrollSection>
+    </DirectionalSlide>
   );
 }
