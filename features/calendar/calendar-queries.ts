@@ -17,7 +17,7 @@ export const calendarCache = {
 
 type StoredEvent = {
   allDay: boolean;
-  calendar: { color: string };
+  calendar: { color: string; isDemo: boolean; name: string };
   calendarId: string;
   day: Date;
   demo: boolean;
@@ -40,6 +40,16 @@ type BookingMatch = {
 };
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+const DEMO_CALENDAR_COLORS: Record<string, CalendarColor> = {
+  Personal: 'amber',
+  Reminders: 'indigo',
+  'Side project': 'sky',
+  Work: 'blue',
+};
+
+function calendarColor(calendar: { color: string; isDemo: boolean; name: string }) {
+  return calendar.isDemo ? (DEMO_CALENDAR_COLORS[calendar.name] ?? 'blue') : (calendar.color as CalendarColor);
+}
 
 async function getCurrentUserId() {
   const user = await verifyAuth();
@@ -62,7 +72,7 @@ async function getCalendarsForUser(userId: string | null): Promise<Calendar[]> {
   });
 
   return rows.map(calendar => ({
-    color: calendar.color as CalendarColor,
+    color: calendarColor(calendar),
     id: calendar.id,
     isDemo: calendar.isDemo,
     name: calendar.name,
@@ -102,7 +112,7 @@ async function getCalendarRangeForUser(
   rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
   const [rows, bookingRows] = await Promise.all([
     prisma.calendarEvent.findMany({
-      include: { calendar: { select: { color: true } } },
+      include: { calendar: { select: { color: true, isDemo: true, name: true } } },
       orderBy: [{ start: 'asc' }, { title: 'asc' }],
       where: { OR: [{ userId }, { userId: null }] },
     }),
@@ -159,7 +169,7 @@ function createBookingMatches(bookings: BookingMatch[]) {
 }
 
 function expandEvent(event: StoredEvent, days: string[], bookingMatches: Set<string>): CalendarEvent[] {
-  const recurrence = event.recurrence ?? (event.demo ? WEEKDAY_NAMES[event.day.getUTCDay()] : null);
+  const recurrence = event.recurrence;
 
   if (!recurrence) {
     const day = dateKey(event.day);
@@ -188,7 +198,7 @@ function toCalendarEvent(event: StoredEvent, day: string, bookingMatches: Set<st
   return {
     calendarId: event.calendarId,
     allDay: event.allDay,
-    color: event.calendar.color as CalendarColor,
+    color: calendarColor(event.calendar),
     day,
     description: event.description,
     duration: event.duration,

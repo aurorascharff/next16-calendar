@@ -169,7 +169,13 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
                     </span>
                     <span className="ml-auto size-8" />
                   </div>
-                ) : null}
+                ) : (
+                  <div className="flex min-w-0 items-center gap-1.5" aria-hidden>
+                    <span className="bg-divider/60 dark:bg-divider-dark h-2 w-7 rounded-full" />
+                    <span className="skeleton-animation size-7 shrink-0 rounded-full" />
+                    <span className="ml-auto size-8" />
+                  </div>
+                )}
               </div>
             );
           })}
