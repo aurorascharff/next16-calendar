@@ -47,9 +47,10 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
     <button
       className={cn(
         'hover:bg-card dark:hover:bg-card-dark focus-visible:ring-accent flex h-6 w-full min-w-0 items-center gap-1 rounded px-1.5 text-left text-xs focus-visible:ring-2 focus-visible:outline-none',
-        event.isBooking && 'ring-divider dark:ring-divider-dark ring-1 ring-inset',
+        event.isBooking && 'cal-booking-row',
       )}
       onClick={clickEvent => onSelect(clickEvent.currentTarget.getBoundingClientRect())}
+      style={event.isBooking ? chipStyle(event.color) : undefined}
       title={`${event.start} · ${event.title}`}
       type="button"
     >

@@ -118,6 +118,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
     <Boundary label="EventPopover" asChild>
       <Ariakit.Popover
         store={store}
+        modal
         unmountOnHide
         fixed
         fitViewport
@@ -130,7 +131,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
         hideOnInteractOutside={!busy}
         wrapperProps={{
           className:
-            'event-popover-wrapper max-sm:!inset-0 max-sm:!h-dvh max-sm:!w-screen max-sm:!max-h-none max-sm:!max-w-none',
+            'event-popover-wrapper max-sm:!inset-0 max-sm:!h-dvh max-sm:!w-screen max-sm:!max-h-none max-sm:!max-w-none max-sm:!overflow-hidden',
         }}
         backdrop={<div className="fixed inset-0 z-40 bg-black/40 sm:hidden" />}
         className={cn(
@@ -192,7 +193,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
 
 function EventPopoverHeader({ busy, children, event }: { busy: boolean; children: ReactNode; event: CalendarEvent }) {
   return (
-    <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-3 border-b px-4 py-3">
+    <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-3 border-b px-4 py-3 max-sm:[&_button]:size-10 max-sm:[&_svg]:size-5">
       <div className="min-w-0">
         <Ariakit.PopoverHeading className="text-base leading-snug font-semibold tracking-tight break-words">
           {event.title}

@@ -72,7 +72,7 @@ export function EventFields({
       </label>
       <div
         aria-disabled={allDay}
-        className={`grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 ${allDay ? disabledTimeBlock : ''}`}
+        className={`grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${allDay ? disabledTimeBlock : ''}`}
       >
         <label className="min-w-0">
           <span className={fieldLabel}>Starts at</span>

@@ -143,6 +143,7 @@ export function EventCreateDialog({
     <Boundary label="EventCreateDialog" asChild>
       <Ariakit.Popover
         store={store}
+        modal
         unmountOnHide
         fixed
         fitViewport
@@ -153,7 +154,7 @@ export function EventCreateDialog({
         gutter={10}
         wrapperProps={{
           className:
-            'event-popover-wrapper max-sm:!inset-0 max-sm:!h-dvh max-sm:!w-screen max-sm:!max-h-none max-sm:!max-w-none',
+            'event-popover-wrapper max-sm:!inset-0 max-sm:!h-dvh max-sm:!w-screen max-sm:!max-h-none max-sm:!max-w-none max-sm:!overflow-hidden',
         }}
         backdrop={<div className="fixed inset-0 z-40 bg-black/40 sm:hidden" />}
         className={cn(
@@ -162,7 +163,7 @@ export function EventCreateDialog({
         )}
         style={{ viewTransitionName: 'dialog' }}
       >
-        <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-4 border-b px-4 py-3">
+        <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-4 border-b px-4 py-3 max-sm:[&_button]:size-10 max-sm:[&_svg]:size-5">
           <div className="min-w-0">
             <Ariakit.PopoverHeading className="text-base font-semibold tracking-tight">
               New event
@@ -181,7 +182,7 @@ export function EventCreateDialog({
           data-calendar-editing
           onKeyDown={handleSubmitShortcut}
         >
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:flex-none sm:overflow-visible">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain p-4 sm:flex-none sm:overflow-visible">
             <EventFields
               allDay={allDay}
               controlHeight={controlHeight}
@@ -210,7 +211,7 @@ export function EventCreateDialog({
               </label>
             </div>
           </div>
-          <div className="border-divider dark:border-divider-dark flex justify-end gap-2 border-t px-4 py-3">
+          <div className="border-divider dark:border-divider-dark flex justify-end gap-2 border-t px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] max-sm:[&_button]:h-11 max-sm:[&_button]:flex-1">
             <Button render={<Ariakit.PopoverDismiss />} variant="ghost">
               Cancel
             </Button>
