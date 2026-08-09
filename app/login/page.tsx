@@ -19,7 +19,7 @@ export default function LoginPage() {
         <span className="mx-auto mb-6 grid size-12 place-items-center rounded-xl bg-accent text-white">
           <CalendarDays className="size-6" strokeWidth={2.25} />
         </span>
-        <h1 className="text-center text-2xl font-semibold tracking-tight">Sign in to Pace</h1>
+        <h1 className="text-center text-2xl font-semibold tracking-tight">Sign in to Cadence</h1>
         <label className="mt-8 block">
           <span className="text-muted mb-1.5 block text-xs font-medium">Name</span>
           <input autoFocus onChange={(event) => setName(event.target.value)} placeholder="Your name" value={name} />

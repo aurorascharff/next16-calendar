@@ -1,7 +1,7 @@
 'use client'
 
 import * as Ariakit from '@ariakit/react'
-import { useTransition } from 'react'
+import { useActionState } from 'react'
 import { toast } from 'sonner'
 import { Dialog } from '@/components/ui/dialog'
 import { createEvent } from '../calendar-actions'
@@ -19,6 +19,8 @@ const calendarColor: Record<CalendarName, EventColor> = {
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 const weekdayLabel = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'long' })
 
+type State = { error?: string }
+
 export function EventCreateDialog({
   store,
   day,
@@ -30,35 +32,30 @@ export function EventCreateDialog({
   defaultStart?: string
   defaultDuration?: number
 }) {
-  const [isPending, startTransition] = useTransition()
   const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()]
 
-  function submit(formData: FormData) {
+  const [state, formAction, isPending] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
     const calendar = String(formData.get('calendar')) as CalendarName
     const repeat = String(formData.get('repeat'))
     const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? weekday : null
-    startTransition(async () => {
-      const result = await createEvent({
-        calendar,
-        color: calendarColor[calendar],
-        day,
-        duration: Number(formData.get('duration')),
-        recurrence,
-        start: String(formData.get('start')),
-        title: String(formData.get('title')),
-      })
-      if (result.error) {
-        toast.error(result.error)
-        return
-      }
-      store.hide()
-      toast.success('Event added to your calendar.')
+    const result = await createEvent({
+      calendar,
+      color: calendarColor[calendar],
+      day,
+      duration: Number(formData.get('duration')),
+      recurrence,
+      start: String(formData.get('start')),
+      title: String(formData.get('title')),
     })
-  }
+    if (result.error) return { error: result.error }
+    store.hide()
+    toast.success('Event added to your calendar.')
+    return {}
+  }, {})
 
   return (
     <Dialog store={store} title="New event" description={formatDay(day)} busy={isPending}>
-      <form action={submit} className="mt-4 space-y-4">
+      <form action={formAction} className="mt-4 space-y-4">
         <label className="block">
           <span className={fieldLabel}>Title</span>
           <input autoFocus name="title" placeholder="What's happening?" />
@@ -97,6 +94,7 @@ export function EventCreateDialog({
             </select>
           </label>
         </div>
+        {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex justify-end gap-2">
           <Ariakit.DialogDismiss
             className="text-muted rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black disabled:opacity-50 dark:hover:text-white"

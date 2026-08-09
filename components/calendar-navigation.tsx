@@ -21,7 +21,7 @@ export function CalendarNavigation() {
             <CalendarDays className="size-4.5" strokeWidth={2.25} />
           </span>
           <span>
-            <span className="block font-semibold tracking-tight">Pace</span>
+            <span className="block font-semibold tracking-tight">Cadence</span>
             <span className="text-muted block text-xs">Calendar workspace</span>
           </span>
         </Link>

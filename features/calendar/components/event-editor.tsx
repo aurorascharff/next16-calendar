@@ -2,10 +2,9 @@
 
 import * as Ariakit from '@ariakit/react'
 import { Trash2 } from 'lucide-react'
-import { useTransition } from 'react'
+import { useActionState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Dialog } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
 import { deleteEvent, updateEvent } from '../calendar-actions'
 import type { CalendarEvent, EventColor } from '../types/calendar'
 import { formatDay } from '../calendar-utils'
@@ -17,10 +16,12 @@ type EventEditorProps = {
   onUpdated: (event: Pick<CalendarEvent, 'color' | 'duration' | 'sourceId' | 'start' | 'title'>) => void
 }
 
+type State = { error?: string }
+
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium'
 
 export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEditorProps) {
-  const [isPending, startTransition] = useTransition()
+  const [isDeleting, startDelete] = useTransition()
   const store = Ariakit.useDialogStore({
     defaultOpen: true,
     setOpen(open) {
@@ -28,7 +29,8 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
     },
   })
 
-  function submit(formData: FormData) {
+  const [state, formAction, isSaving] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
+    if (event.recurring) return { error: 'This is a recurring demo event and can’t be edited.' }
     const input = {
       color: String(formData.get('color')) as EventColor,
       duration: Number(formData.get('duration')),
@@ -36,54 +38,53 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
       start: String(formData.get('start')),
       title: String(formData.get('title')),
     }
-
-    startTransition(async () => {
-      const result = await updateEvent(input)
-      if (result.error) {
-        toast.error(result.error)
-        return
-      }
-
-      onUpdated({ ...input, sourceId: event.sourceId })
-      store.hide()
-      toast.success(event.recurring ? 'Recurring event updated.' : 'Event updated.')
-    })
-  }
+    const result = await updateEvent(input)
+    if (result.error) return { error: result.error }
+    onUpdated({ ...input, sourceId: event.sourceId })
+    store.hide()
+    toast.success('Event updated.')
+    return {}
+  }, {})
 
   function remove() {
-    startTransition(async () => {
+    if (event.recurring) {
+      toast.error('Recurring demo events can’t be deleted.')
+      return
+    }
+    startDelete(async () => {
       const result = await deleteEvent(event.sourceId)
       if (result.error) {
         toast.error(result.error)
         return
       }
-
       onDeleted(event.sourceId)
       store.hide()
-      toast.success(event.recurring ? 'Recurring event removed.' : 'Event removed.')
+      toast.success('Event removed.')
     })
   }
 
+  const busy = isSaving || isDeleting
+
   return (
-    <Dialog store={store} title="Edit event" description={`${formatDay(event.day)} · ${event.start}`} busy={isPending}>
+    <Dialog store={store} title="Edit event" description={`${formatDay(event.day)} · ${event.start}`} busy={busy}>
       {event.recurring ? (
         <p className="text-muted mt-3 rounded-md bg-card px-3 py-2 text-xs dark:bg-card-dark">
-          This is a recurring event. Changes apply to each occurrence.
+          This is a recurring demo event — it can’t be edited or deleted.
         </p>
       ) : null}
-      <form action={submit} className="mt-4 space-y-4">
+      <form action={formAction} className="mt-4 space-y-4">
         <label className="block">
           <span className={fieldLabel}>Title</span>
-          <input autoFocus defaultValue={event.title} name="title" />
+          <input autoFocus defaultValue={event.title} disabled={event.recurring} name="title" />
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className={fieldLabel}>Starts at</span>
-            <input defaultValue={event.start} name="start" type="time" />
+            <input defaultValue={event.start} disabled={event.recurring} name="start" type="time" />
           </label>
           <label className="block">
             <span className={fieldLabel}>Duration</span>
-            <select defaultValue={String(event.duration)} name="duration">
+            <select defaultValue={String(event.duration)} disabled={event.recurring} name="duration">
               <option value="30">30 minutes</option>
               <option value="45">45 minutes</option>
               <option value="60">1 hour</option>
@@ -94,38 +95,37 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
         </div>
         <label className="block">
           <span className={fieldLabel}>Color</span>
-          <select defaultValue={event.color} name="color">
+          <select defaultValue={event.color} disabled={event.recurring} name="color">
             <option value="blue">Blue</option>
             <option value="violet">Violet</option>
             <option value="amber">Amber</option>
             <option value="rose">Rose</option>
           </select>
         </label>
-        <div className={cn('mt-6 flex items-center gap-3', event.recurring ? 'justify-end' : 'justify-between')}>
-          {!event.recurring ? (
-            <button
-              className="text-danger inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-danger/10 disabled:opacity-60"
-              disabled={isPending}
-              onClick={remove}
-              type="button"
-            >
-              <Trash2 className="size-4" />
-              Delete
-            </button>
-          ) : null}
+        {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <button
+            className="text-danger inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-danger/10 disabled:opacity-60"
+            disabled={busy}
+            onClick={remove}
+            type="button"
+          >
+            <Trash2 className="size-4" />
+            Delete
+          </button>
           <div className="flex gap-2">
             <Ariakit.DialogDismiss
               className="text-muted rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black disabled:opacity-50 dark:hover:text-white"
-              disabled={isPending}
+              disabled={busy}
             >
               Cancel
             </Ariakit.DialogDismiss>
             <button
               className="rounded-md bg-accent px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
-              disabled={isPending}
+              disabled={busy || event.recurring}
               type="submit"
             >
-              {isPending ? 'Saving…' : 'Save changes'}
+              {isSaving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </div>

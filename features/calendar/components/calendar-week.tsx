@@ -13,10 +13,10 @@ export async function CalendarWeek({ date, view }: { date: string; view: Calenda
   )
 }
 
-export function CalendarWeekSkeleton() {
+export function CalendarWeekSkeleton({ view = 'week' }: { view?: CalendarView }) {
   return (
     <section className="min-h-0 flex-1 overflow-auto">
-      <CalendarBoardSkeleton />
+      <CalendarBoardSkeleton days={view === 'day' ? 1 : 7} />
     </section>
   )
 }

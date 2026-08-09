@@ -1,20 +1,8 @@
-'use client'
-
-import { Check, Copy, ExternalLink, Link2 } from 'lucide-react'
+import { ExternalLink, Link2 } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { CopyLinkButton } from '@/features/calendar/components/copy-link-button'
 
-export default function SharePage() {
-  const [copied, setCopied] = useState(false)
-
-  async function copyLink() {
-    await navigator.clipboard.writeText(`${window.location.origin}/book/aurora`)
-    setCopied(true)
-    toast.success('Link copied.')
-    window.setTimeout(() => setCopied(false), 2_000)
-  }
-
+export default function BookingPage() {
   return (
     <main className="min-w-0 flex-1 overflow-auto">
       <header className="flex min-h-18 items-center border-b border-divider px-4 sm:px-6 dark:border-divider-dark">
@@ -32,16 +20,9 @@ export default function SharePage() {
           <p className="text-muted mt-1 text-sm">30-minute slots, weekdays 09:30–15:00.</p>
           <div className="border-divider mt-5 flex flex-wrap items-center gap-2 border-t pt-4 dark:border-divider-dark">
             <code className="text-muted flex-1 truncate rounded bg-card px-3 py-2 font-mono text-xs dark:bg-card-dark">
-              pace.dev/book/aurora
+              cadence.dev/book/aurora
             </code>
-            <button
-              className="inline-flex items-center gap-2 rounded-md bg-accent px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
-              onClick={copyLink}
-              type="button"
-            >
-              {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-              {copied ? 'Copied' : 'Copy link'}
-            </button>
+            <CopyLinkButton path="/book/aurora" />
             <Link
               className="border-divider text-muted inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-card hover:text-black dark:border-divider-dark dark:hover:bg-card-dark dark:hover:text-white"
               href="/book/aurora"

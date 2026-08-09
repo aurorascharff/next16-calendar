@@ -11,7 +11,7 @@ export async function BookingProfile({ handle }: { handle: string }) {
       <section className="w-full max-w-xl rounded-lg border border-divider bg-card/40 p-5 sm:p-8 dark:border-divider-dark dark:bg-card-dark/30">
         <Link className="text-muted inline-flex items-center gap-1.5 text-sm transition-colors hover:text-black dark:hover:text-white" href="/">
           <ChevronLeft className="size-4" />
-          Pace
+          Cadence
         </Link>
         <div className="mt-8 flex items-start gap-4">
           <div className="grid size-11 place-items-center rounded-full bg-primary/15 text-primary">

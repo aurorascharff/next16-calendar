@@ -2,96 +2,33 @@
 
 import * as Ariakit from '@ariakit/react'
 import { Repeat } from 'lucide-react'
-import { useEffect, useOptimistic, useState, useTransition } from 'react'
+import { useOptimistic, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { moveEvent, resizeEvent } from '../calendar-actions'
 import type { CalendarEvent, CalendarName } from '../types/calendar'
 import { dateKey, formatDay, timeToMinutes } from '../calendar-utils'
+import {
+  END_MINUTES,
+  GRID_HEIGHT,
+  HOUR_HEIGHT,
+  HOURS,
+  minutesToTime,
+  nearestDuration,
+  packDay,
+  SNAP_MINUTES,
+  snapMinutes,
+  START_HOUR,
+} from '../calendar-layout'
+import { useNow } from '../hooks/use-now'
 import { EventCreateDialog } from './event-create-dialog'
 import { EventEditor } from './event-editor'
 import { useCalendarVisibility } from './calendar-visibility'
-
-const HOUR_HEIGHT = 72
-const START_HOUR = 8
-const HOURS = Array.from({ length: 11 }, (_, index) => START_HOUR + index)
-const END_MINUTES = (START_HOUR + HOURS.length) * 60
-const GRID_HEIGHT = HOURS.length * HOUR_HEIGHT
-const SNAP_MINUTES = 15
-const DURATION_OPTIONS = [30, 45, 60, 90, 120]
 
 const calendarChip: Record<CalendarName, string> = {
   focus: 'bg-indigo-500 text-white ring-black/5 shadow-sm dark:bg-indigo-600',
   personal: 'bg-rose-500 text-white ring-black/5 shadow-sm dark:bg-rose-600',
   team: 'bg-accent text-white ring-black/5 shadow-sm dark:bg-accent-hover',
-}
-
-type Placement = { col: number; cols: number }
-
-function packDay(events: CalendarEvent[]): Map<string, Placement> {
-  const items = events
-    .map((event) => ({ end: timeToMinutes(event.start) + event.duration, event, start: timeToMinutes(event.start) }))
-    .sort((a, b) => a.start - b.start || a.end - b.end)
-
-  const placement = new Map<string, Placement>()
-  let cluster: typeof items = []
-  let clusterEnd = -1
-
-  function flush() {
-    const columnEnds: number[] = []
-    for (const item of cluster) {
-      let col = columnEnds.findIndex((end) => end <= item.start)
-      if (col === -1) {
-        col = columnEnds.length
-        columnEnds.push(item.end)
-      } else {
-        columnEnds[col] = item.end
-      }
-      placement.set(item.event.id, { col, cols: 0 })
-    }
-    for (const item of cluster) {
-      placement.get(item.event.id)!.cols = columnEnds.length
-    }
-    cluster = []
-    clusterEnd = -1
-  }
-
-  for (const item of items) {
-    if (cluster.length && item.start >= clusterEnd) flush()
-    cluster.push(item)
-    clusterEnd = Math.max(clusterEnd, item.end)
-  }
-  flush()
-
-  return placement
-}
-
-function useNow() {
-  const [now, setNow] = useState<Date | null>(null)
-  useEffect(() => {
-    setNow(new Date())
-    const id = setInterval(() => setNow(new Date()), 60_000)
-    return () => clearInterval(id)
-  }, [])
-  return now
-}
-
-function snapMinutes(clientY: number, boundsTop: number) {
-  const offset = Math.max(0, Math.min(GRID_HEIGHT, clientY - boundsTop))
-  const raw = START_HOUR * 60 + (offset / HOUR_HEIGHT) * 60
-  const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES
-  return Math.max(START_HOUR * 60, Math.min(END_MINUTES, snapped))
-}
-
-function minutesToTime(minutes: number) {
-  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
-}
-
-function nearestDuration(minutes: number) {
-  return DURATION_OPTIONS.reduce((best, option) =>
-    Math.abs(option - minutes) < Math.abs(best - minutes) ? option : best,
-  )
 }
 
 export function CalendarBoard({ days, events, view }: { days: string[]; events: CalendarEvent[]; view: 'day' | 'week' }) {
@@ -128,9 +65,14 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
   )
   const [isPending, startTransition] = useTransition()
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
-  const [dropTarget, setDropTarget] = useState<{ day: string; minutes: number } | null>(null)
+  const [dragMove, setDragMove] = useState<{ day: string; sourceId: string; startMin: number } | null>(null)
   const [createSel, setCreateSel] = useState<{ aMin: number; bMin: number; day: string } | null>(null)
   const [createDraft, setCreateDraft] = useState<{ day: string; duration: number; start: string } | null>(null)
+  const [resize, setResize] = useState<{ colTop: number; endMin: number; sourceId: string; startMin: number } | null>(null)
+  const resizingRef = useRef(false)
+  const gridRef = useRef<HTMLDivElement>(null)
+  const moveRef = useRef<{ duration: number; grabOffsetMin: number; moved: boolean; sourceId: string; x0: number; y0: number } | null>(null)
+  const suppressClickRef = useRef(false)
   const createStore = Ariakit.useDialogStore({
     setOpen(open) {
       if (!open) setCreateDraft(null)
@@ -140,28 +82,78 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
   const todayKey = now ? dateKey(now) : null
   const nowMinutes = now ? now.getHours() * 60 + now.getMinutes() : 0
 
-  function handleDragOver(day: string, dragEvent: React.DragEvent<HTMLDivElement>) {
-    dragEvent.preventDefault()
-    const bounds = dragEvent.currentTarget.getBoundingClientRect()
-    setDropTarget({ day, minutes: Math.min(END_MINUTES - SNAP_MINUTES, snapMinutes(dragEvent.clientY, bounds.top)) })
+  function pointToDayIndex(clientX: number) {
+    const grid = gridRef.current
+    if (!grid) return 0
+    const rect = grid.getBoundingClientRect()
+    const gutter = 72
+    const colWidth = (rect.width - gutter) / days.length
+    return Math.max(0, Math.min(days.length - 1, Math.floor((clientX - rect.left - gutter) / colWidth)))
   }
 
-  function handleDrop(day: string, dropEvent: React.DragEvent<HTMLDivElement>) {
-    setDropTarget(null)
-    const sourceId = dropEvent.dataTransfer.getData('text/pace-event')
-    if (!sourceId) return
-    const dragged = optimisticEvents.find((event) => event.sourceId === sourceId)
-    const bounds = dropEvent.currentTarget.getBoundingClientRect()
-    const start = minutesToTime(Math.min(END_MINUTES - SNAP_MINUTES, snapMinutes(dropEvent.clientY, bounds.top)))
+  function pointToMinutes(clientY: number) {
+    const grid = gridRef.current
+    if (!grid) return START_HOUR * 60
+    const rect = grid.getBoundingClientRect()
+    return START_HOUR * 60 + ((clientY - rect.top - 12) / HOUR_HEIGHT) * 60
+  }
+
+  function effectiveDay(event: CalendarEvent) {
+    return dragMove?.sourceId === event.sourceId ? dragMove.day : event.day
+  }
+
+  function effectiveStartMin(event: CalendarEvent) {
+    return dragMove?.sourceId === event.sourceId ? dragMove.startMin : timeToMinutes(event.start)
+  }
+
+  // Pointer-based move: the event block itself follows the cursor (snapped to the
+  // grid) and drops into whichever day column it's over — no floating HTML5 ghost.
+  function handleMoveDown(calendarEvent: CalendarEvent, pointerEvent: React.PointerEvent<HTMLButtonElement>) {
+    if (pointerEvent.button !== 0 || calendarEvent.recurring) return
+    if ((pointerEvent.target as HTMLElement).closest('[data-resize-handle]')) return
+    pointerEvent.stopPropagation()
+    pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId)
+    moveRef.current = {
+      duration: calendarEvent.duration,
+      grabOffsetMin: pointToMinutes(pointerEvent.clientY) - timeToMinutes(calendarEvent.start),
+      moved: false,
+      sourceId: calendarEvent.sourceId,
+      x0: pointerEvent.clientX,
+      y0: pointerEvent.clientY,
+    }
+  }
+
+  function handleMoveMove(pointerEvent: React.PointerEvent<HTMLButtonElement>) {
+    const origin = moveRef.current
+    if (!origin) return
+    if (!origin.moved) {
+      if (Math.abs(pointerEvent.clientX - origin.x0) < 4 && Math.abs(pointerEvent.clientY - origin.y0) < 4) return
+      origin.moved = true
+    }
+    const day = days[pointToDayIndex(pointerEvent.clientX)]
+    const raw = pointToMinutes(pointerEvent.clientY) - origin.grabOffsetMin
+    const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES
+    const startMin = Math.max(START_HOUR * 60, Math.min(END_MINUTES - origin.duration, snapped))
+    setDragMove({ day, sourceId: origin.sourceId, startMin })
+  }
+
+  function handleMoveUp(pointerEvent: React.PointerEvent<HTMLButtonElement>) {
+    const origin = moveRef.current
+    moveRef.current = null
+    try {
+      pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId)
+    } catch {}
+    const target = dragMove
+    setDragMove(null)
+    if (!origin || !origin.moved || !target) return
+    suppressClickRef.current = true
+    requestAnimationFrame(() => {
+      suppressClickRef.current = false
+    })
+    const start = minutesToTime(target.startMin)
+    const { day, sourceId } = target
     startTransition(async () => {
-      setOptimisticEvents({
-        day,
-        everyWeekday: dragged?.recurrence === 'weekday',
-        recurring: dragged?.recurring,
-        sourceId,
-        start,
-        type: 'move',
-      })
+      setOptimisticEvents({ day, sourceId, start, type: 'move' })
       const result = await moveEvent({ day, sourceId, start })
       if (result.error) toast.error(result.error)
     })
@@ -194,6 +186,41 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
     createStore.show()
   }
 
+  function handleResizeDown(event: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) {
+    pointerEvent.stopPropagation()
+    pointerEvent.preventDefault()
+    resizingRef.current = true
+    const column = (pointerEvent.currentTarget as HTMLElement).closest('[data-day-column]')
+    const colTop = column ? column.getBoundingClientRect().top : 0
+    pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId)
+    const startMin = timeToMinutes(event.start)
+    setResize({ colTop, endMin: startMin + event.duration, sourceId: event.sourceId, startMin })
+  }
+
+  function handleResizeMove(pointerEvent: React.PointerEvent<HTMLElement>) {
+    if (!resize) return
+    const raw = snapMinutes(pointerEvent.clientY, resize.colTop)
+    setResize((current) => (current ? { ...current, endMin: Math.max(current.startMin + SNAP_MINUTES, raw) } : current))
+  }
+
+  function handleResizeUp(pointerEvent: React.PointerEvent<HTMLElement>) {
+    if (!resize) return
+    try {
+      pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId)
+    } catch {}
+    const duration = resize.endMin - resize.startMin
+    const sourceId = resize.sourceId
+    setResize(null)
+    requestAnimationFrame(() => {
+      resizingRef.current = false
+    })
+    startTransition(async () => {
+      setOptimisticEvents({ duration, sourceId, type: 'resize' })
+      const result = await resizeEvent({ duration, sourceId })
+      if (result.error) toast.error(result.error)
+    })
+  }
+
   return (
     <div className="relative select-none">
       {isPending ? (
@@ -224,7 +251,7 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
           )
         })}
       </div>
-      <div className="grid pt-3" style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
+      <div className="grid pt-3" ref={gridRef} style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
         <div className="border-r border-divider dark:border-divider-dark">
           {HOURS.map((hour) => (
             <div className="relative h-[72px] pr-3 text-right" key={hour}>
@@ -237,7 +264,7 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
         {days.map((day) => {
           const isToday = day === todayKey
           const showNow = isToday && nowMinutes >= START_HOUR * 60 && nowMinutes <= END_MINUTES
-          const dayEvents = optimisticEvents.filter((event) => event.day === day && !hidden.has(event.calendar))
+          const dayEvents = optimisticEvents.filter((event) => effectiveDay(event) === day && !hidden.has(event.calendar))
           const layout = packDay(dayEvents)
           const selectionLo = createSel?.day === day ? Math.min(createSel.aMin, createSel.bMin) : null
           const selectionHi = createSel?.day === day ? Math.max(createSel.aMin, createSel.bMin) : null
@@ -247,9 +274,8 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
                 'relative border-r border-divider dark:border-divider-dark',
                 isToday && 'bg-accent/[0.035]',
               )}
+              data-day-column
               key={day}
-              onDragOver={(event) => handleDragOver(day, event)}
-              onDrop={(event) => handleDrop(day, event)}
               onPointerDown={(event) => handlePointerDown(day, event)}
               onPointerMove={(event) => handlePointerMove(day, event)}
               onPointerUp={(event) => handlePointerUp(day, event)}
@@ -274,25 +300,31 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
                 </div>
               ) : null}
               {dayEvents.map((event) => {
-                const top = ((timeToMinutes(event.start) - START_HOUR * 60) / 60) * HOUR_HEIGHT
-                const height = Math.max(22, (event.duration / 60) * HOUR_HEIGHT - 3)
+                const startMin = effectiveStartMin(event)
+                const top = ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT
+                const isResizing = resize?.sourceId === event.sourceId
+                const isDragging = dragMove?.sourceId === event.sourceId
+                const displayDuration = isResizing ? resize!.endMin - resize!.startMin : event.duration
+                const height = Math.max(22, (displayDuration / 60) * HOUR_HEIGHT - 3)
                 const place = layout.get(event.id) ?? { col: 0, cols: 1 }
                 const widthPct = 100 / place.cols
                 return (
                   <button
                     className={cn(
-                      'absolute z-10 flex flex-col overflow-hidden rounded-[5px] px-2 py-1 text-left ring-1 ring-inset transition-[filter,box-shadow] hover:z-20 hover:brightness-105 hover:shadow-md focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
-                      'cursor-grab active:cursor-grabbing',
+                      'group absolute flex touch-none flex-col overflow-hidden rounded-[5px] px-2 py-1 text-left ring-1 ring-inset transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+                      isDragging || isResizing ? 'z-30 cursor-grabbing shadow-lg' : 'z-10 cursor-grab hover:z-20 hover:shadow-md',
+                      event.recurring && 'cursor-pointer',
                       calendarChip[event.calendar],
                     )}
                     data-event-chip
-                    draggable
                     key={event.id}
-                    onClick={() => setSelectedEvent(event)}
-                    onDragStart={(dragEvent) => {
-                      dragEvent.dataTransfer.effectAllowed = 'move'
-                      dragEvent.dataTransfer.setData('text/pace-event', event.sourceId)
+                    onClick={() => {
+                      if (suppressClickRef.current) return
+                      setSelectedEvent(event)
                     }}
+                    onPointerDown={(pointerEvent) => handleMoveDown(event, pointerEvent)}
+                    onPointerMove={handleMoveMove}
+                    onPointerUp={handleMoveUp}
                     style={{
                       height,
                       left: `calc(${place.col * widthPct}% + 2px)`,
@@ -307,7 +339,22 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
                       {event.recurring ? <Repeat className="size-3 shrink-0 opacity-50" /> : null}
                     </span>
                     {height > 32 ? (
-                      <span className="mt-0.5 text-[11px] tabular-nums opacity-70">{event.start}</span>
+                      <span className="mt-0.5 text-[11px] tabular-nums opacity-70">
+                        {isResizing ? minutesToTime(resize!.endMin) : minutesToTime(startMin)}
+                      </span>
+                    ) : null}
+                    {!event.recurring ? (
+                      <span
+                        className="absolute inset-x-0 bottom-0 z-10 flex h-2.5 cursor-ns-resize touch-none items-end justify-center pb-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+                        data-event-chip
+                        data-resize-handle
+                        onClick={(clickEvent) => clickEvent.stopPropagation()}
+                        onPointerDown={(pointerEvent) => handleResizeDown(event, pointerEvent)}
+                        onPointerMove={handleResizeMove}
+                        onPointerUp={handleResizeUp}
+                      >
+                        <span className="h-1 w-7 rounded-full bg-white/70" />
+                      </span>
                     ) : null}
                   </button>
                 )
@@ -325,19 +372,6 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
                   {selectionHi > selectionLo ? (
                     <span className="text-accent/80 text-[11px] font-semibold tabular-nums">{minutesToTime(selectionHi)}</span>
                   ) : null}
-                </div>
-              ) : null}
-              {dropTarget?.day === day ? (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-x-0 z-50"
-                  style={{ top: ((dropTarget.minutes - START_HOUR * 60) / 60) * HOUR_HEIGHT }}
-                >
-                  <div className="relative h-0.5 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.35)]">
-                    <span className="absolute -top-2.5 left-0 rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-black shadow-md ring-1 ring-black/10">
-                      {minutesToTime(dropTarget.minutes)}
-                    </span>
-                  </div>
                 </div>
               ) : null}
             </div>
@@ -365,28 +399,40 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
   )
 }
 
-export function CalendarBoardSkeleton() {
+// The empty board itself — same grid the real board renders, minus events.
+// Events stream in on top of it, so there are no placeholder "skeleton" events.
+export function CalendarBoardSkeleton({ days = 7 }: { days?: number }) {
+  const gridTemplate = `4.5rem repeat(${days}, minmax(0, 1fr))`
+  const minWidth = days > 1 ? 760 : undefined
   return (
-    <div className="min-w-[760px]">
-      <div className="grid grid-cols-[4.5rem_repeat(7,minmax(8.5rem,1fr))] border-b border-divider dark:border-divider-dark">
+    <div>
+      <div
+        className="grid border-b border-divider dark:border-divider-dark"
+        style={{ gridTemplateColumns: gridTemplate, minWidth }}
+      >
         <div />
-        {Array.from({ length: 7 }).map((_, index) => (
+        {Array.from({ length: days }).map((_, index) => (
           <div className="px-3 py-2.5" key={index}>
-            <Skeleton className="h-3 w-8" />
-            <Skeleton className="mt-1.5 size-8 rounded-full" />
+            <div className="h-3" />
+            <div className="mt-1 h-8" />
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-[4.5rem_repeat(7,minmax(8.5rem,1fr))] pt-3">
-        <div className="border-r border-divider dark:border-divider-dark" />
-        {Array.from({ length: 7 }).map((_, dayIndex) => (
-          <div className="relative border-r border-divider dark:border-divider-dark" style={{ height: GRID_HEIGHT }} key={dayIndex}>
+      <div className="grid pt-3" style={{ gridTemplateColumns: gridTemplate, minWidth }}>
+        <div className="border-r border-divider dark:border-divider-dark">
+          {HOURS.map((hour) => (
+            <div className="relative h-[72px] pr-3 text-right" key={hour}>
+              <span className="text-muted absolute -top-2 right-3 text-xs tabular-nums">
+                {String(hour).padStart(2, '0')}:00
+              </span>
+            </div>
+          ))}
+        </div>
+        {Array.from({ length: days }).map((_, dayIndex) => (
+          <div className="border-r border-divider dark:border-divider-dark" style={{ height: GRID_HEIGHT }} key={dayIndex}>
             {HOURS.map((hour) => (
               <div className="h-[72px] border-b border-divider/60 dark:border-divider-dark/60" key={hour} />
             ))}
-            {dayIndex % 2 === 0 ? (
-              <Skeleton className="absolute inset-x-1 rounded-md" style={{ height: 64, top: 84 + dayIndex * 12 }} />
-            ) : null}
           </div>
         ))}
       </div>

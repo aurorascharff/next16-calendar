@@ -1,6 +1,6 @@
 <div align="center">
 
-# Pace
+# Cadence
 
 A [Next.js 16.3](https://nextjs.org/blog/next-16-3) calendar workspace demonstrating [Instant Navigations](https://nextjs.org/docs/app/guides/instant-navigation).
 
@@ -19,7 +19,7 @@ A [Next.js 16.3](https://nextjs.org/blog/next-16-3) calendar workspace demonstra
 
 ## Getting started
 
-Pace runs on SQLite locally with zero setup:
+Cadence runs on SQLite locally with zero setup:
 
 ```bash
 pnpm install
