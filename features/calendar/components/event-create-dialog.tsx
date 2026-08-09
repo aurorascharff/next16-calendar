@@ -10,7 +10,6 @@ import { formatDay } from '../calendar-utils'
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium'
 
-// Calendar drives the color, matching the sidebar legend and the grid.
 const calendarColor: Record<CalendarName, EventColor> = {
   focus: 'violet',
   personal: 'rose',

@@ -23,16 +23,22 @@ type StoredEvent = {
   title: string
 }
 
-export async function getCalendarWeek(date: string): Promise<CalendarWeek> {
-  if (!isDateKey(date)) notFound()
-
+async function getCurrentUserId() {
+  'use cache'
+  cacheLife('hours')
   const user = await prisma.user.findUnique({
     select: { id: true },
     where: { handle: 'aurora' },
   })
+  return user?.id ?? null
+}
 
-  if (!user) notFound()
-  return getCalendarWeekForUser(date, user.id)
+export async function getCalendarWeek(date: string): Promise<CalendarWeek> {
+  if (!isDateKey(date)) notFound()
+
+  const userId = await getCurrentUserId()
+  if (!userId) notFound()
+  return getCalendarWeekForUser(date, userId)
 }
 
 async function getCalendarWeekForUser(

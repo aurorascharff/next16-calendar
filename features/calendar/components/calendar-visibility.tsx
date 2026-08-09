@@ -32,8 +32,6 @@ export function useCalendarVisibility() {
   return context
 }
 
-// Shared calendar identity: label + color, used by both the sidebar legend and
-// the event chips so the grid and the legend always read as the same thing.
 export const CALENDAR_META: Record<CalendarName, { dot: string; label: string }> = {
   focus: { dot: 'bg-indigo-500', label: 'Focus' },
   personal: { dot: 'bg-rose-500', label: 'Personal' },

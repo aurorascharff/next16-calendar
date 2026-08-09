@@ -1,5 +1,6 @@
 export type CalendarName = 'focus' | 'personal' | 'team'
 export type EventColor = 'amber' | 'blue' | 'rose' | 'violet'
+export type CalendarView = 'day' | 'week'
 
 export type CalendarEvent = {
   calendar: CalendarName

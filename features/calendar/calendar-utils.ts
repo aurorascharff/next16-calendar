@@ -11,6 +11,13 @@ const monthFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'UTC',
 })
 
+const dayLongFormatter = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  weekday: 'long',
+  timeZone: 'UTC',
+})
+
 function dateFromKey(value: string) {
   return new Date(`${value}T00:00:00.000Z`)
 }
@@ -50,6 +57,16 @@ export function shiftWeek(value: string, direction: -1 | 1) {
   const date = dateFromKey(value)
   date.setUTCDate(date.getUTCDate() + direction * 7)
   return dateKey(date)
+}
+
+export function shiftDay(value: string, direction: -1 | 1) {
+  const date = dateFromKey(value)
+  date.setUTCDate(date.getUTCDate() + direction)
+  return dateKey(date)
+}
+
+export function formatDayLong(value: string) {
+  return dayLongFormatter.format(dateFromKey(value))
 }
 
 export function timeToMinutes(value: string) {

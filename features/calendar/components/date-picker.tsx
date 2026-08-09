@@ -16,7 +16,6 @@ function fromKey(value: string) {
   return new Date(`${value}T00:00:00.000Z`)
 }
 
-// Six-week grid (Monday-first) covering the given month.
 function monthGrid(year: number, month: number) {
   const first = new Date(Date.UTC(year, month, 1))
   const offset = (first.getUTCDay() + 6) % 7
@@ -36,7 +35,6 @@ export function DatePicker({ date }: { date: string }) {
   const store = Ariakit.usePopoverStore()
   const open = Ariakit.useStoreState(store, 'open')
 
-  // Snap the visible month back to the selected date whenever the picker opens.
   useEffect(() => {
     if (open) setView({ month: selected.getUTCMonth(), year: selected.getUTCFullYear() })
     // eslint-disable-next-line react-hooks/exhaustive-deps

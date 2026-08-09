@@ -6,8 +6,8 @@ import { useEffect, useOptimistic, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { moveEvent } from '../calendar-actions'
-import type { CalendarEvent, CalendarName, CalendarWeek } from '../types/calendar'
+import { moveEvent, resizeEvent } from '../calendar-actions'
+import type { CalendarEvent, CalendarName } from '../types/calendar'
 import { dateKey, formatDay, timeToMinutes } from '../calendar-utils'
 import { EventCreateDialog } from './event-create-dialog'
 import { EventEditor } from './event-editor'
@@ -21,9 +21,6 @@ const GRID_HEIGHT = HOURS.length * HOUR_HEIGHT
 const SNAP_MINUTES = 15
 const DURATION_OPTIONS = [30, 45, 60, 90, 120]
 
-// The calendar owns the color, matching the sidebar legend (Focus/Team/Personal).
-// Vibrant in light mode; a shade deeper in dark so they don't over-contrast the
-// neutral chrome.
 const calendarChip: Record<CalendarName, string> = {
   focus: 'bg-indigo-500 text-white ring-black/5 shadow-sm dark:bg-indigo-600',
   personal: 'bg-rose-500 text-white ring-black/5 shadow-sm dark:bg-rose-600',
@@ -97,19 +94,25 @@ function nearestDuration(minutes: number) {
   )
 }
 
-export function CalendarBoard({ week }: { week: CalendarWeek }) {
+export function CalendarBoard({ days, events, view }: { days: string[]; events: CalendarEvent[]; view: 'day' | 'week' }) {
   const { hidden } = useCalendarVisibility()
+  const gridTemplate = `4.5rem repeat(${days.length}, minmax(0, 1fr))`
+  const gridMinWidth = view === 'week' ? 760 : undefined
   const [optimisticEvents, setOptimisticEvents] = useOptimistic(
-    week.events,
+    events,
     (
       current,
       next:
         | { day: string; everyWeekday?: boolean; recurring?: boolean; sourceId: string; start: string; type: 'move' }
         | { sourceId: string; type: 'delete' }
+        | { duration: number; sourceId: string; type: 'resize' }
         | { event: Pick<CalendarEvent, 'color' | 'duration' | 'sourceId' | 'start' | 'title'>; type: 'update' },
     ) => {
       if (next.type === 'delete') {
         return current.filter((event) => event.sourceId !== next.sourceId)
+      }
+      if (next.type === 'resize') {
+        return current.map((event) => (event.sourceId === next.sourceId ? { ...event, duration: next.duration } : event))
       }
       if (next.type === 'update') {
         return current.map((event) =>
@@ -164,7 +167,6 @@ export function CalendarBoard({ week }: { week: CalendarWeek }) {
     })
   }
 
-  // Pointer-drag on empty grid to create — click for a default hour, drag to size.
   function handlePointerDown(day: string, event: React.PointerEvent<HTMLDivElement>) {
     if (event.button !== 0 || (event.target as HTMLElement).closest('[data-event-chip]')) return
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -199,9 +201,12 @@ export function CalendarBoard({ week }: { week: CalendarWeek }) {
           <div className="bg-accent h-full w-1/3" style={{ animation: 'loading-slide 0.9s ease-in-out infinite' }} />
         </div>
       ) : null}
-      <div className="sticky top-0 z-20 grid min-w-[760px] grid-cols-[4.5rem_repeat(7,minmax(8.5rem,1fr))] border-b border-divider bg-surface/90 backdrop-blur dark:border-divider-dark dark:bg-surface-dark/90">
+      <div
+        className="sticky top-0 z-20 grid border-b border-divider bg-surface/90 backdrop-blur dark:border-divider-dark dark:bg-surface-dark/90"
+        style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}
+      >
         <div />
-        {week.days.map((day) => {
+        {days.map((day) => {
           const [weekday, dayNumber] = formatDay(day).split(' ')
           const isToday = day === todayKey
           return (
@@ -219,7 +224,7 @@ export function CalendarBoard({ week }: { week: CalendarWeek }) {
           )
         })}
       </div>
-      <div className="grid min-w-[760px] grid-cols-[4.5rem_repeat(7,minmax(8.5rem,1fr))] pt-3">
+      <div className="grid pt-3" style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
         <div className="border-r border-divider dark:border-divider-dark">
           {HOURS.map((hour) => (
             <div className="relative h-[72px] pr-3 text-right" key={hour}>
@@ -229,7 +234,7 @@ export function CalendarBoard({ week }: { week: CalendarWeek }) {
             </div>
           ))}
         </div>
-        {week.days.map((day) => {
+        {days.map((day) => {
           const isToday = day === todayKey
           const showNow = isToday && nowMinutes >= START_HOUR * 60 && nowMinutes <= END_MINUTES
           const dayEvents = optimisticEvents.filter((event) => event.day === day && !hidden.has(event.calendar))
@@ -239,7 +244,7 @@ export function CalendarBoard({ week }: { week: CalendarWeek }) {
           return (
             <div
               className={cn(
-                'relative cursor-copy border-r border-divider dark:border-divider-dark',
+                'relative border-r border-divider dark:border-divider-dark',
                 isToday && 'bg-accent/[0.035]',
               )}
               key={day}
@@ -328,8 +333,8 @@ export function CalendarBoard({ week }: { week: CalendarWeek }) {
                   className="pointer-events-none absolute inset-x-0 z-50"
                   style={{ top: ((dropTarget.minutes - START_HOUR * 60) / 60) * HOUR_HEIGHT }}
                 >
-                  <div className="relative h-0.5 rounded-full bg-accent ring-2 ring-surface dark:ring-surface-dark">
-                    <span className="absolute -top-2.5 left-0 rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white shadow-md">
+                  <div className="relative h-0.5 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.35)]">
+                    <span className="absolute -top-2.5 left-0 rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-black shadow-md ring-1 ring-black/10">
                       {minutesToTime(dropTarget.minutes)}
                     </span>
                   </div>

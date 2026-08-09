@@ -13,9 +13,6 @@ type Props<T extends string = string> = Omit<
   'href' | 'className' | 'children'
 > & {
   href: Route<T> | URL
-  // Prefix used to decide active state, independent of `href`. Calendar links
-  // point at a specific date (`/calendar/2026-08-10`) but should stay active on
-  // any date, so we match on `/calendar` instead of the exact href.
   match?: string
   exact?: boolean
   className?: Renderable<string | undefined>
@@ -31,10 +28,6 @@ function checkActive(pathname: string, target: string, exact?: boolean): boolean
   return pathname === target || pathname.startsWith(`${target}/`)
 }
 
-// `<Link>` that reflects the current route with `aria-current="page"`, so active
-// styles are pure CSS (`aria-[current=page]:...`). `usePathname` is dynamic under
-// Cache Components, so the read lives behind <Suspense>; the fallback renders the
-// same shell inactive, keeping layout stable with no swap or flash.
 export function NavLink<T extends string>(props: Props<T>) {
   return (
     <Suspense fallback={<NavLinkShell {...props} isActive={false} />}>

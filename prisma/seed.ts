@@ -1,6 +1,7 @@
 import { config } from 'dotenv'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../generated/prisma/client'
+import { normalizeDatabaseUrl } from '../lib/database-url'
 
 // A developer's week. Recurring rituals (standup, focus, ceremonies) are the
 // demo backbone — they exist every matching weekday and can't be deleted, only
@@ -32,9 +33,8 @@ const seedEvents = [
 
 config({ path: '.env.local' })
 
-const url = process.env.DATABASE_URL ?? 'file:./prisma/pace.db'
 const prisma = new PrismaClient({
-  adapter: new PrismaBetterSqlite3({ url: url.replace(/^file:/, '') }),
+  adapter: new PrismaPg({ connectionString: normalizeDatabaseUrl(process.env.DATABASE_URL!) }),
 })
 
 async function main() {

@@ -37,10 +37,6 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
   const event = await prisma.calendarEvent.findUnique({ where: { id: sourceId } })
   if (!event) return { error: 'This event no longer exists.' }
 
-  // Recurring events are generated from a template. Dragging one always changes
-  // its time; if it recurs on a single weekday and is dropped on a different
-  // weekday, the series moves to that weekday too. An every-weekday series has
-  // no single day to move, so only its time changes.
   if (event.recurrence) {
     const data: { recurrence?: string; start: string } = { start }
     if (event.recurrence !== 'weekday' && isDateKey(day)) {
@@ -119,6 +115,18 @@ export async function updateEvent(input: UpdateEventInput) {
     where: { id: input.eventId },
   })
 
+  updateTag(calendarCache.tag)
+  updateTag(calendarCache.weekTag(getWeekDays(event.day.toISOString().slice(0, 10))[0]))
+  return { data: updated }
+}
+
+export async function resizeEvent({ duration, sourceId }: { duration: number; sourceId: string }) {
+  if (duration < 15 || duration > 24 * 60) return { error: 'Choose a valid duration.' }
+
+  const event = await prisma.calendarEvent.findUnique({ where: { id: sourceId } })
+  if (!event) return { error: 'This event no longer exists.' }
+
+  const updated = await prisma.calendarEvent.update({ data: { duration }, where: { id: sourceId } })
   updateTag(calendarCache.tag)
   updateTag(calendarCache.weekTag(getWeekDays(event.day.toISOString().slice(0, 10))[0]))
   return { data: updated }
