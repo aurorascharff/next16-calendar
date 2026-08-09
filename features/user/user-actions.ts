@@ -16,14 +16,14 @@ function toHandle(name: string) {
 }
 
 export async function signIn(_prev: SignInState, formData: FormData): Promise<SignInState> {
-  const name = String(formData.get('name') ?? '').trim();
-  if (!name) return { error: 'Enter a name to sign in.' };
+  const email = String(formData.get('email') ?? '').trim();
+  if (!email) return { error: 'Enter an email to sign in.' };
 
-  const handle = toHandle(name) || `guest-${name.length}`;
+  const handle = toHandle(email) || `guest-${email.length}`;
 
   let userId: string;
   try {
-    const user = await prisma.user.upsert({ create: { handle, name }, update: {}, where: { handle } });
+    const user = await prisma.user.upsert({ create: { handle, name: email }, update: {}, where: { handle } });
     userId = user.id;
   } catch {
     return { error: 'Could not sign you in. Please try again.' };

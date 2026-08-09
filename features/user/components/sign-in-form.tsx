@@ -10,15 +10,16 @@ export function SignInForm() {
   return (
     <form action={formAction} className="mt-8 flex flex-col gap-3">
       <label className="block">
-        <span className="text-muted mb-1.5 block text-xs font-medium">Name</span>
+        <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
         <input
           aria-describedby={state?.error ? 'sign-in-error' : undefined}
           aria-invalid={state?.error ? true : undefined}
-          autoComplete="username"
+          autoComplete="email"
           autoFocus
-          name="name"
-          placeholder="Your name"
+          name="email"
+          placeholder="you@example.com"
           required
+          type="email"
         />
       </label>
       {state?.error ? (
