@@ -260,7 +260,7 @@ main:has([data-calendar-pending]) .calendar-pending-spinner {
 }
 
 @media (max-width: 639px) {
-  .event-editor-wrapper {
+  .event-popover-wrapper {
     transform: none !important;
   }
 }

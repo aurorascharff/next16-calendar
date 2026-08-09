@@ -7,7 +7,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { useCalendarVisibility } from './calendar-visibility';
 import { EventCreateDialog } from './event-create-dialog';
-import { EventEditor } from './event-editor';
+import { EventPopover } from './event-popover';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
 import { applyEventAction, expandOptimisticEvent } from '../utils/event-optimistic-reducer';
@@ -166,7 +166,7 @@ export function CalendarMonthBoard({
         })}
       </div>
       {selectedEvent ? (
-        <EventEditor
+        <EventPopover
           anchorRect={selectedEvent.anchorRect}
           calendar={calendars.find(calendar => calendar.id === selectedEvent.event.calendarId)}
           event={selectedEvent.event}

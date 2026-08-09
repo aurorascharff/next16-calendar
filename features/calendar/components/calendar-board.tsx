@@ -9,7 +9,7 @@ import { CalendarAllDayRow } from './calendar-all-day-row';
 import { CalendarDayHeaderRow } from './calendar-board-rows';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
-import { EventEditor } from './event-editor';
+import { EventPopover } from './event-popover';
 import type { Calendar, CalendarEvent } from '../types/calendar';
 
 export function CalendarBoard({
@@ -112,7 +112,7 @@ export function CalendarBoard({
         </div>
       </div>
       {selectedEvent ? (
-        <EventEditor
+        <EventPopover
           anchorRect={selectedEvent.anchorRect}
           calendar={calendars.find(calendar => calendar.id === selectedEvent.event.calendarId)}
           event={selectedEvent.event}

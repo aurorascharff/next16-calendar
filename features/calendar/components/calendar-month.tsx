@@ -8,7 +8,9 @@ import { CalendarMonthBoard } from './calendar-month-board';
 export async function CalendarMonth({ date }: { date: string }) {
   const [calendarMonth, calendars] = await Promise.all([getCalendarMonth(date), getCalendars()]);
 
-  return <CalendarMonthBoard calendars={calendars} date={date} days={calendarMonth.days} events={calendarMonth.events} />;
+  return (
+    <CalendarMonthBoard calendars={calendars} date={date} days={calendarMonth.days} events={calendarMonth.events} />
+  );
 }
 
 export function CalendarMonthSkeleton({ date }: { date?: string }) {
