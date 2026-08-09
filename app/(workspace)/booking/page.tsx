@@ -1,6 +1,13 @@
 import { Suspense } from 'react';
-import { WorkspaceHeaderActions } from '@/components/workspace-header-actions';
-import { BookingOverview, BookingOverviewFallback } from '@/features/booking/components/booking-overview';
+import { Crossfade } from '@/components/ui/crossfade';
+import {
+  BookingLinkCard,
+  BookingLinkDetails,
+  BookingLinkDetailsSkeleton,
+  BookingSettings,
+  BookingSettingsCard,
+  BookingSettingsSkeleton,
+} from '@/features/booking/components/booking-overview';
 
 export default function BookingPage() {
   return (
@@ -10,12 +17,22 @@ export default function BookingPage() {
           <p className="text-muted text-xs font-medium">Availability</p>
           <h1 className="mt-0.5 text-lg font-semibold">Booking link</h1>
         </div>
-        <WorkspaceHeaderActions />
       </header>
       <section className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6">
-        <Suspense fallback={<BookingOverviewFallback />}>
-          <BookingOverview />
-        </Suspense>
+        <BookingLinkCard>
+          <Crossfade>
+            <Suspense fallback={<BookingLinkDetailsSkeleton />}>
+              <BookingLinkDetails />
+            </Suspense>
+          </Crossfade>
+        </BookingLinkCard>
+        <BookingSettingsCard>
+          <Crossfade>
+            <Suspense fallback={<BookingSettingsSkeleton />}>
+              <BookingSettings />
+            </Suspense>
+          </Crossfade>
+        </BookingSettingsCard>
       </section>
     </main>
   );

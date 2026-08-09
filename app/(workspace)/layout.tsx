@@ -20,26 +20,26 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             <CalendarSidebarBrand />
             <WorkspaceNavigationLinks />
 
-            <div className="relative mt-6 min-h-0 flex-1">
-              <div className="h-full [scrollbar-gutter:stable] overflow-y-auto overscroll-contain pb-6">
-                <div className="px-1">
-                  <MiniMonth />
-                </div>
+            <div className="mt-6 px-1">
+              <MiniMonth />
+            </div>
 
-                <div className="mt-6">
-                  <div className="mb-2 flex items-center justify-between px-3">
-                    <p className="text-muted text-xs font-semibold tracking-wide uppercase">Calendars</p>
-                    <NewCalendarButton />
-                  </div>
+            <div className="mt-6 flex min-h-0 flex-1 flex-col">
+              <div className="mb-2 flex items-center justify-between px-3">
+                <p className="text-muted text-xs font-semibold tracking-wide uppercase">Calendars</p>
+                <NewCalendarButton />
+              </div>
+              <div className="relative min-h-0 flex-1 overflow-hidden">
+                <div className="h-full [scrollbar-gutter:stable] overflow-y-auto overscroll-contain pb-6">
                   <Suspense fallback={<CalendarManagerSkeleton />}>
                     <CalendarList />
                   </Suspense>
                 </div>
+                <div
+                  aria-hidden
+                  className="from-surface dark:from-surface-dark pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t to-transparent"
+                />
               </div>
-              <div
-                aria-hidden
-                className="from-surface dark:from-surface-dark pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t to-transparent"
-              />
             </div>
             <div className="mt-2">
               <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t">

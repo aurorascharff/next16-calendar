@@ -63,7 +63,7 @@ const VARIANTS = Object.fromEntries(
     return [
       color,
       {
-        darkBg: toHex(mixRgb(mixRgb(muted, WHITE, 0.46), INK, 0.06)),
+        darkBg: toHex(mixRgb(muted, WHITE, 0.34)),
         darkText: '#111114',
         lightBg: toHex(mixRgb(muted, INK, 0.1)),
         lightText: '#ffffff',

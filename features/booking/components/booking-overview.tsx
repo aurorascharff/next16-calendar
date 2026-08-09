@@ -1,24 +1,14 @@
 import { Link2 } from 'lucide-react';
-import { Suspense, type ReactNode } from 'react';
-import { Crossfade } from '@/components/ui/crossfade';
+import { type ReactNode } from 'react';
 import { NewCalendarButton } from '@/features/calendar/components/calendar-manager';
 import { getMyBookingSettings, getMyBookingSummary } from '../booking-queries';
 import { BookingLink } from './booking-link';
 import { BookingSettingsForm } from './booking-settings-form';
 
-export async function BookingOverview() {
+export async function BookingLinkDetails() {
   const profile = await getMyBookingSummary();
 
-  return (
-    <>
-      <BookingLinkCard>
-        <BookingLinkDetailsContent profile={profile} />
-      </BookingLinkCard>
-      <Suspense fallback={<BookingSettingsSkeleton />}>
-        <BookingSettings />
-      </Suspense>
-    </>
-  );
+  return <BookingLinkDetailsContent profile={profile} />;
 }
 
 export function BookingLinkCard({ children }: { children: ReactNode }) {
@@ -32,11 +22,19 @@ export function BookingLinkCard({ children }: { children: ReactNode }) {
   );
 }
 
+export function BookingSettingsCard({ children }: { children: ReactNode }) {
+  return (
+    <div className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 min-h-[26rem] rounded-lg border p-5">
+      {children}
+    </div>
+  );
+}
+
 function BookingLinkDetailsContent({ profile }: { profile: Awaited<ReturnType<typeof getMyBookingSummary>> }) {
   const acceptingMeetings = Boolean(profile?.active && profile.hasCalendar);
 
   return (
-    <Crossfade>
+    <>
       {profile ? (
         <>
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -65,42 +63,30 @@ function BookingLinkDetailsContent({ profile }: { profile: Awaited<ReturnType<ty
           <p className="text-muted mt-1 text-sm">Set your availability to share a public booking page.</p>
         </>
       )}
-    </Crossfade>
-  );
-}
-
-export function BookingOverviewFallback() {
-  return (
-    <BookingLinkCard>
-      <BookingLinkDetailsSkeleton />
-    </BookingLinkCard>
+    </>
   );
 }
 
 export async function BookingSettings() {
   const settings = await getMyBookingSettings();
 
-  return (
-    <Crossfade>
-      <BookingSettingsForm settings={settings} />
-    </Crossfade>
-  );
+  return <BookingSettingsForm settings={settings} />;
 }
 
 export function BookingLinkDetailsSkeleton() {
   return (
-    <>
-      <div className="skeleton-animation h-4 w-44 rounded-full" />
-      <div className="skeleton-animation mt-3 h-3 w-64 max-w-full rounded-full" />
-    </>
+    <div className="pt-1">
+      <div className="bg-divider/70 dark:bg-divider-dark h-4 w-44 rounded-full" />
+      <div className="bg-divider/60 dark:bg-divider-dark mt-3 h-3 w-64 max-w-full rounded-full" />
+    </div>
   );
 }
 
 export function BookingSettingsSkeleton() {
   return (
-    <div className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 min-h-[19rem] rounded-lg border p-5">
-      <div className="skeleton-animation h-4 w-44 rounded-full" />
-      <div className="skeleton-animation mt-3 h-3 w-64 max-w-full rounded-full" />
+    <div className="pt-1">
+      <div className="bg-divider/70 dark:bg-divider-dark h-4 w-44 rounded-full" />
+      <div className="bg-divider/60 dark:bg-divider-dark mt-3 h-3 w-64 max-w-full rounded-full" />
     </div>
   );
 }

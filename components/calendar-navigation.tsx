@@ -1,5 +1,6 @@
 import { CalendarDays, Link2, LogOut } from 'lucide-react';
 import { ViewTransition } from 'react';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Crossfade } from '@/components/ui/crossfade';
 import { DaylineMark } from '@/components/ui/dayline-mark';
 import { GitHubIcon } from '@/components/ui/github-icon';
@@ -61,19 +62,18 @@ export async function CurrentUserFooter() {
   if (!user) return null;
 
   return (
-    <div className="flex items-center gap-2.5 px-3 py-3">
+    <div className="flex items-center gap-1 px-3 py-3">
       <span className="bg-accent grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold text-white uppercase">
         {user.name.charAt(0)}
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{user.name}</p>
-        <p className="text-muted truncate text-xs">@{user.handle}</p>
-      </div>
       <form action={signOut}>
         <IconButton label="Log out" size="sm" type="submit">
           <LogOut className="size-4" />
         </IconButton>
       </form>
+      <div className="ml-auto">
+        <ThemeToggle />
+      </div>
     </div>
   );
 }

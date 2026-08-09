@@ -71,14 +71,14 @@ async function getBookingDay(date?: string) {
 export function BookingProfileSkeleton() {
   return (
     <>
-      <div className="min-w-0">
-        <div className="skeleton-animation h-3 w-32 rounded-full" />
-        <div className="skeleton-animation mt-3 h-5 w-3/4 max-w-80 rounded-full" />
-        <div className="skeleton-animation mt-3 h-3 w-48 max-w-full rounded-full" />
+      <div className="min-w-0 pt-1">
+        <div className="bg-divider/70 dark:bg-divider-dark h-3 w-32 rounded-full" />
+        <div className="bg-divider/70 dark:bg-divider-dark mt-3 h-5 w-3/4 max-w-80 rounded-full" />
+        <div className="bg-divider/60 dark:bg-divider-dark mt-3 h-3 w-48 max-w-full rounded-full" />
       </div>
       <div className="col-span-full mt-10 space-y-3">
-        <div className="skeleton-animation h-3 w-28 rounded-full" />
-        <div className="skeleton-animation h-3 w-full max-w-sm rounded-full" />
+        <div className="bg-divider/60 dark:bg-divider-dark h-3 w-28 rounded-full" />
+        <div className="bg-divider/50 dark:bg-divider-dark h-3 w-full max-w-sm rounded-full" />
       </div>
     </>
   );

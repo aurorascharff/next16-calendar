@@ -63,11 +63,7 @@ export function BookingSettingsForm({ settings }: { settings: Settings }) {
   };
 
   return (
-    <form
-      action={formAction}
-      className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 rounded-lg border p-5"
-      key={state.key ?? settings.handle}
-    >
+    <form action={formAction} key={state.key ?? settings.handle}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Availability settings</h2>

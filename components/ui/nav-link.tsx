@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
+import { usePrefetchDefault } from '@/components/demo/use-prefetch-default';
 import type { Route } from 'next';
 
 type RenderProps = { isActive: boolean };
@@ -47,14 +48,19 @@ function NavLinkShell<T extends string>({
   className,
   children,
   isActive,
+  prefetch: explicitPrefetch,
   ...rest
 }: Props<T> & { isActive: boolean }) {
+  const defaultPrefetch = usePrefetchDefault();
+  const prefetch = explicitPrefetch ?? defaultPrefetch;
+
   return (
     <Link
       href={href as Route}
       aria-current={isActive ? 'page' : undefined}
       className={resolve(className, { isActive })}
       suppressHydrationWarning
+      prefetch={prefetch}
       {...rest}
     >
       {resolve(children, { isActive })}
