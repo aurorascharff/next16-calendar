@@ -45,7 +45,7 @@ async function getCalendarsForUser(userId: string | null): Promise<Calendar[]> {
   cacheTag(calendarCache.calendarsTag);
 
   const rows = await prisma.calendar.findMany({
-    orderBy: [{ isDemo: 'desc' }, { createdAt: 'asc' }],
+    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     where: { OR: [{ userId }, { userId: null }] },
   });
 

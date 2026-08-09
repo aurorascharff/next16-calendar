@@ -2,6 +2,8 @@
 
 import { useLayoutEffect, useRef } from 'react';
 import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
+import { dateKey, formatDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { DEFAULT_SCROLL_TOP, GRID_HEIGHT, HOURS } from '../utils/grid';
 import { CalendarAllDayRow, CalendarDayHeaderRow } from './calendar-board-rows';
@@ -9,6 +11,27 @@ import { DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventEditor } from './event-editor';
 import type { Calendar, CalendarEvent, CalendarView } from '../types/calendar';
+
+const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+function matchesRecurrence(recurrence: string | null | undefined, day: string) {
+  if (!recurrence) return false;
+  const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
+  return recurrence === 'weekday' ? weekday >= 1 && weekday <= 5 : recurrence === WEEKDAY_NAMES[weekday];
+}
+
+function optimisticCreatedEvents(event: CalendarEvent, days: string[]) {
+  if (!event.recurrence) return [event];
+
+  return days
+    .filter(day => matchesRecurrence(event.recurrence, day))
+    .map(day => ({
+      ...event,
+      day,
+      id: `${event.sourceId}:${day}`,
+      recurring: true,
+    }));
+}
 
 export function CalendarBoard({
   calendars,
@@ -120,6 +143,11 @@ export function CalendarBoard({
           defaultDuration={createDraft.duration}
           defaultStart={createDraft.start}
           key={`${createDraft.day}-${createDraft.start}-${createDraft.duration}-${createDraft.allDay}`}
+          onCreated={event => {
+            for (const createdEvent of optimisticCreatedEvents(event, days)) {
+              setOptimisticEvents({ event: createdEvent, type: 'create' });
+            }
+          }}
           store={createStore}
         />
       ) : null}
@@ -127,34 +155,68 @@ export function CalendarBoard({
   );
 }
 
-export function CalendarBoardSkeleton({ days = 7 }: { days?: number }) {
-  const gridTemplate = `4.5rem repeat(${days}, minmax(0, 1fr))`;
-  const minWidth = days > 1 ? 760 : undefined;
+export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: string[]; fallbackCount?: number }) {
+  const dayKeys = days ?? Array.from({ length: fallbackCount }, () => null);
+  const todayKey = dateKey(new Date());
+  const gridTemplate = `4.5rem repeat(${dayKeys.length}, minmax(0, 1fr))`;
+  const minWidth = dayKeys.length > 1 ? 760 : undefined;
   return (
     <div>
       <div className="sticky top-0 z-30" style={{ minWidth }}>
         <div
-          className="border-divider bg-surface/90 dark:border-divider-dark dark:bg-surface-dark/90 grid border-b backdrop-blur"
+          className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark grid border-b"
           style={{ gridTemplateColumns: gridTemplate }}
         >
-          <div />
-          {Array.from({ length: days }).map((_, index) => (
-            <div className="flex items-center gap-1.5 px-3 py-1.5" key={index}>
-              <div className="skeleton-animation h-3 w-6 rounded" />
-              <div className="skeleton-animation size-7 rounded-full" />
-            </div>
-          ))}
+          <div className="border-divider dark:border-divider-dark border-r" />
+          {dayKeys.map((day, index) => {
+            const [weekday, dayNumber] = day ? formatDay(day).split(' ') : ['', ''];
+            const isToday = day === todayKey;
+            return (
+              <div
+                className={cn(
+                  'border-divider dark:border-divider-dark flex items-center gap-1.5 border-r px-3 py-1.5 text-left',
+                  isToday && 'bg-card dark:bg-card-dark',
+                )}
+                key={index}
+              >
+                {day ? (
+                  <>
+                    <span className={cn('text-[11px] font-medium uppercase', isToday ? 'text-accent' : 'text-muted')}>
+                      {weekday}
+                    </span>
+                    <span
+                      className={cn(
+                        'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums',
+                        isToday && 'bg-accent text-white',
+                      )}
+                    >
+                      {dayNumber}
+                    </span>
+                  </>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
         <div
-          className="border-divider dark:border-divider-dark bg-surface/70 dark:bg-surface-dark/70 grid border-b"
+          className="border-divider dark:border-divider-dark bg-surface dark:bg-surface-dark grid border-b"
           style={{ gridTemplateColumns: gridTemplate }}
         >
           <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-end border-r px-3 py-1.5 text-[11px] font-medium">
             All day
           </div>
-          {Array.from({ length: days }).map((_, index) => (
-            <div className="border-divider dark:border-divider-dark min-h-9 border-r p-1" key={index} />
-          ))}
+          {dayKeys.map((day, index) => {
+            const isToday = day === todayKey;
+            return (
+              <div
+                className={cn(
+                  'border-divider dark:border-divider-dark min-h-9 border-r p-1',
+                  isToday && 'bg-card dark:bg-card-dark',
+                )}
+                key={index}
+              />
+            );
+          })}
         </div>
       </div>
       <div className="grid" style={{ gridTemplateColumns: gridTemplate, minWidth }}>
@@ -167,9 +229,12 @@ export function CalendarBoardSkeleton({ days = 7 }: { days?: number }) {
             </div>
           ))}
         </div>
-        {Array.from({ length: days }).map((_, dayIndex) => (
+        {dayKeys.map((day, dayIndex) => (
           <div
-            className="border-divider dark:border-divider-dark border-r"
+            className={cn(
+              'border-divider dark:border-divider-dark border-r',
+              day === todayKey && 'bg-card/40 dark:bg-card-dark/40',
+            )}
             key={dayIndex}
             style={{ height: GRID_HEIGHT }}
           >

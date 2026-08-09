@@ -108,7 +108,7 @@ export async function createEvent(input: CreateEventInput) {
   const calendar = input.calendarId
     ? await prisma.calendar.findUnique({ where: { id: input.calendarId } })
     : await prisma.calendar.findFirst({
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
         where: { isDemo: false, userId: user.id },
       });
 

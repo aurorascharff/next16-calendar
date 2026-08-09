@@ -1,7 +1,7 @@
 'use client';
 
 import * as Ariakit from '@ariakit/react';
-import { useOptimistic, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { moveEvent, resizeEvent } from '../calendar-actions';
 import { dateKey, timeToMinutes } from '../calendar-utils';
@@ -19,6 +19,7 @@ import { useNow } from './use-now';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarView } from '../types/calendar';
 
 type OptimisticAction =
+  | { event: CalendarEvent; type: 'create' }
   | { day: string; id: string; start: string; type: 'move' }
   | { sourceId: string; type: 'delete' }
   | { duration: number; sourceId: string; type: 'resize' }
@@ -26,6 +27,26 @@ type OptimisticAction =
       event: Pick<CalendarEvent, 'allDay' | 'description' | 'duration' | 'sourceId' | 'start' | 'title'>;
       type: 'update';
     };
+
+type MoveOrigin = {
+  duration: number;
+  grabOffsetMin: number;
+  id: string;
+  moved: boolean;
+  sourceId: string;
+  x0: number;
+  y0: number;
+};
+
+function applyOptimisticAction(current: CalendarEvent[], next: OptimisticAction) {
+  if (next.type === 'create') return [next.event, ...current.filter(event => event.id !== next.event.id)];
+  if (next.type === 'delete') return current.filter(event => event.sourceId !== next.sourceId);
+  if (next.type === 'resize')
+    return current.map(event => (event.sourceId === next.sourceId ? { ...event, duration: next.duration } : event));
+  if (next.type === 'update')
+    return current.map(event => (event.sourceId === next.event.sourceId ? { ...event, ...next.event } : event));
+  return current.map(event => (event.id === next.id ? { ...event, day: next.day, start: next.start } : event));
+}
 
 export type SelectedEvent = { anchorRect?: DOMRect | null; event: CalendarEvent };
 export type CalendarBoardInteractions = {
@@ -67,14 +88,7 @@ export function useCalendarBoard({
   const { hidden } = useCalendarVisibility();
   const gridTemplate = `4.5rem repeat(${days.length}, minmax(0, 1fr))`;
   const gridMinWidth = view === 'week' ? 760 : undefined;
-  const [optimisticEvents, setOptimisticEvents] = useOptimistic(events, (current, next: OptimisticAction) => {
-    if (next.type === 'delete') return current.filter(event => event.sourceId !== next.sourceId);
-    if (next.type === 'resize')
-      return current.map(event => (event.sourceId === next.sourceId ? { ...event, duration: next.duration } : event));
-    if (next.type === 'update')
-      return current.map(event => (event.sourceId === next.event.sourceId ? { ...event, ...next.event } : event));
-    return current.map(event => (event.id === next.id ? { ...event, day: next.day, start: next.start } : event));
-  });
+  const [optimisticEvents, setOptimisticEvents] = useState(events);
   const [isPending, startTransition] = useTransition();
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
   const [dragMove, setDragMove] = useState<{ day: string; id: string; startMin: number } | null>(null);
@@ -88,15 +102,7 @@ export function useCalendarBoard({
     start: string;
   } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const moveRef = useRef<{
-    duration: number;
-    grabOffsetMin: number;
-    id: string;
-    moved: boolean;
-    sourceId: string;
-    x0: number;
-    y0: number;
-  } | null>(null);
+  const moveRef = useRef<MoveOrigin | null>(null);
   const resizeColTopRef = useRef(0);
   const dragMoveRef = useRef<{ day: string; id: string; startMin: number } | null>(null);
   const createRef = useRef<{ aMin: number; day: string; pointerId: number } | null>(null);
@@ -113,9 +119,27 @@ export function useCalendarBoard({
   const now = useNow();
   const todayKey = now ? dateKey(now) : null;
   const nowMinutes = now ? now.getHours() * 60 + now.getMinutes() : 0;
+  const eventsKey = events
+    .map(event =>
+      [
+        event.id,
+        event.day,
+        event.start,
+        event.duration,
+        event.title,
+        event.allDay,
+        event.description ?? '',
+        event.recurrence ?? '',
+      ].join(':'),
+    )
+    .join('|');
+
+  useEffect(() => {
+    setOptimisticEvents(events);
+  }, [events, eventsKey]);
 
   const writable = calendars.filter(calendar => !calendar.isDemo);
-  const defaultCalendar = writable.at(-1) ?? calendars.at(-1);
+  const defaultCalendar = writable[0] ?? calendars[0];
   const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));
   const allDayEvents = visibleEvents.filter(event => event.allDay);
 
@@ -155,6 +179,14 @@ export function useCalendarBoard({
     };
   }
 
+  function targetMoveFromPointer(origin: MoveOrigin, pointerEvent: React.PointerEvent<HTMLElement>) {
+    const day = days[pointToDayIndex(pointerEvent.clientX)];
+    const raw = pointToMinutes(pointerEvent.clientY) - origin.grabOffsetMin;
+    const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES;
+    const startMin = Math.max(START_HOUR * 60, Math.min(END_MINUTES - origin.duration, snapped));
+    return { day, id: origin.id, startMin };
+  }
+
   function handleMoveMove(pointerEvent: React.PointerEvent<HTMLElement>) {
     const origin = moveRef.current;
     if (!origin) return;
@@ -162,11 +194,7 @@ export function useCalendarBoard({
       if (Math.abs(pointerEvent.clientX - origin.x0) < 4 && Math.abs(pointerEvent.clientY - origin.y0) < 4) return;
       origin.moved = true;
     }
-    const day = days[pointToDayIndex(pointerEvent.clientX)];
-    const raw = pointToMinutes(pointerEvent.clientY) - origin.grabOffsetMin;
-    const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES;
-    const startMin = Math.max(START_HOUR * 60, Math.min(END_MINUTES - origin.duration, snapped));
-    const target = { day, id: origin.id, startMin };
+    const target = targetMoveFromPointer(origin, pointerEvent);
     dragMoveRef.current = target;
     setDragMove(target);
   }
@@ -177,7 +205,7 @@ export function useCalendarBoard({
     try {
       pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId);
     } catch {}
-    const target = dragMoveRef.current;
+    const target = origin?.moved ? targetMoveFromPointer(origin, pointerEvent) : dragMoveRef.current;
     dragMoveRef.current = null;
     setDragMove(null);
     if (!origin || !origin.moved || !target) return;
@@ -188,10 +216,13 @@ export function useCalendarBoard({
     const start = minutesToTime(target.startMin);
     const { day, id } = target;
     const sourceId = origin.sourceId;
+    setOptimisticEvents(current => applyOptimisticAction(current, { day, id, start, type: 'move' }));
     startTransition(async () => {
-      setOptimisticEvents({ day, id, start, type: 'move' });
       const result = await moveEvent({ day, sourceId, start });
-      if (result.error) toast.error(result.error);
+      if (result.error) {
+        setOptimisticEvents(events);
+        toast.error(result.error);
+      }
     });
   }
 
@@ -225,10 +256,13 @@ export function useCalendarBoard({
     const duration = resize.endMin - resize.startMin;
     const sourceId = resize.sourceId;
     setResize(null);
+    setOptimisticEvents(current => applyOptimisticAction(current, { duration, sourceId, type: 'resize' }));
     startTransition(async () => {
-      setOptimisticEvents({ duration, sourceId, type: 'resize' });
       const result = await resizeEvent({ duration, sourceId });
-      if (result.error) toast.error(result.error);
+      if (result.error) {
+        setOptimisticEvents(events);
+        toast.error(result.error);
+      }
     });
   }
 
@@ -339,7 +373,9 @@ export function useCalendarBoard({
     isPending,
     nowMinutes,
     selectedEvent,
-    setOptimisticEvents,
+    setOptimisticEvents: (action: OptimisticAction) => {
+      setOptimisticEvents(current => applyOptimisticAction(current, action));
+    },
     setSelectedEvent,
     todayKey,
     visibleEvents,

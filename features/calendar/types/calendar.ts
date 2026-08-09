@@ -1,5 +1,18 @@
 export type CalendarView = 'day' | 'week';
-export type CalendarColor = 'indigo' | 'blue' | 'sky' | 'teal' | 'violet' | 'rose';
+export type CalendarColor =
+  | 'rose'
+  | 'orange'
+  | 'amber'
+  | 'green'
+  | 'teal'
+  | 'cyan'
+  | 'sky'
+  | 'blue'
+  | 'indigo'
+  | 'violet'
+  | 'fuchsia'
+  | 'magenta'
+  | 'pink';
 
 export type Calendar = {
   color: CalendarColor;

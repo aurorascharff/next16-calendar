@@ -4,9 +4,9 @@ import { PrismaClient } from '../generated/prisma/client';
 import { normalizeDatabaseUrl } from '../lib/database-url';
 
 const demoCalendars = [
-  { color: 'violet', key: 'focus', name: 'Focus' },
-  { color: 'blue', key: 'team', name: 'Team' },
-  { color: 'rose', key: 'personal', name: 'Personal' },
+  { color: 'blue', key: 'focus', name: 'Focus' },
+  { color: 'violet', key: 'team', name: 'Team' },
+  { color: 'magenta', key: 'personal', name: 'Personal' },
 ] as const;
 
 const demoEvents = [

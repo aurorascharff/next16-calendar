@@ -1,4 +1,4 @@
-import { CalendarDays, Link2, LogOut, Sunrise } from 'lucide-react';
+import { CalendarDays, CalendarRange, Link2, LogOut } from 'lucide-react';
 import { Suspense, ViewTransition } from 'react';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Crossfade } from '@/components/ui/crossfade';
@@ -7,7 +7,11 @@ import { IconButton } from '@/components/ui/icon-button';
 import { NavLink } from '@/components/ui/nav-link';
 import { getCalendars } from '@/features/calendar/calendar-queries';
 import { CalendarHomeLink, CalendarHomeNavLink } from '@/features/calendar/components/calendar-home-link';
-import { CalendarManager } from '@/features/calendar/components/calendar-manager';
+import {
+  CalendarManager,
+  CalendarManagerSkeleton,
+  NewCalendarButton,
+} from '@/features/calendar/components/calendar-manager';
 import { MiniMonth } from '@/features/calendar/components/mini-month';
 import { signOut } from '@/features/user/user-actions';
 import { getCurrentUser } from '@/features/user/user-queries';
@@ -22,9 +26,8 @@ export function CalendarNavigation() {
     <ViewTransition name="sidebar" default="none">
       <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-64 shrink-0 flex-col border-r p-3 md:flex">
         <CalendarHomeLink className="mb-6 flex items-center gap-2.5 px-2">
-          <span className="bg-accent relative grid size-8 place-items-center overflow-hidden rounded-md text-white">
-            <Sunrise className="size-4.5" strokeWidth={2.25} />
-            <span className="bg-dayline absolute inset-x-0 bottom-0 h-0.5" />
+          <span className="bg-accent grid size-8 place-items-center rounded-md text-white">
+            <CalendarRange className="size-4.5" strokeWidth={2.25} />
           </span>
           <span>
             <span className="block font-semibold tracking-tight">Dayline</span>
@@ -48,7 +51,11 @@ export function CalendarNavigation() {
         </div>
 
         <div className="mt-6">
-          <Suspense fallback={<CalendarsFallback />}>
+          <div className="mb-2 flex items-center justify-between px-3">
+            <p className="text-muted text-xs font-semibold tracking-wide uppercase">Calendars</p>
+            <NewCalendarButton />
+          </div>
+          <Suspense fallback={<CalendarManagerSkeleton />}>
             <CalendarSection />
           </Suspense>
         </div>
@@ -99,10 +106,6 @@ async function CalendarSection() {
       <CalendarManager calendars={calendars} />
     </Crossfade>
   );
-}
-
-function CalendarsFallback() {
-  return <p className="text-muted mb-2 px-3 text-xs font-semibold tracking-wide uppercase">Calendars</p>;
 }
 
 const mobileTab =

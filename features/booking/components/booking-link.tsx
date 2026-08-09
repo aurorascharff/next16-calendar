@@ -19,7 +19,7 @@ export function BookingLink({ handle }: { handle: string }) {
   }
 
   return (
-    <div className="border-divider dark:border-divider-dark mt-5 border-t pt-4">
+    <div className="border-divider dark:border-divider-dark mt-5 min-h-[7rem] border-t pt-4 sm:min-h-[5.5rem]">
       <p className="text-muted mb-2 text-xs font-medium">Share link</p>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/50 flex min-w-0 flex-1 items-center gap-2 rounded-md border px-3 py-2">

@@ -9,7 +9,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
 import { CalendarPicker } from './calendar-picker';
-import type { Calendar } from '../types/calendar';
+import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 const disabledTimeBlock =
@@ -39,6 +39,7 @@ export function EventCreateDialog({
   defaultCalendarId,
   defaultStart = '10:00',
   defaultDuration = 60,
+  onCreated,
 }: {
   store: Ariakit.PopoverStore;
   day: string;
@@ -48,6 +49,7 @@ export function EventCreateDialog({
   defaultCalendarId?: string;
   defaultStart?: string;
   defaultDuration?: number;
+  onCreated?: (event: CalendarEvent) => void;
 }) {
   const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
   const calendarOptions = calendars ?? [];
@@ -78,6 +80,25 @@ export function EventCreateDialog({
       title: values.title,
     });
     if (result.error) return { error: result.error, key: Date.now(), values };
+    const created = result.data;
+    if (!created) return { error: 'Event was saved, but the response was empty.', key: Date.now(), values };
+    const calendarId = created.calendarId;
+    const calendar = calendarOptions.find(option => option.id === calendarId);
+    onCreated?.({
+      allDay,
+      calendarId,
+      color: (calendar?.color ?? 'blue') as CalendarColor,
+      day,
+      description: values.description.trim() || null,
+      duration: allDay ? 24 * 60 : Number(values.duration),
+      id: created.id,
+      isDemo: false,
+      recurrence,
+      recurring: Boolean(recurrence),
+      sourceId: created.id,
+      start: allDay ? '00:00' : values.start,
+      title: values.title.trim(),
+    });
     store.hide();
     toast.success('Event added to your calendar.');
     return {};
@@ -100,11 +121,14 @@ export function EventCreateDialog({
       unmountOnHide
       fixed
       fitViewport
+      overlap
+      overflowPadding={16}
+      portal
       getAnchorRect={anchorRect ? () => anchorRect : undefined}
       gutter={10}
       hideOnEscape={!isPending}
       hideOnInteractOutside={!isPending}
-      className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 w-[min(24rem,calc(100vw-2rem))] rounded-lg border p-4 shadow-2xl outline-none"
+      className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border p-4 shadow-2xl outline-none"
       style={{ viewTransitionName: 'dialog' }}
     >
       <div className="flex items-start justify-between gap-4">
@@ -118,7 +142,7 @@ export function EventCreateDialog({
           <X className="size-4" />
         </IconButton>
       </div>
-      <form action={formAction} className="mt-4 space-y-4" key={state.key ?? 'new-event'}>
+      <form action={formAction} className="mt-3 space-y-3" key={state.key ?? 'new-event'}>
         <label className="block">
           <span className={fieldLabel}>Title</span>
           <input autoFocus defaultValue={values.title} name="title" placeholder="What's happening?" />
@@ -155,14 +179,14 @@ export function EventCreateDialog({
             {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
           </label>
         </div>
-        {allDay ? <p className="text-muted -mt-2 text-xs">This event will fill the all-day row.</p> : null}
+        {allDay ? <p className="text-muted -mt-1 text-xs">This event will fill the all-day row.</p> : null}
         <label className="block">
           <span className={fieldLabel}>Description</span>
           <textarea
             defaultValue={values.description}
             name="description"
             placeholder="Add notes, links, or context"
-            rows={3}
+            rows={2}
           />
         </label>
         <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
@@ -186,7 +210,7 @@ export function EventCreateDialog({
           </label>
         </div>
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="mt-4 flex justify-end gap-2">
           <Button render={<Ariakit.PopoverDismiss disabled={isPending} />} variant="ghost">
             Cancel
           </Button>

@@ -17,7 +17,7 @@ export function CalendarDayHeaderRow({
 }) {
   return (
     <div
-      className="border-divider bg-surface/90 dark:border-divider-dark dark:bg-surface-dark/90 grid border-b backdrop-blur"
+      className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark grid border-b"
       style={{ gridTemplateColumns: gridTemplate }}
     >
       <div className="border-divider dark:border-divider-dark border-r" />
@@ -69,7 +69,7 @@ export function CalendarAllDayRow({
 }) {
   return (
     <div
-      className="border-divider dark:border-divider-dark bg-surface/70 dark:bg-surface-dark/70 grid border-b"
+      className="border-divider dark:border-divider-dark bg-surface dark:bg-surface-dark grid border-b"
       style={{ gridTemplateColumns: gridTemplate }}
     >
       <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-end border-r px-3 py-1.5 text-[11px] font-medium">
@@ -88,7 +88,7 @@ export function CalendarAllDayRow({
           >
             <button
               aria-label={`Add all-day event on ${formatDay(day)}`}
-              className="focus-visible:ring-accent group hover:bg-card focus-visible:bg-card dark:hover:bg-card-dark dark:focus-visible:bg-card-dark flex min-h-7 w-full flex-col gap-1 rounded-md text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-accent group hover:bg-divider/70 focus-visible:bg-divider/70 dark:hover:bg-divider-dark dark:focus-visible:bg-divider-dark flex min-h-7 w-full flex-col justify-center gap-1 rounded-md text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               onClick={event => onCreateAllDay(day, event)}
               type="button"
             >

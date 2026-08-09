@@ -7,15 +7,16 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { IconButton } from '@/components/ui/icon-button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { createCalendar, deleteCalendar, updateCalendar } from '../calendar-actions';
-import { CALENDAR_COLORS, dotClass } from '../utils/colors';
+import { CALENDAR_COLORS, colorStyle } from '../utils/colors';
 import { useCalendarVisibility } from './calendar-visibility';
 import type { Calendar, CalendarColor } from '../types/calendar';
 
 export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
   const { hidden, toggle } = useCalendarVisibility();
-  const [editing, setEditing] = useState<Calendar | 'new' | null>(null);
+  const [editing, setEditing] = useState<Calendar | null>(null);
   const [isDeleting, startDelete] = useTransition();
   const demoColors = new Set(calendars.filter(calendar => calendar.isDemo).map(calendar => calendar.color));
   const store = Ariakit.useDialogStore({
@@ -34,19 +35,6 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
 
   return (
     <>
-      <div className="mb-2 flex items-center justify-between px-3">
-        <p className="text-muted text-xs font-semibold tracking-wide uppercase">Calendars</p>
-        <IconButton
-          label="New calendar"
-          onClick={() => {
-            setEditing('new');
-            store.show();
-          }}
-          size="sm"
-        >
-          <Plus className="size-4" />
-        </IconButton>
-      </div>
       <div className="space-y-0.5">
         {calendars.map(calendar => {
           const isHidden = hidden.has(calendar.id);
@@ -62,11 +50,8 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
                 type="button"
               >
                 <span
-                  className={cn(
-                    'size-2.5 shrink-0 rounded-full transition-opacity',
-                    dotClass[calendar.color],
-                    isHidden && 'opacity-25',
-                  )}
+                  className={cn('size-2.5 shrink-0 rounded-full transition-opacity', isHidden && 'opacity-25')}
+                  style={colorStyle(calendar.color)}
                 />
                 <span className={cn('text-muted truncate', isHidden && 'line-through opacity-60')}>
                   {calendar.name}
@@ -111,15 +96,41 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
       </div>
       {editing ? (
         <CalendarFormDialog
-          calendar={editing === 'new' ? null : editing}
-          colors={CALENDAR_COLORS.filter(
-            color => !demoColors.has(color) || (editing !== 'new' && color === editing.color),
-          )}
-          key={editing === 'new' ? 'new' : editing.id}
+          calendar={editing}
+          colors={CALENDAR_COLORS.filter(color => !demoColors.has(color) || color === editing.color)}
+          key={editing.id}
           store={store}
         />
       ) : null}
     </>
+  );
+}
+
+export function NewCalendarButton() {
+  const store = Ariakit.useDialogStore();
+
+  return (
+    <>
+      <IconButton label="New calendar" onClick={store.show} size="sm">
+        <Plus className="size-4" />
+      </IconButton>
+      <CalendarFormDialog calendar={null} colors={CALENDAR_COLORS} store={store} />
+    </>
+  );
+}
+
+export function CalendarManagerSkeleton() {
+  const widths = ['w-20', 'w-24', 'w-16', 'w-20'];
+
+  return (
+    <div aria-label="Loading calendars" className="space-y-0.5 px-3">
+      {widths.map((width, index) => (
+        <div className="flex h-8 items-center gap-2.5" key={index}>
+          <Skeleton className="size-2.5 shrink-0 rounded-full" />
+          <Skeleton className={cn('h-3 rounded-full', width)} />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -159,18 +170,18 @@ function CalendarFormDialog({
         </label>
         <div>
           <span className="text-muted mb-1.5 block text-xs font-medium">Color</span>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {colors.map(option => (
               <button
                 aria-label={option}
                 aria-pressed={color === option}
                 className={cn(
                   'ring-offset-surface dark:ring-offset-surface-dark size-7 rounded-full ring-2 ring-offset-2 transition',
-                  dotClass[option],
                   color === option ? 'ring-accent' : 'ring-transparent',
                 )}
                 key={option}
                 onClick={() => setColor(option)}
+                style={colorStyle(option)}
                 type="button"
               />
             ))}

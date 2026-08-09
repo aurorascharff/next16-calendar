@@ -9,7 +9,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { deleteEvent, updateEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
-import { dotClass } from '../utils/colors';
+import { colorStyle } from '../utils/colors';
 import type { Calendar, CalendarEvent } from '../types/calendar';
 
 type EventEditorProps = {
@@ -116,6 +116,8 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
       unmountOnHide
       fixed
       fitViewport
+      overlap
+      overflowPadding={16}
       portal
       getAnchorRect={anchorRect ? () => anchorRect : undefined}
       gutter={10}
@@ -127,12 +129,12 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
       }}
       backdrop={<div className="fixed inset-0 z-40 bg-black/40 sm:hidden" />}
       className={cn(
-        'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 flex w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border shadow-2xl outline-none',
+        'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 flex max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border shadow-2xl outline-none',
         'max-sm:!inset-0 max-sm:!h-dvh max-sm:!max-h-dvh max-sm:!w-full max-sm:!max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-none max-sm:border-0',
       )}
       style={{ viewTransitionName: 'dialog' }}
     >
-      <div className="border-divider dark:border-divider-dark flex items-start justify-between gap-4 border-b px-4 py-4 sm:border-b-0 sm:pb-2">
+      <div className="flex items-start justify-between gap-4 px-4 pt-4 pb-2">
         <div className="min-w-0">
           <Ariakit.PopoverHeading className="truncate text-base font-semibold tracking-tight">
             {mode === 'details' ? event.title : 'Edit event'}
@@ -149,8 +151,8 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
 
       {mode === 'details' ? (
         <>
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3 sm:flex-none">
-            <div className="grid grid-cols-[1rem_minmax(0,1fr)] gap-x-3 gap-y-4 text-sm">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-2 sm:flex-none">
+            <div className="grid grid-cols-[1rem_minmax(0,1fr)] gap-x-3 gap-y-3 text-sm">
               <CalendarDays className="text-muted mt-0.5 size-4" />
               <div>
                 <p>{formatDay(event.day)}</p>
@@ -158,7 +160,7 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
                   {event.allDay ? 'All day' : `${event.start} · ${durationLabel(event.duration)}`}
                 </p>
               </div>
-              <span className={cn('mt-1 size-2.5 rounded-full', dotClass[event.color])} />
+              <span className="mt-1 size-2.5 rounded-full" style={colorStyle(event.color)} />
               <p>{calendar?.name ?? 'Calendar'}</p>
               {event.recurring ? (
                 <>
@@ -172,7 +174,7 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
               </p>
             </div>
           </div>
-          <div className="border-divider dark:border-divider-dark mt-auto flex items-center justify-between gap-3 border-t p-4">
+          <div className="border-divider dark:border-divider-dark mt-auto flex items-center justify-between gap-3 border-t p-3">
             <Button
               className="text-danger hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger"
               disabled={busy}
@@ -194,7 +196,7 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
           className="flex min-h-0 flex-1 flex-col overflow-hidden sm:flex-none"
           key={state.key ?? event.id}
         >
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3 sm:flex-none sm:overflow-visible">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-2 sm:flex-none sm:overflow-visible">
             <label className="block">
               <span className={fieldLabel}>Title</span>
               <input autoFocus defaultValue={values.title} name="title" />
@@ -228,19 +230,19 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
                 {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
               </label>
             </div>
-            {allDay ? <p className="text-muted -mt-2 text-xs">This event will fill the all-day row.</p> : null}
+            {allDay ? <p className="text-muted -mt-1 text-xs">This event will fill the all-day row.</p> : null}
             <label className="block">
               <span className={fieldLabel}>Description</span>
               <textarea
                 defaultValue={values.description}
                 name="description"
                 placeholder="Add notes, links, or context"
-                rows={3}
+                rows={2}
               />
             </label>
             {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
           </div>
-          <div className="border-divider dark:border-divider-dark mt-auto flex justify-end gap-2 border-t p-4">
+          <div className="border-divider dark:border-divider-dark mt-auto flex justify-end gap-2 border-t p-3">
             <Button disabled={busy} onClick={() => setMode('details')} variant="ghost">
               Cancel
             </Button>
