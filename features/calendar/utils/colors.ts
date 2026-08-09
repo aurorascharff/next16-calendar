@@ -40,7 +40,7 @@ const INK: RGB = [17, 17, 20];
 const MUTE: RGB = [115, 115, 125];
 const WHITE: RGB = [255, 255, 255];
 
-const MUTE_AMOUNT = 0.4;
+const MUTE_AMOUNT = 0.22;
 
 function toRgb(hex: string): RGB {
   return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
@@ -56,8 +56,6 @@ function toHex([r, g, b]: RGB): string {
 
 type Variants = { darkBg: string; darkText: string; lightBg: string; lightText: string };
 
-// Mode-specific solids: light mode uses soft fills with dark text; dark mode
-// uses deeper fills with a muted light tint, not pure white.
 const VARIANTS = Object.fromEntries(
   CALENDAR_COLORS.map(color => {
     const base = toRgb(CALENDAR_HEX[color]);
@@ -65,10 +63,10 @@ const VARIANTS = Object.fromEntries(
     return [
       color,
       {
-        darkBg: toHex(mixRgb(muted, INK, 0.5)),
-        darkText: toHex(mixRgb(base, WHITE, 0.78)),
-        lightBg: toHex(mixRgb(muted, WHITE, 0.5)),
-        lightText: '#111114',
+        darkBg: toHex(mixRgb(mixRgb(muted, WHITE, 0.46), INK, 0.06)),
+        darkText: '#111114',
+        lightBg: toHex(mixRgb(muted, INK, 0.1)),
+        lightText: '#ffffff',
       },
     ];
   }),

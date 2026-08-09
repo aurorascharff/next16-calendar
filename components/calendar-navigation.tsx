@@ -2,6 +2,7 @@ import { CalendarDays, Link2, LogOut } from 'lucide-react';
 import { ViewTransition } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
 import { DaylineMark } from '@/components/ui/dayline-mark';
+import { GitHubIcon } from '@/components/ui/github-icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { NavLink } from '@/components/ui/nav-link';
 import { getCalendars } from '@/features/calendar/calendar-queries';
@@ -12,16 +13,22 @@ import { getCurrentUser } from '@/features/user/user-queries';
 
 const sidebarLink =
   'flex min-h-10 w-52 max-w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-muted transition-colors not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent-fade aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
+const REPO_URL = 'https://github.com/aurorascharff/next16-calendar';
 
 export function CalendarSidebarBrand() {
   return (
-    <CalendarHomeLink className="mb-6 flex items-center gap-2.5 px-2">
-      <DaylineMark className="size-8 shrink-0" />
-      <span>
-        <span className="block font-semibold tracking-tight">Dayline</span>
-        <span className="text-muted block text-xs">Shape your day</span>
-      </span>
-    </CalendarHomeLink>
+    <div className="mb-6 flex items-center justify-between gap-2 px-2">
+      <CalendarHomeLink className="flex min-w-0 items-center gap-2.5">
+        <DaylineMark className="size-8 shrink-0" />
+        <span className="min-w-0">
+          <span className="block truncate font-semibold tracking-tight">Dayline</span>
+          <span className="text-muted block truncate text-xs">Shape your day</span>
+        </span>
+      </CalendarHomeLink>
+      <IconButton external href={REPO_URL} label="View source on GitHub" size="sm">
+        <GitHubIcon className="size-4" />
+      </IconButton>
+    </div>
   );
 }
 

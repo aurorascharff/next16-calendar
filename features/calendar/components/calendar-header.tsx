@@ -25,12 +25,12 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <div className="hidden sm:block">
-            <WorkspaceHeaderActions />
-          </div>
-          <div className="hidden sm:block">
             <Suspense fallback={<div className="h-8 w-[5.5rem]" />}>
               <SlowControl />
             </Suspense>
+          </div>
+          <div className="hidden sm:block">
+            <WorkspaceHeaderActions />
           </div>
           <NewEventButton day={date} />
         </div>

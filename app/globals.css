@@ -84,24 +84,25 @@
 .cal-chip {
   background-color: var(--cal-lb);
   color: var(--cal-lt);
-  --tw-ring-color: rgb(0 0 0 / 0.06);
+  --tw-ring-color: rgb(0 0 0 / 0.08);
 }
 .dark .cal-chip {
   background-color: var(--cal-db);
   color: var(--cal-dt);
-  --tw-ring-color: rgb(255 255 255 / 0.08);
+  --tw-ring-color: rgb(0 0 0 / 0.16);
 }
 
 .cal-chip-booking {
-  background-color: color-mix(in srgb, var(--cal-lb) 20%, transparent);
+  background-color: var(--cal-lb);
   color: var(--cal-lt);
-  --tw-ring-color: color-mix(in srgb, var(--cal-lb) 70%, transparent);
+  --tw-ring-color: currentColor;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 72%, transparent);
 }
 
 .dark .cal-chip-booking {
-  background-color: color-mix(in srgb, var(--cal-db) 22%, transparent);
+  background-color: var(--cal-db);
   color: var(--cal-dt);
-  --tw-ring-color: color-mix(in srgb, var(--cal-dt) 55%, transparent);
+  --tw-ring-color: currentColor;
 }
 
 .skeleton-animation {

@@ -110,7 +110,7 @@ export function DayColumn({
       {selection ? (
         <div
           aria-hidden
-          className="cal-chip pointer-events-none absolute right-0.5 left-0.5 z-30 flex flex-col overflow-hidden rounded-[5px] px-2 py-1 opacity-90 ring-1 ring-inset"
+          className="cal-chip pointer-events-none absolute right-0.5 left-0.5 z-30 flex flex-col overflow-hidden rounded-[5px] px-2 py-1 ring-1 ring-inset"
           style={{
             ...chipStyle(interaction.selectionColor),
             height: eventHeight(Math.max(SNAP_MINUTES, selection.hi - selection.lo)),

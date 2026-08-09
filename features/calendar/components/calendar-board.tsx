@@ -158,11 +158,6 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
   const minWidth = dayKeys.length > 1 ? 760 : undefined;
   return (
     <div className="relative">
-      <div
-        aria-hidden
-        className="from-surface via-surface/60 dark:from-surface-dark dark:via-surface-dark/60 pointer-events-none absolute inset-x-0 top-[4.85rem] bottom-0 z-20 bg-gradient-to-b to-transparent opacity-70"
-        style={{ minWidth }}
-      />
       <div className="sticky top-0 z-30" style={{ minWidth }}>
         <div
           className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark grid border-b"
