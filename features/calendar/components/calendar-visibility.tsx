@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 type CalendarVisibility = {
   hidden: ReadonlySet<string>
@@ -12,17 +12,16 @@ const CalendarVisibilityContext = createContext<CalendarVisibility | null>(null)
 export function CalendarVisibilityProvider({ children }: { children: React.ReactNode }) {
   const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set())
 
-  const toggle = useCallback((calendarId: string) => {
+  function toggle(calendarId: string) {
     setHidden((current) => {
       const next = new Set(current)
       if (next.has(calendarId)) next.delete(calendarId)
       else next.add(calendarId)
       return next
     })
-  }, [])
+  }
 
-  const value = useMemo(() => ({ hidden, toggle }), [hidden, toggle])
-  return <CalendarVisibilityContext.Provider value={value}>{children}</CalendarVisibilityContext.Provider>
+  return <CalendarVisibilityContext.Provider value={{ hidden, toggle }}>{children}</CalendarVisibilityContext.Provider>
 }
 
 export function useCalendarVisibility() {

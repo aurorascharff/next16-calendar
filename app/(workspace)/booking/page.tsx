@@ -1,6 +1,5 @@
-import { ExternalLink, Link2 } from 'lucide-react'
-import Link from 'next/link'
-import { CopyLinkButton } from '@/features/calendar/components/copy-link-button'
+import { Suspense } from 'react'
+import { BookingLinkPanel, BookingLinkPanelSkeleton } from '@/features/calendar/components/booking-link-panel'
 
 export default function BookingPage() {
   return (
@@ -12,27 +11,9 @@ export default function BookingPage() {
         </div>
       </header>
       <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-        <div className="border-divider rounded-xl border bg-card/40 p-6 dark:border-divider-dark dark:bg-card-dark/30">
-          <div className="mb-4 grid size-10 place-items-center rounded-lg bg-accent/15 text-accent">
-            <Link2 className="size-5" />
-          </div>
-          <h2 className="text-base font-semibold">Focused conversation</h2>
-          <p className="text-muted mt-1 text-sm">30-minute slots, weekdays 09:30–15:00.</p>
-          <div className="border-divider mt-5 flex flex-wrap items-center gap-2 border-t pt-4 dark:border-divider-dark">
-            <code className="text-muted flex-1 truncate rounded bg-card px-3 py-2 font-mono text-xs dark:bg-card-dark">
-              cadence.dev/book/aurora
-            </code>
-            <CopyLinkButton path="/book/aurora" />
-            <Link
-              className="border-divider text-muted inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-card hover:text-black dark:border-divider-dark dark:hover:bg-card-dark dark:hover:text-white"
-              href="/book/aurora"
-              prefetch
-            >
-              <ExternalLink className="size-4" />
-              Preview
-            </Link>
-          </div>
-        </div>
+        <Suspense fallback={<BookingLinkPanelSkeleton />}>
+          <BookingLinkPanel />
+        </Suspense>
       </section>
     </main>
   )

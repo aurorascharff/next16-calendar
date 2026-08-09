@@ -2,7 +2,7 @@
 
 import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/db'
-import { isCalendarColor } from './calendar-colors'
+import { isCalendarColor } from './utils/colors'
 import { calendarCache } from './calendar-queries'
 import { getWeekDays, isDateKey } from './calendar-utils'
 
@@ -52,7 +52,7 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
 
   const event = await findEvent(sourceId)
   if (!event) return { error: 'This event no longer exists.' }
-  if (event.demo) return { error: 'Demo events can’t be moved.' }
+  if (event.demo) return { error: 'Create your own calendar to make changes.' }
 
   if (event.recurrence) {
     const data: { recurrence?: string; start: string } = { start }
@@ -114,7 +114,7 @@ export async function updateEvent(input: UpdateEventInput) {
 
   const event = await findEvent(input.eventId)
   if (!event) return { error: 'This event no longer exists.' }
-  if (event.demo) return { error: 'Demo events can’t be edited.' }
+  if (event.demo) return { error: 'Create your own calendar to make changes.' }
 
   const updated = await prisma.calendarEvent.update({
     data: { duration: input.duration, start: input.start, title },
@@ -129,7 +129,7 @@ export async function resizeEvent({ duration, sourceId }: { duration: number; so
 
   const event = await findEvent(sourceId)
   if (!event) return { error: 'This event no longer exists.' }
-  if (event.demo) return { error: 'Demo events can’t be resized.' }
+  if (event.demo) return { error: 'Create your own calendar to make changes.' }
 
   const updated = await prisma.calendarEvent.update({ data: { duration }, where: { id: sourceId } })
   invalidateWeek(event.day)
@@ -139,7 +139,7 @@ export async function resizeEvent({ duration, sourceId }: { duration: number; so
 export async function deleteEvent(eventId: string) {
   const event = await findEvent(eventId)
   if (!event) return { error: 'This event no longer exists.' }
-  if (event.demo) return { error: 'Demo events can’t be deleted.' }
+  if (event.demo) return { error: 'Create your own calendar to make changes.' }
 
   await prisma.calendarEvent.delete({ where: { id: eventId } })
   invalidateWeek(event.day)

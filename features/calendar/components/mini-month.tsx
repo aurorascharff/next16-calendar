@@ -1,10 +1,10 @@
 'use client'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { startTransition, useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { dateKey } from '../calendar-utils'
+import { dateKey, getWeekDays } from '../calendar-utils'
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 const monthLabel = new Intl.DateTimeFormat('en-GB', { month: 'long', timeZone: 'UTC', year: 'numeric' })
@@ -23,14 +23,23 @@ function monthGrid(year: number, month: number) {
 
 export function MiniMonth() {
   const router = useRouter()
+  const pathname = usePathname()
+  const selected = pathname.match(/\/calendar\/(\d{4}-\d{2}-\d{2})/)?.[1]
+  const weekDays = selected ? getWeekDays(selected) : null
+  const weekSet = weekDays ? new Set(weekDays) : null
+  const firstKey = weekDays?.[0]
+  const lastKey = weekDays?.[6]
   const [today, setToday] = useState<string | null>(null)
   const [view, setView] = useState<{ month: number; year: number } | null>(null)
 
   useEffect(() => {
-    const now = new Date()
-    setToday(dateKey(now))
-    setView({ month: now.getUTCMonth(), year: now.getUTCFullYear() })
+    setToday(dateKey(new Date()))
   }, [])
+
+  useEffect(() => {
+    const base = selected ? new Date(`${selected}T00:00:00.000Z`) : new Date()
+    setView({ month: base.getUTCMonth(), year: base.getUTCFullYear() })
+  }, [selected])
 
   if (!view) return <div className="h-[232px]" aria-hidden />
 
@@ -76,16 +85,21 @@ export function MiniMonth() {
           <span key={index}>{label}</span>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-y-0.5">
         {days.map((day) => {
           const key = dateKey(day)
           const isToday = key === today
+          const inWeek = weekSet?.has(key)
           const isOutside = day.getUTCMonth() !== view.month
           return (
             <button
               className={cn(
-                'grid size-7 place-items-center rounded-md text-xs tabular-nums transition-colors',
-                isToday ? 'bg-accent font-semibold text-white' : 'hover:bg-card dark:hover:bg-card-dark',
+                'grid size-7 place-items-center text-xs tabular-nums transition-colors',
+                isToday && 'z-10 rounded-md bg-accent font-semibold text-white',
+                !isToday && inWeek && 'bg-card dark:bg-card-dark',
+                !isToday && inWeek && key === firstKey && 'rounded-l-md',
+                !isToday && inWeek && key === lastKey && 'rounded-r-md',
+                !isToday && !inWeek && 'rounded-md hover:bg-card dark:hover:bg-card-dark',
                 !isToday && isOutside && 'text-muted/40',
               )}
               key={key}

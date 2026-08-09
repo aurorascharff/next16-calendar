@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { bookSlot } from '../calendar-actions'
 
@@ -37,7 +37,7 @@ export function BookingSlots({
   const [isPending, startTransition] = useTransition()
   const [day, setDay] = useState(() => toDateKey(new Date()))
   const [guestName, setGuestName] = useState('')
-  const slots = useMemo(() => slotsBetween(startTime, endTime, duration), [duration, endTime, startTime])
+  const slots = slotsBetween(startTime, endTime, duration)
 
   function selectSlot(slot: string) {
     startTransition(async () => {

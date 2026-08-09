@@ -4,6 +4,7 @@ import { Suspense, ViewTransition } from 'react'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { GitHubIcon } from '@/components/ui/github-icon'
 import { NavLink } from '@/components/ui/nav-link'
+import { Crossfade } from '@/components/ui/crossfade'
 import { getCalendars } from '@/features/calendar/calendar-queries'
 import { CalendarManager } from '@/features/calendar/components/calendar-manager'
 import { MiniMonth } from '@/features/calendar/components/mini-month'
@@ -87,7 +88,11 @@ export function CalendarNavigation() {
 
 async function CalendarSection() {
   const calendars = await getCalendars()
-  return <CalendarManager calendars={calendars} />
+  return (
+    <Crossfade>
+      <CalendarManager calendars={calendars} />
+    </Crossfade>
+  )
 }
 
 function CalendarsFallback() {

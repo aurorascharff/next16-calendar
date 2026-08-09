@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { Dialog } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { createCalendar, deleteCalendar, updateCalendar } from '../calendar-actions'
-import { CALENDAR_COLORS, dotClass } from '../calendar-colors'
+import { CALENDAR_COLORS, dotClass } from '../utils/colors'
 import type { Calendar, CalendarColor } from '../types/calendar'
 import { useCalendarVisibility } from './calendar-visibility'
 
@@ -15,6 +15,9 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
   const { hidden, toggle } = useCalendarVisibility()
   const [editing, setEditing] = useState<Calendar | 'new' | null>(null)
   const [isDeleting, startDelete] = useTransition()
+  // Colors used by demo calendars are off-limits for custom ones, so they stay
+  // visually distinct (an edited calendar keeps its own color as an option).
+  const demoColors = new Set(calendars.filter((calendar) => calendar.isDemo).map((calendar) => calendar.color))
   const store = Ariakit.useDialogStore({
     setOpen(open) {
       if (!open) setEditing(null)
@@ -100,14 +103,27 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
         })}
       </div>
       {editing ? (
-        <CalendarFormDialog key={editing === 'new' ? 'new' : editing.id} calendar={editing === 'new' ? null : editing} store={store} />
+        <CalendarFormDialog
+          calendar={editing === 'new' ? null : editing}
+          colors={CALENDAR_COLORS.filter((color) => !demoColors.has(color) || (editing !== 'new' && color === editing.color))}
+          key={editing === 'new' ? 'new' : editing.id}
+          store={store}
+        />
       ) : null}
     </>
   )
 }
 
-function CalendarFormDialog({ calendar, store }: { calendar: Calendar | null; store: Ariakit.DialogStore }) {
-  const [color, setColor] = useState<CalendarColor>(calendar?.color ?? 'indigo')
+function CalendarFormDialog({
+  calendar,
+  colors,
+  store,
+}: {
+  calendar: Calendar | null
+  colors: CalendarColor[]
+  store: Ariakit.DialogStore
+}) {
+  const [color, setColor] = useState<CalendarColor>(calendar?.color ?? colors[0] ?? 'indigo')
 
   const [state, formAction, isPending] = useActionState(async (_prev: { error?: string }, formData: FormData) => {
     const name = String(formData.get('name'))
@@ -130,7 +146,7 @@ function CalendarFormDialog({ calendar, store }: { calendar: Calendar | null; st
         <div>
           <span className="text-muted mb-1.5 block text-xs font-medium">Color</span>
           <div className="flex gap-2">
-            {CALENDAR_COLORS.map((option) => (
+            {colors.map((option) => (
               <button
                 aria-label={option}
                 aria-pressed={color === option}

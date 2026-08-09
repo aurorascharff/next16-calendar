@@ -7,6 +7,7 @@ import { Dialog } from '@/components/ui/dialog'
 import { createEvent } from '../calendar-actions'
 import type { Calendar } from '../types/calendar'
 import { formatDay } from '../calendar-utils'
+import { CalendarPicker } from './calendar-picker'
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium'
 
@@ -71,16 +72,10 @@ export function EventCreateDialog({
           </label>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <label className="block">
+          <div className="block">
             <span className={fieldLabel}>Calendar</span>
-            <select defaultValue={calendars[0]?.id} name="calendarId">
-              {calendars.map((calendar) => (
-                <option key={calendar.id} value={calendar.id}>
-                  {calendar.name}
-                </option>
-              ))}
-            </select>
-          </label>
+            <CalendarPicker calendars={calendars} defaultValue={calendars[0]?.id} name="calendarId" />
+          </div>
           <label className="block">
             <span className={fieldLabel}>Repeat</span>
             <select defaultValue="" name="repeat">

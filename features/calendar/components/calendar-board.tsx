@@ -6,7 +6,7 @@ import { useOptimistic, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { moveEvent, resizeEvent } from '../calendar-actions'
-import { chipClass } from '../calendar-colors'
+import { chipClass } from '../utils/colors'
 import type { Calendar, CalendarEvent } from '../types/calendar'
 import { dateKey, formatDay, timeToMinutes } from '../calendar-utils'
 import {
@@ -20,7 +20,7 @@ import {
   SNAP_MINUTES,
   snapMinutes,
   START_HOUR,
-} from '../calendar-layout'
+} from '../utils/grid'
 import { useNow } from '../hooks/use-now'
 import { EventCreateDialog } from './event-create-dialog'
 import { EventEditor } from './event-editor'
@@ -45,7 +45,7 @@ export function CalendarBoard({
     (
       current,
       next:
-        | { day: string; everyWeekday?: boolean; recurring?: boolean; sourceId: string; start: string; type: 'move' }
+        | { day: string; id: string; start: string; type: 'move' }
         | { sourceId: string; type: 'delete' }
         | { duration: number; sourceId: string; type: 'resize' }
         | { event: Pick<CalendarEvent, 'duration' | 'sourceId' | 'start' | 'title'>; type: 'update' },
@@ -61,22 +61,20 @@ export function CalendarBoard({
           event.sourceId === next.event.sourceId ? { ...event, ...next.event } : event,
         )
       }
-      return current.map((event) => {
-        if (event.sourceId !== next.sourceId) return event
-        if (next.recurring && next.everyWeekday) return { ...event, start: next.start }
-        return { ...event, day: next.day, start: next.start }
-      })
+      // Move only the dragged occurrence (match by instance id, not the shared
+      // source id) so a recurring event's other days don't all jump too.
+      return current.map((event) => (event.id === next.id ? { ...event, day: next.day, start: next.start } : event))
     },
   )
   const [isPending, startTransition] = useTransition()
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
-  const [dragMove, setDragMove] = useState<{ day: string; sourceId: string; startMin: number } | null>(null)
+  const [dragMove, setDragMove] = useState<{ day: string; id: string; startMin: number } | null>(null)
   const [createSel, setCreateSel] = useState<{ aMin: number; bMin: number; day: string } | null>(null)
   const [createDraft, setCreateDraft] = useState<{ day: string; duration: number; start: string } | null>(null)
   const [resize, setResize] = useState<{ colTop: number; endMin: number; sourceId: string; startMin: number } | null>(null)
   const resizingRef = useRef(false)
   const gridRef = useRef<HTMLDivElement>(null)
-  const moveRef = useRef<{ duration: number; grabOffsetMin: number; moved: boolean; sourceId: string; x0: number; y0: number } | null>(null)
+  const moveRef = useRef<{ duration: number; grabOffsetMin: number; id: string; moved: boolean; sourceId: string; x0: number; y0: number } | null>(null)
   const suppressClickRef = useRef(false)
   const createStore = Ariakit.useDialogStore({
     setOpen(open) {
@@ -104,23 +102,24 @@ export function CalendarBoard({
   }
 
   function effectiveDay(event: CalendarEvent) {
-    return dragMove?.sourceId === event.sourceId ? dragMove.day : event.day
+    return dragMove?.id === event.id ? dragMove.day : event.day
   }
 
   function effectiveStartMin(event: CalendarEvent) {
-    return dragMove?.sourceId === event.sourceId ? dragMove.startMin : timeToMinutes(event.start)
+    return dragMove?.id === event.id ? dragMove.startMin : timeToMinutes(event.start)
   }
 
   // Pointer-based move: the event block itself follows the cursor (snapped to the
   // grid) and drops into whichever day column it's over — no floating HTML5 ghost.
   function handleMoveDown(calendarEvent: CalendarEvent, pointerEvent: React.PointerEvent<HTMLButtonElement>) {
-    if (pointerEvent.button !== 0 || calendarEvent.isDemo) return
+    if (pointerEvent.button !== 0) return
     if ((pointerEvent.target as HTMLElement).closest('[data-resize-handle]')) return
     pointerEvent.stopPropagation()
     pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId)
     moveRef.current = {
       duration: calendarEvent.duration,
       grabOffsetMin: pointToMinutes(pointerEvent.clientY) - timeToMinutes(calendarEvent.start),
+      id: calendarEvent.id,
       moved: false,
       sourceId: calendarEvent.sourceId,
       x0: pointerEvent.clientX,
@@ -139,7 +138,7 @@ export function CalendarBoard({
     const raw = pointToMinutes(pointerEvent.clientY) - origin.grabOffsetMin
     const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES
     const startMin = Math.max(START_HOUR * 60, Math.min(END_MINUTES - origin.duration, snapped))
-    setDragMove({ day, sourceId: origin.sourceId, startMin })
+    setDragMove({ day, id: origin.id, startMin })
   }
 
   function handleMoveUp(pointerEvent: React.PointerEvent<HTMLButtonElement>) {
@@ -156,9 +155,10 @@ export function CalendarBoard({
       suppressClickRef.current = false
     })
     const start = minutesToTime(target.startMin)
-    const { day, sourceId } = target
+    const { day, id } = target
+    const sourceId = origin.sourceId
     startTransition(async () => {
-      setOptimisticEvents({ day, sourceId, start, type: 'move' })
+      setOptimisticEvents({ day, id, start, type: 'move' })
       const result = await moveEvent({ day, sourceId, start })
       if (result.error) toast.error(result.error)
     })
@@ -308,7 +308,7 @@ export function CalendarBoard({
                 const startMin = effectiveStartMin(event)
                 const top = ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT
                 const isResizing = resize?.sourceId === event.sourceId
-                const isDragging = dragMove?.sourceId === event.sourceId
+                const isDragging = dragMove?.id === event.id
                 const displayDuration = isResizing ? resize!.endMin - resize!.startMin : event.duration
                 const height = Math.max(22, (displayDuration / 60) * HOUR_HEIGHT - 3)
                 const place = layout.get(event.id) ?? { col: 0, cols: 1 }
@@ -318,7 +318,6 @@ export function CalendarBoard({
                     className={cn(
                       'group absolute flex touch-none flex-col overflow-hidden rounded-[5px] px-2 py-1 text-left ring-1 ring-inset transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
                       isDragging || isResizing ? 'z-30 cursor-grabbing shadow-lg' : 'z-10 cursor-grab hover:z-20 hover:shadow-md',
-                      event.isDemo && 'cursor-pointer',
                       chipClass[event.color],
                     )}
                     data-event-chip
@@ -343,24 +342,22 @@ export function CalendarBoard({
                       <span className="min-w-0 flex-1 truncate text-xs font-semibold leading-tight">{event.title}</span>
                       {event.recurring ? <Repeat className="size-3 shrink-0 opacity-50" /> : null}
                     </span>
-                    {height > 32 ? (
+                    {height >= 46 ? (
                       <span className="mt-0.5 text-[11px] tabular-nums opacity-70">
                         {isResizing ? minutesToTime(resize!.endMin) : minutesToTime(startMin)}
                       </span>
                     ) : null}
-                    {!event.isDemo ? (
-                      <span
-                        className="absolute inset-x-0 bottom-0 z-10 flex h-2.5 cursor-ns-resize touch-none items-end justify-center pb-0.5 opacity-0 transition-opacity group-hover:opacity-100"
-                        data-event-chip
-                        data-resize-handle
-                        onClick={(clickEvent) => clickEvent.stopPropagation()}
-                        onPointerDown={(pointerEvent) => handleResizeDown(event, pointerEvent)}
-                        onPointerMove={handleResizeMove}
-                        onPointerUp={handleResizeUp}
-                      >
-                        <span className="h-1 w-7 rounded-full bg-white/70" />
-                      </span>
-                    ) : null}
+                    <span
+                      className="absolute inset-x-0 bottom-0 z-10 flex h-2.5 cursor-ns-resize touch-none items-end justify-center pb-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+                      data-event-chip
+                      data-resize-handle
+                      onClick={(clickEvent) => clickEvent.stopPropagation()}
+                      onPointerDown={(pointerEvent) => handleResizeDown(event, pointerEvent)}
+                      onPointerMove={handleResizeMove}
+                      onPointerUp={handleResizeUp}
+                    >
+                      <span className="h-1 w-7 rounded-full bg-current opacity-30" />
+                    </span>
                   </button>
                 )
               })}

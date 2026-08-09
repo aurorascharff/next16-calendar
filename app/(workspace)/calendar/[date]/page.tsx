@@ -9,20 +9,19 @@ const weekTransition = {
   default: 'none',
 }
 
-export default function CalendarPage(props: PageProps<'/calendar/[date]'>) {
-  const resolved = Promise.all([props.params, props.searchParams]).then(([{ date }, { view }]) => ({
-    date,
-    view: (view === 'day' ? 'day' : 'week') as CalendarView,
-  }))
+function toView(view: string | string[] | undefined): CalendarView {
+  return view === 'day' ? 'day' : 'week'
+}
 
+export default function CalendarPage({ params, searchParams }: PageProps<'/calendar/[date]'>) {
   return (
     <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
       <Suspense fallback={<CalendarHeaderSkeleton />}>
-        {resolved.then(({ date, view }) => <CalendarHeader date={date} view={view} />)}
+        {params.then(({ date }) => searchParams.then(({ view }) => <CalendarHeader date={date} view={toView(view)} />))}
       </Suspense>
       <ViewTransition default="none" enter={weekTransition} exit={weekTransition} update={weekTransition}>
         <Suspense fallback={<CalendarWeekSkeleton />}>
-          {resolved.then(({ date, view }) => <CalendarWeek date={date} view={view} />)}
+          {params.then(({ date }) => searchParams.then(({ view }) => <CalendarWeek date={date} view={toView(view)} />))}
         </Suspense>
       </ViewTransition>
     </main>
