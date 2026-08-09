@@ -118,7 +118,7 @@ export async function getBookingAvailability(handle: string, date: string) {
 export async function getMyBookingProfile(handle: string) {
   'use cache';
   cacheLife('hours');
-  cacheTag(bookingCache.tag(handle));
+  cacheTag(bookingCache.tag(handle), calendarCache.calendarsTag);
 
   const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
   if (!bookingPage) return null;
@@ -160,7 +160,7 @@ async function getWritableCalendars(userId: string) {
 async function getMyBookingSettingsForUser(userId: string, handle: string) {
   'use cache';
   cacheLife('hours');
-  cacheTag(bookingCache.tag(handle));
+  cacheTag(bookingCache.tag(handle), calendarCache.calendarsTag);
 
   const calendars = await getWritableCalendars(userId);
   const bookingPage = await prisma.bookingPage.findFirst({ where: { handle, userId } });

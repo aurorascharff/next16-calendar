@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useOptimistic, useTransition } from 'react';
+import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
@@ -19,32 +20,34 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
   const period = view === 'month' ? 'month' : 'week';
 
   return (
-    <div className="flex items-center gap-1">
-      {today ? (
-        <Button className="h-8 px-3" render={<Link href={calendarHref(today, view)} prefetch />} variant="ghost">
-          Today
-        </Button>
-      ) : (
-        <Button className="h-8 px-3" disabled variant="ghost">
-          Today
-        </Button>
-      )}
-      <div className="flex items-center">
-        <IconButton
-          label={`Previous ${period}`}
-          render={<Link href={calendarHref(previous, view)} prefetch transitionTypes={['nav-back']} />}
-        >
-          <ChevronLeft className="size-4.5" />
-        </IconButton>
-        <IconButton
-          label={`Next ${period}`}
-          render={<Link href={calendarHref(next, view)} prefetch transitionTypes={['nav-forward']} />}
-        >
-          <ChevronRight className="size-4.5" />
-        </IconButton>
+    <Boundary label="CalendarControls" asChild>
+      <div className="flex items-center gap-1">
+        {today ? (
+          <Button className="h-8 px-3" render={<Link href={calendarHref(today, view)} prefetch />} variant="ghost">
+            Today
+          </Button>
+        ) : (
+          <Button className="h-8 px-3" disabled variant="ghost">
+            Today
+          </Button>
+        )}
+        <div className="flex items-center">
+          <IconButton
+            label={`Previous ${period}`}
+            render={<Link href={calendarHref(previous, view)} prefetch transitionTypes={['nav-back']} />}
+          >
+            <ChevronLeft className="size-4.5" />
+          </IconButton>
+          <IconButton
+            label={`Next ${period}`}
+            render={<Link href={calendarHref(next, view)} prefetch transitionTypes={['nav-forward']} />}
+          >
+            <ChevronRight className="size-4.5" />
+          </IconButton>
+        </div>
+        <DatePicker date={date} view={view} />
       </div>
-      <DatePicker date={date} view={view} />
-    </div>
+    </Boundary>
   );
 }
 
@@ -103,27 +106,29 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
   }
 
   return (
-    <div className="border-divider dark:border-divider-dark flex items-center rounded-md border p-0.5">
-      <Link
-        aria-keyshortcuts="W"
-        aria-current={optimisticView === 'week' ? 'page' : undefined}
-        className={cn(item, optimisticView === 'week' ? active : inactive)}
-        href={calendarHref(date, 'week')}
-        onNavigate={() => markView('week')}
-        prefetch
-      >
-        Week
-      </Link>
-      <Link
-        aria-keyshortcuts="M"
-        aria-current={optimisticView === 'month' ? 'page' : undefined}
-        className={cn(item, optimisticView === 'month' ? active : inactive)}
-        href={calendarHref(date, 'month')}
-        onNavigate={() => markView('month')}
-        prefetch
-      >
-        Month
-      </Link>
-    </div>
+    <Boundary label="ViewToggle" asChild>
+      <div className="border-divider dark:border-divider-dark flex items-center rounded-md border p-0.5">
+        <Link
+          aria-keyshortcuts="W"
+          aria-current={optimisticView === 'week' ? 'page' : undefined}
+          className={cn(item, optimisticView === 'week' ? active : inactive)}
+          href={calendarHref(date, 'week')}
+          onNavigate={() => markView('week')}
+          prefetch
+        >
+          Week
+        </Link>
+        <Link
+          aria-keyshortcuts="M"
+          aria-current={optimisticView === 'month' ? 'page' : undefined}
+          className={cn(item, optimisticView === 'month' ? active : inactive)}
+          href={calendarHref(date, 'month')}
+          onNavigate={() => markView('month')}
+          prefetch
+        >
+          Month
+        </Link>
+      </div>
+    </Boundary>
   );
 }

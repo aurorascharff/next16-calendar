@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDay } from '../calendar-utils';
 import { chipStyle } from '../utils/colors';
@@ -25,10 +25,10 @@ export function CalendarAllDayRow({
 
   const content = (
     <div className="grid min-h-8" style={{ gridTemplateColumns: gridTemplate }}>
-      <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-center border-r">
+      <div className="border-divider dark:border-divider-dark text-muted flex items-start justify-center border-r p-1">
         {canExpand ? (
-          <span className="all-day-chevron group-focus-visible/summary:ring-accent grid size-6 place-items-center rounded-full transition-transform group-open:rotate-180 group-focus-visible/summary:ring-2">
-            <ChevronDown className="size-3.5" />
+          <span className="group-focus-visible/summary:ring-accent hidden size-6 place-items-center rounded-full group-open:grid group-focus-visible/summary:ring-2">
+            <ChevronUp className="size-3.5" />
           </span>
         ) : null}
       </div>
@@ -52,7 +52,7 @@ export function CalendarAllDayRow({
               {hiddenEventCount > 0 ? (
                 <span
                   aria-label={`${hiddenEventCount} more all-day events on ${formatDay(day)}`}
-                  className="bg-card text-muted dark:bg-card-dark ring-divider dark:ring-divider-dark h-6 shrink-0 rounded-[5px] px-2 text-[11px] leading-6 font-semibold ring-1 group-open:hidden"
+                  className="text-muted h-6 shrink-0 px-1 text-[11px] leading-6 font-semibold group-open:hidden"
                 >
                   +{hiddenEventCount}
                 </span>
@@ -98,7 +98,7 @@ function AllDayEventButton({
 }) {
   return (
     <button
-      className="cal-chip focus-visible:ring-accent flex h-6 w-full min-w-0 flex-none items-center gap-1 rounded-[5px] px-2 text-left text-[11px] leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none"
+      className="cal-chip focus-visible:ring-accent flex h-6 w-full min-w-0 flex-none items-center gap-1 rounded-[5px] px-2 text-left text-xs leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none"
       onClick={click => {
         if (preventToggle) {
           click.preventDefault();

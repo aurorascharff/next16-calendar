@@ -4,6 +4,7 @@ import * as Ariakit from '@ariakit/react';
 import { X } from 'lucide-react';
 import { useActionState, useState, type KeyboardEvent } from 'react';
 import { toast } from 'sonner';
+import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { createEvent } from '../calendar-actions';
@@ -157,131 +158,135 @@ export function EventCreateDialog({
   }
 
   return (
-    <Ariakit.Popover
-      store={store}
-      unmountOnHide
-      fixed
-      fitViewport
-      overlap
-      overflowPadding={16}
-      portal
-      getAnchorRect={anchorRect ? () => anchorRect : undefined}
-      gutter={10}
-      className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border p-4 shadow-2xl outline-none"
-      style={{ viewTransitionName: 'dialog' }}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <Ariakit.PopoverHeading className="text-base font-semibold tracking-tight">New event</Ariakit.PopoverHeading>
-          <Ariakit.PopoverDescription className="text-muted mt-0.5 text-sm">
-            {formatDay(day)}
-          </Ariakit.PopoverDescription>
-        </div>
-        <IconButton className="-mr-1" label="Close" render={<Ariakit.PopoverDismiss />}>
-          <X className="size-4" />
-        </IconButton>
-      </div>
-      <form
-        action={formAction}
-        className="mt-3 space-y-3"
-        data-calendar-editing
-        key={state.key ?? 'new-event'}
-        onKeyDown={handleSubmitShortcut}
+    <Boundary label="EventCreateDialog" asChild>
+      <Ariakit.Popover
+        store={store}
+        unmountOnHide
+        fixed
+        fitViewport
+        overlap
+        overflowPadding={16}
+        portal
+        getAnchorRect={anchorRect ? () => anchorRect : undefined}
+        gutter={10}
+        className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border p-4 shadow-2xl outline-none"
+        style={{ viewTransitionName: 'dialog' }}
       >
-        <label className="block">
-          <span className={fieldLabel}>Title</span>
-          <input
-            autoFocus
-            defaultValue={values.title}
-            name="title"
-            onInput={event => event.currentTarget.setCustomValidity('')}
-            onInvalid={event => event.currentTarget.setCustomValidity('Add a title before saving the event.')}
-            pattern={titlePattern}
-            placeholder="What's happening?"
-            required
-            className={controlHeight}
-          />
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            checked={allDay}
-            className="size-4 w-auto"
-            name="allDay"
-            onChange={event => setAllDay(event.target.checked)}
-            type="checkbox"
-          />
-          All day
-        </label>
-        <div
-          aria-disabled={allDay}
-          className={`${calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'} ${allDay ? disabledTimeBlock : ''}`}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <Ariakit.PopoverHeading className="text-base font-semibold tracking-tight">
+              New event
+            </Ariakit.PopoverHeading>
+            <Ariakit.PopoverDescription className="text-muted mt-0.5 text-sm">
+              {formatDay(day)}
+            </Ariakit.PopoverDescription>
+          </div>
+          <IconButton className="-mr-1" label="Close" render={<Ariakit.PopoverDismiss />}>
+            <X className="size-4" />
+          </IconButton>
+        </div>
+        <form
+          action={formAction}
+          className="mt-3 space-y-3"
+          data-calendar-editing
+          key={state.key ?? 'new-event'}
+          onKeyDown={handleSubmitShortcut}
         >
           <label className="block">
-            <span className={fieldLabel}>Starts at</span>
+            <span className={fieldLabel}>Title</span>
             <input
+              autoFocus
+              defaultValue={values.title}
+              name="title"
+              onInput={event => event.currentTarget.setCustomValidity('')}
+              onInvalid={event => event.currentTarget.setCustomValidity('Add a title before saving the event.')}
+              pattern={titlePattern}
+              placeholder="What's happening?"
+              required
               className={controlHeight}
-              defaultValue={values.start}
-              disabled={allDay}
-              name={allDay ? undefined : 'start'}
-              type="time"
             />
-            {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
           </label>
-          <label className="block">
-            <span className={fieldLabel}>Duration</span>
-            <select
-              className={controlHeight}
-              defaultValue={values.duration}
-              disabled={allDay}
-              name={allDay ? undefined : 'duration'}
-            >
-              {durationOptions(values.duration).map(duration => (
-                <option key={duration} value={duration}>
-                  {durationLabel(duration)}
-                </option>
-              ))}
-            </select>
-            {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              checked={allDay}
+              className="size-4 w-auto"
+              name="allDay"
+              onChange={event => setAllDay(event.target.checked)}
+              type="checkbox"
+            />
+            All day
           </label>
-        </div>
-        {allDay ? <p className="text-muted -mt-1 text-xs">This event will fill the all-day row.</p> : null}
-        <label className="block">
-          <span className={fieldLabel}>Description</span>
-          <textarea
-            defaultValue={values.description}
-            name="description"
-            placeholder="Add notes, links, or context"
-            rows={2}
-          />
-        </label>
-        <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
-          {calendarOptions.length > 0 ? (
-            <div className="block">
-              <span className={fieldLabel}>Calendar</span>
-              <CalendarPicker
-                calendars={calendarOptions}
-                defaultValue={values.calendarId || writableCalendarId}
-                name="calendarId"
+          <div
+            aria-disabled={allDay}
+            className={`${calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'} ${allDay ? disabledTimeBlock : ''}`}
+          >
+            <label className="block">
+              <span className={fieldLabel}>Starts at</span>
+              <input
+                className={controlHeight}
+                defaultValue={values.start}
+                disabled={allDay}
+                name={allDay ? undefined : 'start'}
+                type="time"
               />
-            </div>
-          ) : null}
+              {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
+            </label>
+            <label className="block">
+              <span className={fieldLabel}>Duration</span>
+              <select
+                className={controlHeight}
+                defaultValue={values.duration}
+                disabled={allDay}
+                name={allDay ? undefined : 'duration'}
+              >
+                {durationOptions(values.duration).map(duration => (
+                  <option key={duration} value={duration}>
+                    {durationLabel(duration)}
+                  </option>
+                ))}
+              </select>
+              {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
+            </label>
+          </div>
+          {allDay ? <p className="text-muted -mt-1 text-xs">This event will fill the all-day row.</p> : null}
           <label className="block">
-            <span className={fieldLabel}>Repeat</span>
-            <select defaultValue={values.repeat} name="repeat">
-              <option value="">Does not repeat</option>
-              <option value="weekly">Weekly on {weekdayLabel.format(new Date(`${day}T00:00:00.000Z`))}</option>
-              <option value="weekday">Every weekday</option>
-            </select>
+            <span className={fieldLabel}>Description</span>
+            <textarea
+              defaultValue={values.description}
+              name="description"
+              placeholder="Add notes, links, or context"
+              rows={2}
+            />
           </label>
-        </div>
-        {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
-        <div className="mt-4 flex justify-end gap-2">
-          <Button render={<Ariakit.PopoverDismiss />} variant="ghost">
-            Cancel
-          </Button>
-          <Button type="submit">Create event</Button>
-        </div>
-      </form>
-    </Ariakit.Popover>
+          <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
+            {calendarOptions.length > 0 ? (
+              <div className="block">
+                <span className={fieldLabel}>Calendar</span>
+                <CalendarPicker
+                  calendars={calendarOptions}
+                  defaultValue={values.calendarId || writableCalendarId}
+                  name="calendarId"
+                />
+              </div>
+            ) : null}
+            <label className="block">
+              <span className={fieldLabel}>Repeat</span>
+              <select defaultValue={values.repeat} name="repeat">
+                <option value="">Does not repeat</option>
+                <option value="weekly">Weekly on {weekdayLabel.format(new Date(`${day}T00:00:00.000Z`))}</option>
+                <option value="weekday">Every weekday</option>
+              </select>
+            </label>
+          </div>
+          {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
+          <div className="mt-4 flex justify-end gap-2">
+            <Button render={<Ariakit.PopoverDismiss />} variant="ghost">
+              Cancel
+            </Button>
+            <Button type="submit">Create event</Button>
+          </div>
+        </form>
+      </Ariakit.Popover>
+    </Boundary>
   );
 }

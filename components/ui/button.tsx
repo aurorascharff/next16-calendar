@@ -2,6 +2,7 @@
 
 import { cloneElement, type ButtonHTMLAttributes, type ReactElement, type ReactNode } from 'react';
 import { useFormStatus } from 'react-dom';
+import { Boundary } from '@/components/internal/boundary';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 
@@ -66,12 +67,18 @@ export function Button({
 
   if (render) {
     const renderClassName = render.props?.className;
-    return cloneElement(render, { className: cn(classes, renderClassName), ...props }, content);
+    return (
+      <Boundary label="Button" asChild>
+        {cloneElement(render, { className: cn(classes, renderClassName), ...props }, content)}
+      </Boundary>
+    );
   }
 
   return (
-    <button className={classes} disabled={isDisabled} type={type} {...props}>
-      {content}
-    </button>
+    <Boundary label="Button" asChild>
+      <button className={classes} disabled={isDisabled} type={type} {...props}>
+        {content}
+      </button>
+    </Boundary>
   );
 }

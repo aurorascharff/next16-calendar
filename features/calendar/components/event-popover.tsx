@@ -4,6 +4,7 @@ import * as Ariakit from '@ariakit/react';
 import { AlignLeft, ArrowLeft, CalendarDays, Check, Pencil, Repeat2, Trash2, X } from 'lucide-react';
 import { type ReactNode, useActionState, useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Boundary } from '@/components/internal/boundary';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { deleteEvent, updateEvent } from '../calendar-actions';
@@ -131,76 +132,78 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
   const [allDay, setAllDay] = useState(values.allDay);
 
   return (
-    <Ariakit.Popover
-      store={store}
-      unmountOnHide
-      fixed
-      fitViewport
-      flip="left-start"
-      overflowPadding={16}
-      portal
-      getAnchorRect={anchorRect ? () => anchorRect : undefined}
-      gutter={10}
-      hideOnEscape={!busy}
-      hideOnInteractOutside={!busy}
-      wrapperProps={{
-        className:
-          'event-popover-wrapper max-sm:!inset-0 max-sm:!h-dvh max-sm:!w-screen max-sm:!max-h-none max-sm:!max-w-none',
-      }}
-      backdrop={<div className="fixed inset-0 z-40 bg-black/40 sm:hidden" />}
-      className={cn(
-        'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 flex max-h-[calc(100dvh-2rem)] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border shadow-2xl outline-none',
-        'max-sm:!inset-0 max-sm:!h-dvh max-sm:!max-h-dvh max-sm:!w-full max-sm:!max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-none max-sm:border-0',
-      )}
-      style={{ viewTransitionName: 'dialog' }}
-    >
-      {mode === 'details' ? (
-        <>
-          <EventPopoverHeader busy={busy} event={event}>
-            <IconButton disabled={busy} label="Edit event" onClick={() => setMode('edit')} size="sm">
-              <Pencil className="size-4" />
-            </IconButton>
-            <IconButton
-              className="text-danger hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger"
-              disabled={busy}
-              label="Delete event"
-              onClick={remove}
-              size="sm"
-            >
-              <Trash2 className="size-4" />
-            </IconButton>
-          </EventPopoverHeader>
-          <EventDetails calendar={calendar} event={event} />
-        </>
-      ) : (
-        <>
-          <EventPopoverHeader busy={busy} event={event}>
-            <IconButton disabled={busy} label="Back to event details" onClick={() => setMode('details')} size="sm">
-              <ArrowLeft className="size-4" />
-            </IconButton>
-            <IconButton
-              className="text-accent hover:bg-accent/10 hover:text-accent dark:hover:bg-accent/10 dark:hover:text-accent"
-              disabled={busy}
-              form={formId}
-              label="Save changes"
-              size="sm"
-              type="submit"
-            >
-              <Check className="size-4" />
-            </IconButton>
-          </EventPopoverHeader>
-          <EventEditForm
-            allDay={allDay}
-            busy={busy}
-            formAction={formAction}
-            formId={formId}
-            onAllDayChange={setAllDay}
-            state={state}
-            values={values}
-          />
-        </>
-      )}
-    </Ariakit.Popover>
+    <Boundary label="EventPopover" asChild>
+      <Ariakit.Popover
+        store={store}
+        unmountOnHide
+        fixed
+        fitViewport
+        flip="left-start"
+        overflowPadding={16}
+        portal
+        getAnchorRect={anchorRect ? () => anchorRect : undefined}
+        gutter={10}
+        hideOnEscape={!busy}
+        hideOnInteractOutside={!busy}
+        wrapperProps={{
+          className:
+            'event-popover-wrapper max-sm:!inset-0 max-sm:!h-dvh max-sm:!w-screen max-sm:!max-h-none max-sm:!max-w-none',
+        }}
+        backdrop={<div className="fixed inset-0 z-40 bg-black/40 sm:hidden" />}
+        className={cn(
+          'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 flex max-h-[calc(100dvh-2rem)] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border shadow-2xl outline-none',
+          'max-sm:!inset-0 max-sm:!h-dvh max-sm:!max-h-dvh max-sm:!w-full max-sm:!max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-none max-sm:border-0',
+        )}
+        style={{ viewTransitionName: 'dialog' }}
+      >
+        {mode === 'details' ? (
+          <>
+            <EventPopoverHeader busy={busy} event={event}>
+              <IconButton disabled={busy} label="Edit event" onClick={() => setMode('edit')} size="sm">
+                <Pencil className="size-4" />
+              </IconButton>
+              <IconButton
+                className="text-danger hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger"
+                disabled={busy}
+                label="Delete event"
+                onClick={remove}
+                size="sm"
+              >
+                <Trash2 className="size-4" />
+              </IconButton>
+            </EventPopoverHeader>
+            <EventDetails calendar={calendar} event={event} />
+          </>
+        ) : (
+          <>
+            <EventPopoverHeader busy={busy} event={event}>
+              <IconButton disabled={busy} label="Back to event details" onClick={() => setMode('details')} size="sm">
+                <ArrowLeft className="size-4" />
+              </IconButton>
+              <IconButton
+                className="text-accent hover:bg-accent/10 hover:text-accent dark:hover:bg-accent/10 dark:hover:text-accent"
+                disabled={busy}
+                form={formId}
+                label="Save changes"
+                size="sm"
+                type="submit"
+              >
+                <Check className="size-4" />
+              </IconButton>
+            </EventPopoverHeader>
+            <EventEditForm
+              allDay={allDay}
+              busy={busy}
+              formAction={formAction}
+              formId={formId}
+              onAllDayChange={setAllDay}
+              state={state}
+              values={values}
+            />
+          </>
+        )}
+      </Ariakit.Popover>
+    </Boundary>
   );
 }
 
@@ -208,7 +211,7 @@ function EventPopoverHeader({ busy, children, event }: { busy: boolean; children
   return (
     <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-3 border-b px-4 py-3">
       <div className="min-w-0">
-        <Ariakit.PopoverHeading className="truncate text-base font-semibold tracking-tight">
+        <Ariakit.PopoverHeading className="text-base leading-snug font-semibold tracking-tight break-words">
           {event.title}
         </Ariakit.PopoverHeading>
         <Ariakit.PopoverDescription className="text-muted mt-0.5 text-sm">

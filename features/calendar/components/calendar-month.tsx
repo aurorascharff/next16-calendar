@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { getCalendars, getCalendarMonth } from '../calendar-queries';
 import { getMonthDays } from '../calendar-utils';
 import { CalendarMonthBoard } from './calendar-month-board';
+import { CalendarBoardViewport } from './calendar-scroll-section';
 
 export async function CalendarMonth({ date }: { date: string }) {
   const [calendarMonth, calendars] = await Promise.all([getCalendarMonth(date), getCalendars()]);
@@ -53,7 +54,9 @@ export function CalendarMonthSkeleton({ date }: { date?: string }) {
 export function CalendarMonthScroll({ children, date }: { children: ReactNode; date?: string }) {
   return (
     <DirectionalSlide key={date ? `month:${date.slice(0, 7)}` : 'loading:month'} name="calendar-board">
-      <section className="min-h-0 flex-1 overflow-auto [overflow-anchor:none]">{children}</section>
+      <CalendarBoardViewport>
+        <section className="min-h-0 flex-1 overflow-auto [overflow-anchor:none]">{children}</section>
+      </CalendarBoardViewport>
     </DirectionalSlide>
   );
 }

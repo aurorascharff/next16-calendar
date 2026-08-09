@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useOptimistic, useState, useTransition } from 'react';
+import { Boundary } from '@/components/internal/boundary';
 import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
@@ -99,60 +100,64 @@ function MiniMonthCalendar({
   const days = monthGrid(view.year, view.month);
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-semibold">{monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}</span>
-        <div className="flex items-center gap-0.5">
-          <IconButton label="Previous month" onClick={() => shiftMonth(-1)} size="sm">
-            <ChevronLeft className="size-4" />
-          </IconButton>
-          <IconButton label="Next month" onClick={() => shiftMonth(1)} size="sm">
-            <ChevronRight className="size-4" />
-          </IconButton>
+    <Boundary label="MiniMonth" asChild>
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-sm font-semibold">
+            {monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}
+          </span>
+          <div className="flex items-center gap-0.5">
+            <IconButton label="Previous month" onClick={() => shiftMonth(-1)} size="sm">
+              <ChevronLeft className="size-4" />
+            </IconButton>
+            <IconButton label="Next month" onClick={() => shiftMonth(1)} size="sm">
+              <ChevronRight className="size-4" />
+            </IconButton>
+          </div>
+        </div>
+        <div className="text-muted mb-1 grid grid-cols-7 text-center text-[10px] font-medium">
+          {WEEKDAY_LABELS.map((label, index) => (
+            <span key={index}>{label}</span>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-y-0.5">
+          {days.map(day => {
+            const key = dateKey(day);
+            const isToday = key === today;
+            const inWeek = calendarView === 'week' && weekSet?.has(key);
+            const isSelected = calendarView === 'month' && key === optimisticSelected;
+            const isOutside = day.getUTCMonth() !== view.month;
+            return (
+              <HoverPrefetchLink
+                className={cn(
+                  'relative grid h-7 w-full place-items-center text-xs tabular-nums',
+                  inWeek && 'bg-divider/70 dark:bg-divider-dark/80',
+                  inWeek && key === firstKey && 'rounded-l-md',
+                  inWeek && key === lastKey && 'rounded-r-md',
+                )}
+                href={calendarHref(key, calendarView)}
+                key={key}
+                onNavigate={() => {
+                  if (key === optimisticSelected) return;
+                  startTransition(() => setOptimisticSelected(key));
+                }}
+              >
+                <span
+                  className={cn(
+                    'grid size-7 place-items-center rounded-md',
+                    isToday && 'bg-accent font-semibold text-white',
+                    !isToday && isSelected && 'ring-accent text-accent ring-1 ring-inset',
+                    !isToday && !isSelected && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
+                    !isToday && isOutside && 'text-muted/40',
+                  )}
+                >
+                  {day.getUTCDate()}
+                </span>
+              </HoverPrefetchLink>
+            );
+          })}
         </div>
       </div>
-      <div className="text-muted mb-1 grid grid-cols-7 text-center text-[10px] font-medium">
-        {WEEKDAY_LABELS.map((label, index) => (
-          <span key={index}>{label}</span>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-y-0.5">
-        {days.map(day => {
-          const key = dateKey(day);
-          const isToday = key === today;
-          const inWeek = calendarView === 'week' && weekSet?.has(key);
-          const isSelected = calendarView === 'month' && key === optimisticSelected;
-          const isOutside = day.getUTCMonth() !== view.month;
-          return (
-            <HoverPrefetchLink
-              className={cn(
-                'relative grid h-7 w-full place-items-center text-xs tabular-nums',
-                inWeek && 'bg-divider/70 dark:bg-divider-dark/80',
-                inWeek && key === firstKey && 'rounded-l-md',
-                inWeek && key === lastKey && 'rounded-r-md',
-              )}
-              href={calendarHref(key, calendarView)}
-              key={key}
-              onNavigate={() => {
-                if (key === optimisticSelected) return;
-                startTransition(() => setOptimisticSelected(key));
-              }}
-            >
-              <span
-                className={cn(
-                  'grid size-7 place-items-center rounded-md',
-                  isToday && 'bg-accent font-semibold text-white',
-                  !isToday && isSelected && 'ring-accent text-accent ring-1 ring-inset',
-                  !isToday && !isSelected && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
-                  !isToday && isOutside && 'text-muted/40',
-                )}
-              >
-                {day.getUTCDate()}
-              </span>
-            </HoverPrefetchLink>
-          );
-        })}
-      </div>
-    </div>
+    </Boundary>
   );
 }

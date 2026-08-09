@@ -3,7 +3,7 @@ import { DirectionalSlide } from '@/components/ui/directional-slide';
 import { getCalendars, getCalendarWeek } from '../calendar-queries';
 import { getWeekDays } from '../calendar-utils';
 import { CalendarBoard, CalendarBoardSkeleton } from './calendar-board';
-import { CalendarScrollSection } from './calendar-scroll-section';
+import { CalendarBoardViewport, CalendarScrollSection } from './calendar-scroll-section';
 
 export async function CalendarWeek({ date }: { date: string }) {
   const [week, calendars] = await Promise.all([getCalendarWeek(date), getCalendars()]);
@@ -22,9 +22,11 @@ export function CalendarWeekScroll({ children, date }: { children: ReactNode; da
 
   return (
     <DirectionalSlide key={days ? `week:${days.join(',')}` : 'loading:week'} name="calendar-board">
-      <CalendarScrollSection scrollKey={days ? `week:${days.join(',')}` : 'loading:week'}>
-        {children}
-      </CalendarScrollSection>
+      <CalendarBoardViewport>
+        <CalendarScrollSection scrollKey={days ? `week:${days.join(',')}` : 'loading:week'}>
+          {children}
+        </CalendarScrollSection>
+      </CalendarBoardViewport>
     </DirectionalSlide>
   );
 }

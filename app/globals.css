@@ -265,6 +265,41 @@ main:has([data-calendar-pending]) .calendar-pending-spinner {
   }
 }
 
+@layer base {
+  html.boundary-mode [data-component] {
+    position: relative;
+    border-radius: 6px;
+  }
+
+  html.boundary-mode :is([data-component], [data-sonner-toast])::before {
+    content: attr(data-component);
+    position: absolute;
+    top: 0;
+    left: 0.5rem;
+    z-index: 9999;
+    transform: translateY(-100%);
+    border-radius: 4px 4px 0 0;
+    background: #4f6ef7;
+    padding: 1px 6px;
+    color: white;
+    font-family: var(--font-geist-mono), monospace;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  html.boundary-mode [data-sonner-toast]::before {
+    content: 'Toast';
+  }
+}
+
+html.boundary-mode :is([data-component], [data-sonner-toast]) {
+  outline: 2px solid #4f6ef7;
+  outline-offset: -2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*),

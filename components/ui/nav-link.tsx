@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
 import { usePrefetchDefault } from '@/components/demo/use-prefetch-default';
+import { Boundary } from '@/components/internal/boundary';
 import type { Route } from 'next';
 
 type RenderProps = { isActive: boolean };
@@ -28,9 +29,11 @@ function checkActive(pathname: string, target: string, exact?: boolean): boolean
 
 export function NavLink<T extends string>(props: Props<T>) {
   return (
-    <Suspense fallback={<NavLinkShell {...props} isActive={false} />}>
-      <NavLinkInner {...props} />
-    </Suspense>
+    <Boundary label="NavLink">
+      <Suspense fallback={<NavLinkShell {...props} isActive={false} />}>
+        <NavLinkInner {...props} />
+      </Suspense>
+    </Boundary>
   );
 }
 

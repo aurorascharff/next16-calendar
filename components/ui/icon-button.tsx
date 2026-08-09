@@ -1,6 +1,7 @@
 'use client';
 
 import { cloneElement, type ButtonHTMLAttributes, type ReactElement, type ReactNode } from 'react';
+import { Boundary } from '@/components/internal/boundary';
 import { cn } from '@/lib/utils';
 
 type Size = 'sm' | 'default';
@@ -36,29 +37,37 @@ export function IconButton({
   const classes = cn(base, sizes[size], className);
 
   if (render) {
-    return cloneElement(
-      render,
-      { 'aria-label': label, className: cn(classes, render.props?.className), ...props },
-      children,
+    return (
+      <Boundary label="IconButton" asChild>
+        {cloneElement(
+          render,
+          { 'aria-label': label, className: cn(classes, render.props?.className), ...props },
+          children,
+        )}
+      </Boundary>
     );
   }
 
   if (href) {
     return (
-      <a
-        aria-label={label}
-        className={classes}
-        href={href}
-        {...(external ? { rel: 'noopener noreferrer', target: '_blank' } : {})}
-      >
-        {children}
-      </a>
+      <Boundary label="IconButton" asChild>
+        <a
+          aria-label={label}
+          className={classes}
+          href={href}
+          {...(external ? { rel: 'noopener noreferrer', target: '_blank' } : {})}
+        >
+          {children}
+        </a>
+      </Boundary>
     );
   }
 
   return (
-    <button aria-label={label} className={classes} type={type} {...props}>
-      {children}
-    </button>
+    <Boundary label="IconButton" asChild>
+      <button aria-label={label} className={classes} type={type} {...props}>
+        {children}
+      </button>
+    </Boundary>
   );
 }

@@ -1,9 +1,10 @@
 'use client';
 
 import * as Ariakit from '@ariakit/react';
-import { CircleHelp, Gauge, Wifi, WifiOff, Zap, ZapOff } from 'lucide-react';
+import { CircleHelp, Eye, EyeOff, Gauge, Wifi, WifiOff, Zap, ZapOff } from 'lucide-react';
 import { useOffline } from 'next/offline';
 import { type ButtonHTMLAttributes, type ReactNode, useOptimistic } from 'react';
+import { Boundary, useBoundaryMode } from '@/components/internal/boundary';
 import { cn } from '@/lib/utils';
 import { setSlow, setPrefetch } from './demo-actions';
 import { setSimulatedOffline } from './offline-mode';
@@ -82,6 +83,7 @@ export function DemoToolbarClient({
   prefetchEnabled: boolean;
   slowEnabled: boolean;
 }) {
+  const { mode, toggleMode } = useBoundaryMode();
   const offline = useOffline();
   const guide = Ariakit.useDialogStore();
 
@@ -90,6 +92,15 @@ export function DemoToolbarClient({
       style={{ viewTransitionName: 'demo-toolbar' }}
       className="border-divider bg-surface/85 dark:border-divider-dark dark:bg-surface-dark/85 flex items-center overflow-hidden rounded-full border text-xs shadow-sm backdrop-blur-md"
     >
+      <ToggleButton
+        active={mode === 'on'}
+        aria-label={mode === 'on' ? 'Client outlines on' : 'Client outlines off'}
+        aria-pressed={mode === 'on'}
+        icon={mode === 'on' ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}
+        label="Client"
+        onClick={toggleMode}
+      />
+      <Divider />
       <CookieToggle
         enabled={prefetchEnabled}
         iconOff={<ZapOff className="size-3.5" />}
@@ -122,23 +133,37 @@ export function DemoToolbarClient({
       >
         <CircleHelp className="size-3.5" />
       </Ariakit.DialogDisclosure>
-      <DemoGuideDialog guide={guide} offline={offline} prefetch={prefetchEnabled} slow={slowEnabled} />
+      <DemoGuideDialog
+        boundaries={mode === 'on'}
+        guide={guide}
+        offline={offline}
+        prefetch={prefetchEnabled}
+        slow={slowEnabled}
+      />
     </div>
   );
 }
 
 function DemoGuideDialog({
+  boundaries,
   guide,
   offline,
   prefetch,
   slow,
 }: {
+  boundaries: boolean;
   guide: Ariakit.DialogStore;
   offline: boolean;
   prefetch: boolean;
   slow: boolean;
 }) {
   const rows = [
+    {
+      Icon: boundaries ? Eye : EyeOff,
+      name: 'Client',
+      on: boundaries,
+      text: 'Outlines the Client Components. Everything else is server-rendered and ships no JS.',
+    },
     {
       Icon: Zap,
       name: 'Prefetch',
@@ -160,33 +185,35 @@ function DemoGuideDialog({
   ];
 
   return (
-    <Ariakit.Dialog
-      store={guide}
-      backdrop={<div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" />}
-      className="border-divider dark:border-divider-dark fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-white p-6 shadow-2xl outline-none dark:bg-black"
-      unmountOnHide
-    >
-      <Ariakit.DialogHeading className="text-xl font-bold">How this demo works</Ariakit.DialogHeading>
-      <Ariakit.DialogDescription className="text-muted mt-2 text-sm leading-relaxed">
-        Dayline keeps the calendar shell stable while route data streams, prefetches, or intentionally slows down for
-        demos.
-      </Ariakit.DialogDescription>
-      <div className="mt-6 flex flex-col gap-4">
-        {rows.map(({ Icon, name, on, text }) => (
-          <div key={name} className="flex gap-3">
-            <Icon className={cn('mt-0.5 size-4.5 shrink-0', on ? 'text-accent' : 'text-muted')} />
-            <div>
-              <p className="text-sm font-semibold">{name}</p>
-              <p className="text-muted mt-1 text-sm leading-relaxed">{text}</p>
+    <Boundary label="DemoGuide" asChild>
+      <Ariakit.Dialog
+        store={guide}
+        backdrop={<div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" />}
+        className="border-divider dark:border-divider-dark fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-white p-6 shadow-2xl outline-none dark:bg-black"
+        unmountOnHide
+      >
+        <Ariakit.DialogHeading className="text-xl font-bold">How this demo works</Ariakit.DialogHeading>
+        <Ariakit.DialogDescription className="text-muted mt-2 text-sm leading-relaxed">
+          Dayline keeps the calendar shell stable while route data streams, prefetches, or intentionally slows down for
+          demos.
+        </Ariakit.DialogDescription>
+        <div className="mt-6 flex flex-col gap-4">
+          {rows.map(({ Icon, name, on, text }) => (
+            <div key={name} className="flex gap-3">
+              <Icon className={cn('mt-0.5 size-4.5 shrink-0', on ? 'text-accent' : 'text-muted')} />
+              <div>
+                <p className="text-sm font-semibold">{name}</p>
+                <p className="text-muted mt-1 text-sm leading-relaxed">{text}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      <div className="border-divider dark:border-divider-dark mt-6 flex justify-end border-t pt-4">
-        <Ariakit.DialogDismiss className="border-divider hover:bg-card dark:border-divider-dark dark:hover:bg-card-dark rounded-full border px-5 py-2 text-sm font-semibold transition-colors">
-          Close
-        </Ariakit.DialogDismiss>
-      </div>
-    </Ariakit.Dialog>
+          ))}
+        </div>
+        <div className="border-divider dark:border-divider-dark mt-6 flex justify-end border-t pt-4">
+          <Ariakit.DialogDismiss className="border-divider hover:bg-card dark:border-divider-dark dark:hover:bg-card-dark rounded-full border px-5 py-2 text-sm font-semibold transition-colors">
+            Close
+          </Ariakit.DialogDismiss>
+        </div>
+      </Ariakit.Dialog>
+    </Boundary>
   );
 }

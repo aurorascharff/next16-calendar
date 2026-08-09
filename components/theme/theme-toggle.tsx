@@ -3,6 +3,7 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
+import { Boundary } from '@/components/internal/boundary';
 import { cn } from '@/lib/utils';
 
 const subscribe = () => () => {};
@@ -20,20 +21,22 @@ export function ThemeToggle() {
   const active = mounted ? theme : undefined;
 
   return (
-    <div
-      style={{ viewTransitionName: 'theme-toggle' }}
-      className="border-divider dark:border-divider-dark inline-flex items-center rounded-full border p-0.5"
-    >
-      <ToggleButton active={active === 'light'} label="Light theme" onClick={() => setTheme('light')}>
-        <Sun className="size-4" />
-      </ToggleButton>
-      <ToggleButton active={active === 'dark'} label="Dark theme" onClick={() => setTheme('dark')}>
-        <Moon className="size-4" />
-      </ToggleButton>
-      <ToggleButton active={active === 'system'} label="System theme" onClick={() => setTheme('system')}>
-        <Monitor className="size-4" />
-      </ToggleButton>
-    </div>
+    <Boundary label="ThemeToggle">
+      <div
+        style={{ viewTransitionName: 'theme-toggle' }}
+        className="border-divider dark:border-divider-dark inline-flex items-center rounded-full border p-0.5"
+      >
+        <ToggleButton active={active === 'light'} label="Light theme" onClick={() => setTheme('light')}>
+          <Sun className="size-4" />
+        </ToggleButton>
+        <ToggleButton active={active === 'dark'} label="Dark theme" onClick={() => setTheme('dark')}>
+          <Moon className="size-4" />
+        </ToggleButton>
+        <ToggleButton active={active === 'system'} label="System theme" onClick={() => setTheme('system')}>
+          <Monitor className="size-4" />
+        </ToggleButton>
+      </div>
+    </Boundary>
   );
 }
 

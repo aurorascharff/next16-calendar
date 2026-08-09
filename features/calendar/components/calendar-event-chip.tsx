@@ -7,6 +7,11 @@ import type { CalendarEvent } from '../types/calendar';
 
 type PointerHandler = (event: React.PointerEvent<HTMLElement>) => void;
 
+function titleLineCount(height: number, hasTimeLabel: boolean) {
+  const availableHeight = height - 12 - (hasTimeLabel ? 17 : 0);
+  return Math.max(1, Math.floor(availableHeight / 15));
+}
+
 export function EventChip({
   event,
   height,
@@ -42,6 +47,8 @@ export function EventChip({
   top: number;
   width: string;
 }) {
+  const titleLines = titleLineCount(height, Boolean(timeLabel));
+
   return (
     <button
       className={cn(
@@ -60,9 +67,21 @@ export function EventChip({
       title={`${event.title} · ${event.start}`}
       type="button"
     >
-      <span className="flex items-center gap-1.5">
-        <span className="min-w-0 flex-1 truncate text-xs leading-tight font-semibold">{event.title}</span>
-        {event.recurring ? <Repeat className="size-3 shrink-0 opacity-50" /> : null}
+      <span className="flex items-start gap-1.5">
+        <span
+          className={cn(
+            'min-w-0 flex-1 overflow-hidden text-xs leading-tight font-semibold',
+            titleLines === 1 ? 'truncate' : 'break-words whitespace-normal',
+          )}
+          style={
+            titleLines > 1
+              ? { display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: titleLines }
+              : undefined
+          }
+        >
+          {event.title}
+        </span>
+        {event.recurring ? <Repeat className="mt-px size-3 shrink-0 opacity-50" /> : null}
       </span>
       {timeLabel ? <span className="mt-0.5 text-[11px] tabular-nums opacity-70">{timeLabel}</span> : null}
       <span

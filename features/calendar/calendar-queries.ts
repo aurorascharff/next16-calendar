@@ -39,6 +39,8 @@ type BookingMatch = {
   startsAt: Date;
 };
 
+const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
 async function getCurrentUserId() {
   const user = await verifyAuth();
   return user.id;
@@ -157,12 +159,12 @@ function createBookingMatches(bookings: BookingMatch[]) {
 }
 
 function expandEvent(event: StoredEvent, days: string[], bookingMatches: Set<string>): CalendarEvent[] {
-  if (!event.recurrence) {
+  const recurrence = event.recurrence ?? (event.demo ? WEEKDAY_NAMES[event.day.getUTCDay()] : null);
+
+  if (!recurrence) {
     const day = dateKey(event.day);
     return days.includes(day) ? [toCalendarEvent(event, day, bookingMatches)] : [];
   }
-
-  const recurrence = event.recurrence;
 
   return days.flatMap(day =>
     matchesRecurrence(recurrence, day)
@@ -170,7 +172,7 @@ function expandEvent(event: StoredEvent, days: string[], bookingMatches: Set<str
           {
             ...toCalendarEvent(event, day, bookingMatches),
             id: `${event.id}:${day}`,
-            recurring: true,
+            recurring: Boolean(event.recurrence),
           },
         ]
       : [],
@@ -179,9 +181,7 @@ function expandEvent(event: StoredEvent, days: string[], bookingMatches: Set<str
 
 function matchesRecurrence(recurrence: string, day: string) {
   const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
-  return recurrence === 'weekday'
-    ? weekday >= 1 && weekday <= 5
-    : recurrence === ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][weekday];
+  return recurrence === 'weekday' ? weekday >= 1 && weekday <= 5 : recurrence === WEEKDAY_NAMES[weekday];
 }
 
 function toCalendarEvent(event: StoredEvent, day: string, bookingMatches: Set<string>): CalendarEvent {
