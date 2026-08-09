@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, LoaderCircle } from 'lucide-react';
 import Link, { useLinkStatus } from 'next/link';
-import { useActionState, useOptimistic, useState, useTransition } from 'react';
+import { useActionState, useOptimistic, useState, useTransition, ViewTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
@@ -14,6 +14,8 @@ import type { Route } from 'next';
 
 const dayHref = (handle: string, day: string) => `/book/${handle}?date=${day}` as Route;
 type SelectedSlot = { day: string; time: string };
+
+const daySlide = { 'nav-back': 'nav-back', 'nav-forward': 'nav-forward', default: 'none' };
 
 function DayNavigationIcon({ direction }: { direction: 'next' | 'previous' }) {
   const { pending } = useLinkStatus();
@@ -65,7 +67,14 @@ export function BookingSlots({
       <div className="mb-3 flex items-center justify-between gap-3 sm:mb-4">
         <IconButton
           label="Previous day"
-          render={<Link href={dayHref(handle, previousDay)} onNavigate={() => navigateDay(previousDay)} prefetch />}
+          render={
+            <Link
+              href={dayHref(handle, previousDay)}
+              onNavigate={() => navigateDay(previousDay)}
+              prefetch
+              transitionTypes={['nav-back']}
+            />
+          }
         >
           <DayNavigationIcon direction="previous" />
         </IconButton>
@@ -74,7 +83,14 @@ export function BookingSlots({
         </span>
         <IconButton
           label="Next day"
-          render={<Link href={dayHref(handle, nextDay)} onNavigate={() => navigateDay(nextDay)} prefetch />}
+          render={
+            <Link
+              href={dayHref(handle, nextDay)}
+              onNavigate={() => navigateDay(nextDay)}
+              prefetch
+              transitionTypes={['nav-forward']}
+            />
+          }
         >
           <DayNavigationIcon direction="next" />
         </IconButton>
@@ -103,43 +119,45 @@ export function BookingSlots({
             <input autoComplete="name" name="guestName" placeholder="Name" required />
           </label>
           <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
-          <div className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain py-1 pr-1">
-            {allTaken ? (
-              <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm sm:h-full sm:min-h-0">
-                No open {duration}-minute slots on this day. Try another date.
-              </p>
-            ) : (
-              <div className="grid gap-2 p-px sm:grid-cols-2">
-                {visibleSlots.map(slot =>
-                  slot.taken ? (
-                    <div
-                      aria-disabled="true"
-                      className="border-divider bg-card/35 text-muted/50 dark:border-divider-dark dark:bg-card-dark/35 rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums line-through"
-                      key={slot.time}
-                    >
-                      {slot.time}
-                      <span className="ml-2 text-[11px] no-underline">Booked</span>
-                    </div>
-                  ) : (
-                    <button
-                      aria-pressed={selectedSlot?.day === day && selectedSlot.time === slot.time}
-                      className={cn(
-                        'focus-visible:ring-primary/25 rounded-md border bg-transparent px-4 py-3 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100',
-                        selectedSlot?.day === day && selectedSlot.time === slot.time
-                          ? 'border-primary text-black shadow-[inset_0_0_0_1px_var(--color-primary)] dark:text-white'
-                          : 'border-divider text-muted hover:border-primary/45 dark:border-divider-dark dark:hover:border-primary/60 hover:text-black dark:hover:text-white',
-                      )}
-                      key={slot.time}
-                      onClick={() => setSelectedSlot({ day, time: slot.time })}
-                      type="button"
-                    >
-                      {slot.time}
-                    </button>
-                  ),
-                )}
-              </div>
-            )}
-          </div>
+          <ViewTransition default="none" key={day} name="booking-slots" share={daySlide}>
+            <div className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain py-1 pr-1">
+              {allTaken ? (
+                <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm sm:h-full sm:min-h-0">
+                  No open {duration}-minute slots on this day. Try another date.
+                </p>
+              ) : (
+                <div className="grid gap-2 p-px sm:grid-cols-2">
+                  {visibleSlots.map(slot =>
+                    slot.taken ? (
+                      <div
+                        aria-disabled="true"
+                        className="border-divider bg-card/35 text-muted/50 dark:border-divider-dark dark:bg-card-dark/35 rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums line-through"
+                        key={slot.time}
+                      >
+                        {slot.time}
+                        <span className="ml-2 text-[11px] no-underline">Booked</span>
+                      </div>
+                    ) : (
+                      <button
+                        aria-pressed={selectedSlot?.day === day && selectedSlot.time === slot.time}
+                        className={cn(
+                          'focus-visible:ring-primary/25 rounded-md border bg-transparent px-4 py-3 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100',
+                          selectedSlot?.day === day && selectedSlot.time === slot.time
+                            ? 'border-primary text-black shadow-[inset_0_0_0_1px_var(--color-primary)] dark:text-white'
+                            : 'border-divider text-muted hover:border-primary/45 dark:border-divider-dark dark:hover:border-primary/60 hover:text-black dark:hover:text-white',
+                        )}
+                        key={slot.time}
+                        onClick={() => setSelectedSlot({ day, time: slot.time })}
+                        type="button"
+                      >
+                        {slot.time}
+                      </button>
+                    ),
+                  )}
+                </div>
+              )}
+            </div>
+          </ViewTransition>
           <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 mt-4 flex min-h-16 items-center justify-between gap-3 rounded-lg border p-3">
             <div className="min-w-0">
               <p className="text-sm font-semibold tabular-nums">{selectedAvailable?.time ?? 'Choose a time'}</p>

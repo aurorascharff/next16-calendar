@@ -21,7 +21,7 @@ function eventHeight(duration: number) {
   return Math.max(22, (duration / 60) * HOUR_HEIGHT - 3);
 }
 
-function CalendarEventLayer({
+export function CalendarEventLayer({
   events,
   interaction,
 }: {
@@ -71,14 +71,12 @@ function CalendarEventLayer({
 
 export function DayColumn({
   day,
-  events,
   interaction,
   isToday,
   nowMinutes,
   showNow,
 }: {
   day: string;
-  events: CalendarEvent[];
   interaction: CalendarBoardInteractions;
   isToday: boolean;
   nowMinutes: number;
@@ -99,7 +97,6 @@ export function DayColumn({
       onPointerUp={event => interaction.create.onPointerUp(day, event)}
       style={{ height: GRID_HEIGHT }}
     >
-      <CalendarEventLayer events={events} interaction={interaction} />
       {HOURS.map(hour => (
         <div
           className={cn('border-divider/60 dark:border-divider-dark/60 h-[72px] border-b', hour === 0 && 'border-t')}

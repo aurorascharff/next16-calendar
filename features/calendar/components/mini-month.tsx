@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Suspense, useOptimistic, useState, useTransition } from 'react';
+import { useOptimistic, useState, useTransition } from 'react';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { dateKey, getWeekDays } from '../calendar-utils';
@@ -31,22 +31,40 @@ function monthOf(dateKeyValue: string) {
 }
 
 export function MiniMonth() {
-  return (
-    <Suspense fallback={<div aria-hidden className="h-[232px]" />}>
-      <MiniMonthInner />
-    </Suspense>
-  );
-}
-
-function MiniMonthInner() {
   const pathname = usePathname();
   const selected = pathname.match(/\/calendar\/(\d{4}-\d{2}-\d{2})/)?.[1] ?? null;
   const today = useTodayKey();
   const initialKey = selected ?? today;
 
-  if (!initialKey) return <div aria-hidden className="h-[232px]" />;
+  if (!initialKey) return <MiniMonthSkeleton />;
 
   return <MiniMonthCalendar initialKey={initialKey} key={initialKey} selected={selected} today={today} />;
+}
+
+export function MiniMonthSkeleton() {
+  return (
+    <div aria-hidden className="h-[232px]">
+      <div className="mb-2 flex h-7 items-center justify-between">
+        <span className="bg-divider/60 dark:bg-divider-dark h-3 w-24 rounded-full" />
+        <span className="flex gap-0.5">
+          <span className="bg-divider/50 dark:bg-divider-dark size-7 rounded-md" />
+          <span className="bg-divider/50 dark:bg-divider-dark size-7 rounded-md" />
+        </span>
+      </div>
+      <div className="text-muted mb-1 grid grid-cols-7 text-center text-[10px] font-medium">
+        {WEEKDAY_LABELS.map((label, index) => (
+          <span key={index}>{label}</span>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-y-0.5">
+        {Array.from({ length: 42 }, (_, index) => (
+          <span className="grid h-7 place-items-center" key={index}>
+            <span className="bg-divider/50 dark:bg-divider-dark size-2 rounded-full" />
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function MiniMonthCalendar({

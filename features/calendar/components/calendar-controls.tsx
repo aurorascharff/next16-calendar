@@ -35,13 +35,13 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
       <div className="flex items-center">
         <IconButton
           label={view === 'day' ? 'Previous day' : 'Previous week'}
-          render={<Link href={calendarHref(previous, view)} prefetch />}
+          render={<Link href={calendarHref(previous, view)} prefetch transitionTypes={['nav-back']} />}
         >
           <ChevronLeft className="size-4.5" />
         </IconButton>
         <IconButton
           label={view === 'day' ? 'Next day' : 'Next week'}
-          render={<Link href={calendarHref(next, view)} prefetch />}
+          render={<Link href={calendarHref(next, view)} prefetch transitionTypes={['nav-forward']} />}
         >
           <ChevronRight className="size-4.5" />
         </IconButton>

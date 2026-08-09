@@ -15,62 +15,31 @@ export const CALENDAR_COLORS: CalendarColor[] = [
   'pink',
 ];
 
-export const CALENDAR_HEX: Record<CalendarColor, string> = {
-  amber: '#b45309',
-  blue: '#2563eb',
-  cyan: '#0e7490',
-  fuchsia: '#c026d3',
-  green: '#15803d',
-  indigo: '#4f46e5',
-  magenta: '#c21d92',
-  orange: '#c2410c',
-  pink: '#db2777',
-  rose: '#e11d48',
-  sky: '#0369a1',
-  teal: '#0f766e',
-  violet: '#7c3aed',
-};
-
 export function isCalendarColor(value: string): value is CalendarColor {
   return (CALENDAR_COLORS as string[]).includes(value);
 }
 
-type RGB = [number, number, number];
-const INK: RGB = [17, 17, 20];
-const MUTE: RGB = [115, 115, 125];
-const WHITE: RGB = [255, 255, 255];
-
-const MUTE_AMOUNT = 0.22;
-
-function toRgb(hex: string): RGB {
-  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
-}
-
-function mixRgb(from: RGB, to: RGB, amount: number): RGB {
-  return [0, 1, 2].map(i => Math.round(from[i] + (to[i] - from[i]) * amount)) as RGB;
-}
-
-function toHex([r, g, b]: RGB): string {
-  return `#${[r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')}`;
-}
-
 type Variants = { darkBg: string; darkText: string; lightBg: string; lightText: string };
 
-const VARIANTS = Object.fromEntries(
-  CALENDAR_COLORS.map(color => {
-    const base = toRgb(CALENDAR_HEX[color]);
-    const muted = mixRgb(base, MUTE, MUTE_AMOUNT);
-    return [
-      color,
-      {
-        darkBg: toHex(mixRgb(muted, WHITE, 0.34)),
-        darkText: '#111114',
-        lightBg: toHex(mixRgb(muted, INK, 0.1)),
-        lightText: '#ffffff',
-      },
-    ];
-  }),
-) as Record<CalendarColor, Variants>;
+const VARIANTS: Record<CalendarColor, Variants> = {
+  amber: { darkBg: '#c19a58', darkText: '#111114', lightBg: '#96651f', lightText: '#ffffff' },
+  blue: { darkBg: '#7892d8', darkText: '#111114', lightBg: '#4f6ed7', lightText: '#ffffff' },
+  cyan: { darkBg: '#64a2af', darkText: '#111114', lightBg: '#317587', lightText: '#ffffff' },
+  fuchsia: { darkBg: '#b978b5', darkText: '#111114', lightBg: '#9b468f', lightText: '#ffffff' },
+  green: { darkBg: '#6aa27b', darkText: '#111114', lightBg: '#397a4f', lightText: '#ffffff' },
+  indigo: { darkBg: '#8985cb', darkText: '#111114', lightBg: '#5c58b8', lightText: '#ffffff' },
+  magenta: { darkBg: '#b976a8', darkText: '#111114', lightBg: '#98467f', lightText: '#ffffff' },
+  orange: { darkBg: '#ca885f', darkText: '#111114', lightBg: '#a95d32', lightText: '#ffffff' },
+  pink: { darkBg: '#c17d98', darkText: '#111114', lightBg: '#a54c70', lightText: '#ffffff' },
+  rose: { darkBg: '#ca7c91', darkText: '#111114', lightBg: '#ad4b64', lightText: '#ffffff' },
+  sky: { darkBg: '#70a0c1', darkText: '#111114', lightBg: '#3b719b', lightText: '#ffffff' },
+  teal: { darkBg: '#61a098', darkText: '#111114', lightBg: '#34756e', lightText: '#ffffff' },
+  violet: { darkBg: '#9981c4', darkText: '#111114', lightBg: '#7354aa', lightText: '#ffffff' },
+};
+
+export const CALENDAR_HEX = Object.fromEntries(
+  Object.entries(VARIANTS).map(([color, variant]) => [color, variant.lightBg]),
+) as Record<CalendarColor, string>;
 
 export function chipStyle(color: CalendarColor): React.CSSProperties {
   const variant = VARIANTS[color];

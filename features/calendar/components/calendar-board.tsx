@@ -5,14 +5,14 @@ import { cn } from '@/lib/utils';
 import { formatDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { GRID_HEIGHT, HOURS } from '../utils/grid';
-import { CalendarAllDayRow, CalendarDayHeaderRow } from './calendar-board-rows';
-import { DayColumn } from './calendar-day-column';
+import { CalendarAllDayRow } from './calendar-all-day-row';
+import { CalendarDayHeaderRow } from './calendar-board-rows';
+import { CalendarEventLayer, DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventEditor } from './event-editor';
 import type { Calendar, CalendarEvent, CalendarView } from '../types/calendar';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
 function matchesRecurrence(recurrence: string | null | undefined, day: string) {
   if (!recurrence) return false;
   const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
@@ -75,18 +75,26 @@ export function CalendarBoard({
         </div>
       ) : null}
       <div className="sticky top-0 z-30" style={{ minWidth: gridMinWidth }}>
-        <CalendarDayHeaderRow days={days} gridTemplate={gridTemplate} todayKey={todayKey} />
+        <CalendarDayHeaderRow
+          days={days}
+          gridTemplate={gridTemplate}
+          onCreateAllDay={handleAllDayCreate}
+          todayKey={todayKey}
+        />
         <CalendarAllDayRow
           days={days}
           events={allDayEvents}
           getEffectiveDay={effectiveDay}
           gridTemplate={gridTemplate}
-          onCreateAllDay={handleAllDayCreate}
           onSelectEvent={setSelectedEvent}
           todayKey={todayKey}
         />
       </div>
-      <div className="grid" ref={gridRef} style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
+      <div
+        className="relative grid"
+        ref={gridRef}
+        style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}
+      >
         <div className="border-divider dark:border-divider-dark border-r">
           {HOURS.map(hour => (
             <div
@@ -104,11 +112,9 @@ export function CalendarBoard({
         </div>
         {days.map(day => {
           const isToday = day === todayKey;
-          const dayEvents = visibleEvents.filter(event => !event.allDay && effectiveDay(event) === day);
           return (
             <DayColumn
               day={day}
-              events={dayEvents}
               interaction={interactions}
               isToday={isToday}
               key={day}
@@ -117,6 +123,19 @@ export function CalendarBoard({
             />
           );
         })}
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 left-[4.5rem] z-10 grid"
+          style={{ gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }}
+        >
+          {days.map(day => (
+            <div className="relative min-w-0" data-day-column key={day}>
+              <CalendarEventLayer
+                events={visibleEvents.filter(event => !event.allDay && effectiveDay(event) === day)}
+                interaction={interactions}
+              />
+            </div>
+          ))}
+        </div>
       </div>
       {selectedEvent ? (
         <EventEditor
@@ -168,16 +187,17 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
             const [weekday, dayNumber] = day ? formatDay(day).split(' ') : ['', ''];
             return (
               <div
-                className="border-divider dark:border-divider-dark flex items-center gap-1.5 border-r px-3 py-1.5 text-left"
+                className="border-divider dark:border-divider-dark border-r px-3 py-1.5"
                 key={index}
               >
                 {day ? (
-                  <>
+                  <div className="flex min-w-0 items-center gap-1.5">
                     <span className="text-muted text-[11px] font-medium uppercase">{weekday}</span>
                     <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums">
                       {dayNumber}
                     </span>
-                  </>
+                    <span className="ml-auto size-8" />
+                  </div>
                 ) : null}
               </div>
             );
@@ -187,11 +207,9 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
           className="border-divider dark:border-divider-dark bg-surface dark:bg-surface-dark grid border-b"
           style={{ gridTemplateColumns: gridTemplate }}
         >
-          <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-end border-r px-3 py-1.5 text-[11px] font-medium">
-            All day
-          </div>
+          <div className="border-divider dark:border-divider-dark h-8 border-r" />
           {dayKeys.map((_, index) => (
-            <div className="border-divider dark:border-divider-dark min-h-12 border-r p-1" key={index} />
+            <div className="border-divider dark:border-divider-dark h-8 border-r p-1" key={index} />
           ))}
         </div>
       </div>

@@ -8,7 +8,7 @@ import { Crossfade } from '@/components/ui/crossfade';
 import { CalendarList } from '@/features/calendar/components/calendar-list';
 import { CalendarManagerSkeleton, NewCalendarButton } from '@/features/calendar/components/calendar-manager';
 import { CalendarVisibilityProvider } from '@/features/calendar/components/calendar-visibility';
-import { MiniMonth } from '@/features/calendar/components/mini-month';
+import { MiniMonth, MiniMonthSkeleton } from '@/features/calendar/components/mini-month';
 import { CurrentUserFooter } from '@/features/user/components/current-user-footer';
 import type { ReactNode } from 'react';
 
@@ -20,11 +20,11 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
           <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-64 shrink-0 flex-col border-r p-3 md:flex">
             <CalendarSidebarBrand />
             <WorkspaceNavigationLinks />
-
             <div className="mt-6 px-1">
-              <MiniMonth />
+              <Suspense fallback={<MiniMonthSkeleton />}>
+                <MiniMonth />
+              </Suspense>
             </div>
-
             <div className="mt-6 flex min-h-0 flex-1 flex-col">
               <div className="mb-2 flex items-center justify-between px-3">
                 <p className="text-muted text-xs font-semibold tracking-wide uppercase">Calendars</p>
