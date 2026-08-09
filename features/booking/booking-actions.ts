@@ -1,7 +1,8 @@
 'use server';
 
-import { refresh, updateTag } from 'next/cache';
-import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
+import { updateTag } from 'next/cache';
+import { calendarCache } from '@/features/calendar/calendar-queries';
+import { dateKey, getWeekDays, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { getCurrentUser } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { bookingCache } from './booking-queries';
@@ -17,11 +18,31 @@ type AvailabilityInput = {
   title: string;
 };
 
+export type BookSlotState = {
+  error?: string;
+  success?: string;
+} | null;
+
 function occursOn(event: { day: Date; recurrence: string | null }, day: string) {
   if (!event.recurrence) return dateKey(event.day) === day;
   const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
   if (event.recurrence === 'weekday') return weekday >= 1 && weekday <= 5;
   return event.recurrence === WEEKDAY_NAMES[weekday];
+}
+
+export async function bookSlotAction(_state: BookSlotState, formData: FormData): Promise<BookSlotState> {
+  const result = await bookSlot({
+    day: String(formData.get('day') ?? ''),
+    guestName: String(formData.get('guestName') ?? ''),
+    handle: String(formData.get('handle') ?? ''),
+    slot: String(formData.get('slot') ?? ''),
+  });
+
+  if ('error' in result) return { error: result.error };
+
+  return {
+    success: `Booked ${result.data.slot}. A confirmation is on its way.`,
+  };
 }
 
 export async function bookSlot({
@@ -41,7 +62,10 @@ export async function bookSlot({
   const name = guestName.trim();
   if (!name) return { error: 'Enter your name to book this time.' };
 
-  const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
+  const bookingPage = await prisma.bookingPage.findUnique({
+    include: { user: { select: { name: true } } },
+    where: { handle },
+  });
   if (!bookingPage || !bookingPage.active) {
     return { error: 'This booking page is not available.' };
   }
@@ -65,18 +89,48 @@ export async function bookSlot({
 
   const startsAt = new Date(`${day}T${slot}:00.000Z`);
   try {
-    await prisma.booking.create({
-      data: {
-        bookingPageId: bookingPage.id,
-        guestName: name,
-        startsAt,
-      },
+    await prisma.$transaction(async tx => {
+      const calendar = await tx.calendar.findFirst({
+        orderBy: { createdAt: 'desc' },
+        where: { isDemo: false, userId: bookingPage.userId },
+      });
+
+      if (!calendar) {
+        throw new Error('calendar-not-enabled');
+      }
+
+      await tx.booking.create({
+        data: {
+          bookingPageId: bookingPage.id,
+          guestName: name,
+          startsAt,
+        },
+      });
+
+      await tx.calendarEvent.create({
+        data: {
+          calendarId: calendar.id,
+          description: `${bookingPage.user.name} and ${name}`,
+          day: new Date(`${day}T00:00:00.000Z`),
+          duration: bookingPage.duration,
+          start: slot,
+          title: bookingPage.title,
+          userId: bookingPage.userId,
+        },
+      });
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'calendar-not-enabled') {
+      return { error: 'This booking link is not accepting meetings yet.' };
+    }
+
     return { error: 'That time was just booked. Choose another slot.' };
   }
 
   updateTag(bookingCache.tag(handle));
+  updateTag(calendarCache.calendarsTag);
+  updateTag(calendarCache.tag);
+  updateTag(calendarCache.weekTag(getWeekDays(day)[0]));
   return { data: { slot, startsAt } };
 }
 
@@ -118,6 +172,5 @@ export async function updateBookingAvailability(input: AvailabilityInput) {
   });
 
   updateTag(bookingCache.tag(user.handle));
-  refresh();
   return { data: page };
 }

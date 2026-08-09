@@ -23,7 +23,7 @@ function occursOn(event: { day: Date; recurrence: string | null }, day: string) 
   return event.recurrence === WEEKDAY_NAMES[weekday];
 }
 
-export type BookingSlot = { taken: boolean; time: string };
+export type BookingSlot = { reason: 'booked' | 'calendar' | null; taken: boolean; time: string };
 
 export const bookingCache = {
   tag: (handle: string) => `booking:${handle}`,
@@ -55,6 +55,11 @@ export async function getBookingAvailability(handle: string, date?: string) {
       where: { OR: [{ userId: bookingPage.user.id }, { userId: null }] },
     }),
   ]);
+  const calendar = await prisma.calendar.findFirst({
+    orderBy: { createdAt: 'desc' },
+    select: { name: true },
+    where: { isDemo: false, userId: bookingPage.user.id },
+  });
 
   const bookedMinutes = new Set(
     bookings.map(booking => booking.startsAt.getUTCHours() * 60 + booking.startsAt.getUTCMinutes()),
@@ -71,12 +76,14 @@ export async function getBookingAvailability(handle: string, date?: string) {
     time => {
       const start = timeToMinutes(time);
       const end = start + bookingPage.duration;
-      const taken = bookedMinutes.has(start) || busy.some(block => start < block.end && end > block.start);
-      return { taken, time };
+      const booked = bookedMinutes.has(start);
+      const unavailable = busy.some(block => start < block.end && end > block.start);
+      return { reason: booked ? 'booked' : unavailable ? 'calendar' : null, taken: booked || unavailable, time };
     },
   );
 
   return {
+    calendarName: calendar?.name ?? null,
     day,
     duration: bookingPage.duration,
     endTime: bookingPage.endTime,

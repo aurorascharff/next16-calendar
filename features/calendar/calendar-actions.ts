@@ -17,6 +17,7 @@ type CreateEventInput = {
   allDay?: boolean;
   calendarId?: string;
   day: string;
+  description?: string;
   duration: number;
   recurrence?: string | null;
   start: string;
@@ -25,6 +26,7 @@ type CreateEventInput = {
 
 type UpdateEventInput = {
   allDay?: boolean;
+  description?: string;
   duration: number;
   eventId: string;
   start: string;
@@ -102,12 +104,14 @@ export async function createEvent(input: CreateEventInput) {
   if (calendar.userId !== userId) return { error: 'Choose a calendar for this event.' };
 
   const recurrence = input.recurrence && RECURRENCE_VALUES.has(input.recurrence) ? input.recurrence : null;
+  const description = input.description?.trim() || null;
 
   const event = await prisma.calendarEvent.create({
     data: {
       calendarId: calendar.id,
       allDay,
       day: new Date(`${input.day}T00:00:00.000Z`),
+      description,
       duration: allDay ? 24 * 60 : input.duration,
       recurrence,
       start: allDay ? '00:00' : input.start,
@@ -133,6 +137,7 @@ export async function updateEvent(input: UpdateEventInput) {
   const updated = await prisma.calendarEvent.update({
     data: {
       allDay,
+      description: input.description?.trim() || null,
       duration: allDay ? 24 * 60 : input.duration,
       start: allDay ? '00:00' : input.start,
       title,

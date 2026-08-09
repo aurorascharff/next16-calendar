@@ -1,5 +1,6 @@
 import { CalendarCheck, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { RouteTransition } from '@/components/ui/route-transition';
 import { getBookingAvailability } from '../booking-queries';
 import { BookingSlots } from './booking-slots';
 
@@ -29,12 +30,21 @@ export async function BookingProfile({ date, handle }: { date?: string; handle: 
           </div>
         </div>
         <div className="border-divider dark:border-divider-dark mt-8 border-t pt-6">
-          <BookingSlots
-            day={availability.day}
-            duration={availability.duration}
-            handle={availability.handle}
-            slots={availability.slots}
-          />
+          {availability.calendarName ? (
+            <RouteTransition slideKey={availability.day}>
+              <BookingSlots
+                calendarName={availability.calendarName}
+                day={availability.day}
+                duration={availability.duration}
+                handle={availability.handle}
+                slots={availability.slots}
+              />
+            </RouteTransition>
+          ) : (
+            <p className="text-muted border-divider dark:border-divider-dark rounded-md border border-dashed px-4 py-8 text-center text-sm">
+              This booking link is not accepting meetings yet.
+            </p>
+          )}
         </div>
       </section>
     </main>

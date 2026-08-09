@@ -92,7 +92,7 @@ export function CalendarAllDayRow({
           >
             <button
               aria-label={`Add all-day event on ${formatDay(day)}`}
-              className="focus-visible:ring-accent flex w-full flex-col gap-1 rounded-md text-left focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-accent group flex min-h-7 w-full flex-col gap-1 rounded-md text-left transition-colors hover:bg-accent/[0.06] focus-visible:bg-accent/[0.06] focus-visible:ring-2 focus-visible:outline-none"
               onClick={event => onCreateAllDay(day, event)}
               type="button"
             >
@@ -111,7 +111,7 @@ export function CalendarAllDayRow({
                   </span>
                 ))
               ) : (
-                <span className="sr-only">Create all-day event</span>
+                <span className="sr-only">New all-day event</span>
               )}
             </button>
           </div>

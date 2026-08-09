@@ -13,6 +13,7 @@ export type CalendarEvent = {
   calendarId: string;
   color: CalendarColor;
   day: string;
+  description?: string | null;
   duration: number;
   id: string;
   isDemo: boolean;

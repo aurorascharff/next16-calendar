@@ -33,6 +33,7 @@ model Calendar {
 model CalendarEvent {
   id         String   @id @default(cuid())
   title      String
+  description String?
   day        DateTime
   allDay     Boolean  @default(false)
   start      String

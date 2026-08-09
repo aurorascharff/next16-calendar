@@ -22,7 +22,10 @@ type OptimisticAction =
   | { day: string; id: string; start: string; type: 'move' }
   | { sourceId: string; type: 'delete' }
   | { duration: number; sourceId: string; type: 'resize' }
-  | { event: Pick<CalendarEvent, 'allDay' | 'duration' | 'sourceId' | 'start' | 'title'>; type: 'update' };
+  | {
+      event: Pick<CalendarEvent, 'allDay' | 'description' | 'duration' | 'sourceId' | 'start' | 'title'>;
+      type: 'update';
+    };
 
 export type SelectedEvent = { anchorRect?: DOMRect | null; event: CalendarEvent };
 export type CalendarBoardInteractions = {
@@ -241,15 +244,18 @@ export function useCalendarBoard({
     try {
       event.currentTarget.releasePointerCapture(event.pointerId);
     } catch {}
-    const lo = Math.min(createSel.aMin, createSel.bMin);
-    const hi = Math.max(createSel.aMin, createSel.bMin);
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const releasedMin = snapMinutes(event.clientY, bounds.top);
+    const lo = Math.min(createSel.aMin, releasedMin);
+    const hi = Math.max(createSel.aMin, releasedMin);
     const duration = hi - lo >= SNAP_MINUTES ? nearestDuration(hi - lo) : 60;
-    setCreateSel({ aMin: lo, bMin: lo + duration, day });
+    const startMin = Math.min(lo, END_MINUTES - duration);
+    setCreateSel({ aMin: startMin, bMin: startMin + duration, day });
     setCreateDraft({
       anchorRect: new DOMRect(event.clientX, event.clientY, 0, 0),
       day,
       duration,
-      start: minutesToTime(Math.min(lo, END_MINUTES - 60)),
+      start: minutesToTime(startMin),
     });
     createStore.show();
   }

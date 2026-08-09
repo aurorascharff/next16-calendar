@@ -2,10 +2,12 @@ import { timeToMinutes } from '../calendar-utils';
 import type { CalendarEvent } from '../types/calendar';
 
 export const HOUR_HEIGHT = 72;
-export const START_HOUR = 8;
-export const HOURS = Array.from({ length: 11 }, (_, index) => START_HOUR + index);
-export const END_MINUTES = (START_HOUR + HOURS.length) * 60;
+export const START_HOUR = 0;
+export const HOURS = Array.from({ length: 24 }, (_, index) => START_HOUR + index);
+export const END_MINUTES = 24 * 60;
 export const GRID_HEIGHT = HOURS.length * HOUR_HEIGHT;
+export const DEFAULT_SCROLL_HOUR = 7;
+export const DEFAULT_SCROLL_TOP = (DEFAULT_SCROLL_HOUR - START_HOUR) * HOUR_HEIGHT;
 export const SNAP_MINUTES = 15;
 export const DURATION_OPTIONS = [30, 45, 60, 90, 120];
 

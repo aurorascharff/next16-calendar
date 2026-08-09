@@ -13,11 +13,14 @@ type EventEditorProps = {
   event: CalendarEvent;
   onClose: () => void;
   onDeleted: (sourceId: string) => void;
-  onUpdated: (event: Pick<CalendarEvent, 'allDay' | 'duration' | 'sourceId' | 'start' | 'title'>) => void;
+  onUpdated: (
+    event: Pick<CalendarEvent, 'allDay' | 'description' | 'duration' | 'sourceId' | 'start' | 'title'>,
+  ) => void;
 };
 
 type FormValues = {
   allDay: boolean;
+  description: string;
   duration: string;
   start: string;
   title: string;
@@ -26,6 +29,8 @@ type FormValues = {
 type State = { error?: string; key?: number; values?: FormValues };
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
+const disabledTimeBlock =
+  'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
 
 export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }: EventEditorProps) {
   const [isDeleting, startDelete] = useTransition();
@@ -41,12 +46,14 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
     const allDay = formData.get('allDay') === 'on';
     const values = {
       allDay,
+      description: String(formData.get('description') ?? ''),
       duration: String(formData.get('duration')),
       start: String(formData.get('start')),
       title: String(formData.get('title')),
     };
     const input = {
       allDay,
+      description: values.description,
       duration: Number(values.duration),
       eventId: event.sourceId,
       start: values.start,
@@ -54,7 +61,14 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
     };
     const result = await updateEvent(input);
     if (result.error) return { error: result.error, key: Date.now(), values };
-    onUpdated({ allDay, duration: input.duration, sourceId: event.sourceId, start: input.start, title: input.title });
+    onUpdated({
+      allDay,
+      description: input.description,
+      duration: input.duration,
+      sourceId: event.sourceId,
+      start: input.start,
+      title: input.title,
+    });
     store.hide();
     toast.success('Event updated.');
     return {};
@@ -76,6 +90,7 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
   const busy = isSaving || isDeleting;
   const values = state.values ?? {
     allDay: event.allDay,
+    description: event.description ?? '',
     duration: String(event.duration),
     start: event.start,
     title: event.title,
@@ -126,7 +141,7 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
           />
           All day
         </label>
-        <div className="grid grid-cols-2 gap-3">
+        <div aria-disabled={allDay} className={`grid grid-cols-2 gap-3 ${allDay ? disabledTimeBlock : ''}`}>
           <label className="block">
             <span className={fieldLabel}>Starts at</span>
             <input defaultValue={values.start} disabled={allDay} name={allDay ? undefined : 'start'} type="time" />
@@ -144,6 +159,16 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
             {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
           </label>
         </div>
+        {allDay ? <p className="text-muted -mt-2 text-xs">This event will fill the all-day row.</p> : null}
+        <label className="block">
+          <span className={fieldLabel}>Description</span>
+          <textarea
+            defaultValue={values.description}
+            name="description"
+            placeholder="Add notes, links, or context"
+            rows={3}
+          />
+        </label>
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex items-center justify-between gap-3">
           <button

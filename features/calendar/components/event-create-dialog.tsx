@@ -10,6 +10,8 @@ import { CalendarPicker } from './calendar-picker';
 import type { Calendar } from '../types/calendar';
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
+const disabledTimeBlock =
+  'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const weekdayLabel = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'long' });
@@ -17,6 +19,7 @@ const weekdayLabel = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday
 type FormValues = {
   allDay: boolean;
   calendarId: string;
+  description: string;
   duration: string;
   repeat: string;
   start: string;
@@ -55,6 +58,7 @@ export function EventCreateDialog({
     const values = {
       allDay,
       calendarId: String(formData.get('calendarId') ?? ''),
+      description: String(formData.get('description') ?? ''),
       duration: String(formData.get('duration')),
       repeat,
       start: String(formData.get('start')),
@@ -65,6 +69,7 @@ export function EventCreateDialog({
       allDay,
       calendarId: values.calendarId || undefined,
       day,
+      description: values.description,
       duration: Number(values.duration),
       recurrence,
       start: values.start,
@@ -79,6 +84,7 @@ export function EventCreateDialog({
   const values = state.values ?? {
     allDay: defaultAllDay,
     calendarId: writableCalendarId ?? '',
+    description: '',
     duration: String(defaultDuration),
     repeat: '',
     start: defaultStart,
@@ -129,7 +135,10 @@ export function EventCreateDialog({
           />
           All day
         </label>
-        <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
+        <div
+          aria-disabled={allDay}
+          className={`${calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'} ${allDay ? disabledTimeBlock : ''}`}
+        >
           <label className="block">
             <span className={fieldLabel}>Starts at</span>
             <input defaultValue={values.start} disabled={allDay} name={allDay ? undefined : 'start'} type="time" />
@@ -147,6 +156,16 @@ export function EventCreateDialog({
             {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
           </label>
         </div>
+        {allDay ? <p className="text-muted -mt-2 text-xs">This event will fill the all-day row.</p> : null}
+        <label className="block">
+          <span className={fieldLabel}>Description</span>
+          <textarea
+            defaultValue={values.description}
+            name="description"
+            placeholder="Add notes, links, or context"
+            rows={3}
+          />
+        </label>
         <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
           {calendarOptions.length > 0 ? (
             <div className="block">

@@ -7,7 +7,7 @@ export async function CalendarWeek({ date, view }: { date: string; view: Calenda
   const days = view === 'day' ? [date] : week.days;
 
   return (
-    <section className="min-h-0 flex-1 overflow-auto">
+    <section className="min-h-0 flex-1 overflow-auto" data-calendar-scroll>
       <CalendarBoard calendars={calendars} days={days} events={week.events} view={view} />
     </section>
   );
@@ -15,7 +15,7 @@ export async function CalendarWeek({ date, view }: { date: string; view: Calenda
 
 export function CalendarWeekSkeleton({ view = 'week' }: { view?: CalendarView }) {
   return (
-    <section className="min-h-0 flex-1 overflow-auto">
+    <section className="min-h-0 flex-1 overflow-auto" data-calendar-scroll>
       <CalendarBoardSkeleton days={view === 'day' ? 1 : 7} />
     </section>
   );

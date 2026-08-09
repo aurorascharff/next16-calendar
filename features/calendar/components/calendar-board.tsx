@@ -1,7 +1,9 @@
 'use client';
 
+import { useLayoutEffect, useRef } from 'react';
+import { Spinner } from '@/components/ui/spinner';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
-import { GRID_HEIGHT, HOURS } from '../utils/grid';
+import { DEFAULT_SCROLL_TOP, GRID_HEIGHT, HOURS } from '../utils/grid';
 import { CalendarAllDayRow, CalendarDayHeaderRow } from './calendar-board-rows';
 import { DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
@@ -38,12 +40,25 @@ export function CalendarBoard({
     todayKey,
     visibleEvents,
   } = useCalendarBoard({ calendars, days, events, view });
+  const rootRef = useRef<HTMLDivElement>(null);
+  const scrollKey = `${view}:${days.join(',')}`;
+
+  useLayoutEffect(() => {
+    const scrollContainer = rootRef.current?.closest('[data-calendar-scroll]');
+    if (scrollContainer instanceof HTMLElement) {
+      scrollContainer.scrollTop = DEFAULT_SCROLL_TOP;
+    }
+  }, [scrollKey]);
 
   return (
-    <div className="relative select-none">
+    <div className="relative select-none" ref={rootRef}>
       {isPending ? (
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-40 h-0.5 overflow-hidden">
-          <div className="bg-accent h-full w-1/3" style={{ animation: 'loading-slide 0.9s ease-in-out infinite' }} />
+        <div
+          aria-label="Saving calendar changes"
+          className="border-divider bg-surface/90 text-accent shadow-soft dark:border-divider-dark dark:bg-surface-dark/90 pointer-events-none absolute top-3 right-4 z-40 grid size-8 place-items-center rounded-full border"
+          role="status"
+        >
+          <Spinner className="size-4" />
         </div>
       ) : null}
       <CalendarDayHeaderRow

@@ -21,6 +21,7 @@ type StoredEvent = {
   calendarId: string;
   day: Date;
   demo: boolean;
+  description: string | null;
   duration: number;
   id: string;
   recurrence: string | null;
@@ -119,6 +120,7 @@ function toCalendarEvent(event: StoredEvent, day: string): CalendarEvent {
     allDay: event.allDay,
     color: event.calendar.color as CalendarColor,
     day,
+    description: event.description,
     duration: event.duration,
     id: event.id,
     isDemo: event.demo,

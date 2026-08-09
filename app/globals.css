@@ -54,6 +54,13 @@
     @apply border-divider placeholder-gray focus:border-accent focus:ring-accent/25 dark:border-divider-dark w-full rounded-md border bg-white px-3 py-2 text-sm text-black transition-colors focus:ring-2 focus:outline-none dark:bg-[#1c1c1c] dark:text-white;
   }
 
+  input:disabled,
+  textarea:disabled,
+  select:disabled {
+    @apply bg-card text-muted opacity-60 dark:bg-card-dark;
+    cursor: not-allowed;
+  }
+
   select {
     -webkit-appearance: none;
     appearance: none;
@@ -119,15 +126,6 @@
   }
 }
 
-@keyframes loading-slide {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(400%);
-  }
-}
-
 :root {
   --duration-exit: 130ms;
   --duration-enter: 190ms;
@@ -145,65 +143,38 @@
   }
 }
 
-@keyframes slide-in-right {
+@keyframes slide {
   from {
-    transform: translateX(22px);
+    translate: var(--slide-offset);
   }
   to {
-    transform: translateX(0);
-  }
-}
-@keyframes slide-out-left {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-22px);
-  }
-}
-@keyframes slide-in-left {
-  from {
-    transform: translateX(-22px);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-@keyframes slide-out-right {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(22px);
+    translate: 0;
   }
 }
 
-::view-transition-old(.week-forward) {
+::view-transition-old(.nav-forward) {
+  --slide-offset: -60px;
   animation:
     var(--duration-exit) ease-in both fade reverse,
-    var(--duration-move) ease-in both slide-out-left;
+    var(--duration-move) ease-in-out both slide reverse;
 }
-::view-transition-new(.week-forward) {
+::view-transition-new(.nav-forward) {
+  --slide-offset: 60px;
   animation:
     var(--duration-enter) ease-out var(--duration-exit) both fade,
-    var(--duration-move) ease-out both slide-in-right;
+    var(--duration-move) ease-in-out both slide;
 }
-::view-transition-old(.week-back) {
+::view-transition-old(.nav-back) {
+  --slide-offset: 60px;
   animation:
     var(--duration-exit) ease-in both fade reverse,
-    var(--duration-move) ease-in both slide-out-right;
+    var(--duration-move) ease-in-out both slide reverse;
 }
-::view-transition-new(.week-back) {
+::view-transition-new(.nav-back) {
+  --slide-offset: -60px;
   animation:
     var(--duration-enter) ease-out var(--duration-exit) both fade,
-    var(--duration-move) ease-out both slide-in-left;
-}
-
-::view-transition-old(.week-fade) {
-  animation: var(--duration-exit) ease-in both fade reverse;
-}
-::view-transition-new(.week-fade) {
-  animation: var(--duration-enter) ease-out var(--duration-exit) both fade;
+    var(--duration-move) ease-in-out both slide;
 }
 
 ::view-transition {
