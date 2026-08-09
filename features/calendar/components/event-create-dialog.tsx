@@ -8,12 +8,14 @@ import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
+import { DURATION_OPTIONS } from '../utils/grid';
 import { CalendarPicker } from './calendar-picker';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 const disabledTimeBlock =
   'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
+const controlHeight = 'h-12';
 const titlePattern = '.*\\S.*';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -33,6 +35,19 @@ type State = { error?: string; key?: number; values?: FormValues };
 
 function optimisticEventId(day: string, values: Pick<FormValues, 'start' | 'title'>) {
   return `optimistic:${day}:${values.start}:${values.title}:${Date.now()}`;
+}
+
+function durationLabel(minutes: number) {
+  if (minutes < 60) return `${minutes} minutes`;
+  if (minutes === 60) return '1 hour';
+  if (minutes % 60 === 0) return `${minutes / 60} hours`;
+  return `${Math.floor(minutes / 60)} hr ${minutes % 60} min`;
+}
+
+function durationOptions(value: string) {
+  const current = Number(value);
+  const options = Number.isFinite(current) ? [...DURATION_OPTIONS, current] : DURATION_OPTIONS;
+  return [...new Set(options)].sort((a, b) => a - b);
 }
 
 export function EventCreateDialog({
@@ -183,6 +198,7 @@ export function EventCreateDialog({
             pattern={titlePattern}
             placeholder="What's happening?"
             required
+            className={controlHeight}
           />
         </label>
         <label className="flex items-center gap-2 text-sm">
@@ -201,18 +217,28 @@ export function EventCreateDialog({
         >
           <label className="block">
             <span className={fieldLabel}>Starts at</span>
-            <input defaultValue={values.start} disabled={allDay} name={allDay ? undefined : 'start'} type="time" />
+            <input
+              className={controlHeight}
+              defaultValue={values.start}
+              disabled={allDay}
+              name={allDay ? undefined : 'start'}
+              type="time"
+            />
             {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
           </label>
           <label className="block">
             <span className={fieldLabel}>Duration</span>
-            <select defaultValue={values.duration} disabled={allDay} name={allDay ? undefined : 'duration'}>
-              <option value="15">15 minutes</option>
-              <option value="30">30 minutes</option>
-              <option value="45">45 minutes</option>
-              <option value="60">1 hour</option>
-              <option value="90">90 minutes</option>
-              <option value="120">2 hours</option>
+            <select
+              className={controlHeight}
+              defaultValue={values.duration}
+              disabled={allDay}
+              name={allDay ? undefined : 'duration'}
+            >
+              {durationOptions(values.duration).map(duration => (
+                <option key={duration} value={duration}>
+                  {durationLabel(duration)}
+                </option>
+              ))}
             </select>
             {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
           </label>

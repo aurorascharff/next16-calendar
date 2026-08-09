@@ -63,7 +63,7 @@ export function BookingSettingsForm({ settings }: { settings: Settings }) {
   };
 
   return (
-    <form action={formAction} key={state.key ?? settings.handle}>
+    <form action={formAction} className="flex flex-1 flex-col" key={state.key ?? settings.handle}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Availability settings</h2>
@@ -114,7 +114,7 @@ export function BookingSettingsForm({ settings }: { settings: Settings }) {
         </div>
       </div>
       {state.error ? <p className="text-danger mt-4 text-sm">{state.error}</p> : null}
-      <div className="mt-5 flex justify-end">
+      <div className="mt-auto flex justify-end pt-5">
         <Button type="submit">Save settings</Button>
       </div>
     </form>

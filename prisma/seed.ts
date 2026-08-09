@@ -213,8 +213,7 @@ async function main() {
 main()
   .then(() => prisma.$disconnect())
   .catch(async error => {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    process.stderr.write(`${error instanceof Error ? error.stack || error.message : String(error)}\n`);
     await prisma.$disconnect();
     process.exit(1);
   });

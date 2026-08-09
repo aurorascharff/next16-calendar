@@ -61,8 +61,8 @@ export function BookingSlots({
   }
 
   return (
-    <div className="min-h-0 w-full sm:min-w-[32rem]">
-      <div className="mb-4 flex items-center justify-between gap-3">
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <div className="mb-3 flex items-center justify-between gap-3 sm:mb-4">
         <IconButton
           label="Previous day"
           render={<Link href={dayHref(handle, previousDay)} onNavigate={() => navigateDay(previousDay)} prefetch />}
@@ -94,22 +94,22 @@ export function BookingSlots({
           </div>
         </div>
       ) : (
-        <form action={formAction} className="flex min-h-0 flex-col">
+        <form action={formAction} className="flex min-h-0 flex-1 flex-col">
           <input name="day" type="hidden" value={day} />
           <input name="handle" type="hidden" value={handle} />
           <input name="slot" type="hidden" value={selectedAvailable?.time ?? ''} />
-          <label className="mb-4 block">
+          <label className="mb-3 block sm:mb-4">
             <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
             <input autoComplete="name" name="guestName" placeholder="Name" required />
           </label>
           <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
-          <div className="dark:bg-surface-dark min-h-0 [scrollbar-gutter:stable] overflow-y-auto rounded-lg bg-white pr-1 sm:h-80">
+          <div className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain py-1 pr-1">
             {allTaken ? (
               <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm sm:h-full sm:min-h-0">
                 No open {duration}-minute slots on this day. Try another date.
               </p>
             ) : (
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 p-px sm:grid-cols-2">
                 {visibleSlots.map(slot =>
                   slot.taken ? (
                     <div

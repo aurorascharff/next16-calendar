@@ -191,7 +191,7 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
             All day
           </div>
           {dayKeys.map((_, index) => (
-            <div className="border-divider dark:border-divider-dark min-h-9 border-r p-1" key={index} />
+            <div className="border-divider dark:border-divider-dark min-h-12 border-r p-1" key={index} />
           ))}
         </div>
       </div>

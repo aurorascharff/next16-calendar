@@ -11,7 +11,9 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
   return (
     <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
       <Suspense fallback={<CalendarHeaderSkeleton />}>
-        {params.then(({ date }) => searchParams.then(({ view }) => <CalendarHeader date={date} view={toView(view)} />))}
+        {Promise.all([params, searchParams]).then(([{ date }, { view }]) => (
+          <CalendarHeader date={date} view={toView(view)} />
+        ))}
       </Suspense>
       <Suspense
         fallback={
@@ -20,18 +22,16 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
           </CalendarWeekScroll>
         }
       >
-        {params.then(({ date }) =>
-          searchParams.then(({ view }) => {
-            const calendarView = toView(view);
-            return (
-              <CalendarWeekScroll date={date} view={calendarView}>
-                <Suspense fallback={<CalendarWeekSkeleton date={date} view={calendarView} />}>
-                  <CalendarWeek date={date} view={calendarView} />
-                </Suspense>
-              </CalendarWeekScroll>
-            );
-          }),
-        )}
+        {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
+          const calendarView = toView(view);
+          return (
+            <CalendarWeekScroll date={date} view={calendarView}>
+              <Suspense fallback={<CalendarWeekSkeleton date={date} view={calendarView} />}>
+                <CalendarWeek date={date} view={calendarView} />
+              </Suspense>
+            </CalendarWeekScroll>
+          );
+        })}
       </Suspense>
     </main>
   );

@@ -1,11 +1,9 @@
 'use client';
 
 import { Check, Copy, ExternalLink, Link2 } from 'lucide-react';
-import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import type { Route } from 'next';
+import { IconButton } from '@/components/ui/icon-button';
 
 export function BookingLink({ handle }: { handle: string }) {
   const [copied, setCopied] = useState(false);
@@ -21,24 +19,16 @@ export function BookingLink({ handle }: { handle: string }) {
   return (
     <div className="border-divider dark:border-divider-dark mt-5 min-h-[7rem] border-t pt-4 sm:min-h-[5.5rem]">
       <p className="text-muted mb-2 text-xs font-medium">Share link</p>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/50 flex min-w-0 flex-1 items-center gap-2 rounded-md border px-3 py-2">
-          <Link2 className="text-muted size-4 shrink-0" />
-          <span className="min-w-0 flex-1 truncate font-mono text-sm text-black dark:text-white">{path}</span>
-        </div>
-        <div className="flex gap-2">
-          <Button className="flex-1 sm:flex-none" onClick={copy}>
+      <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/50 flex min-w-0 items-center gap-2 rounded-md border p-1 pl-3">
+        <Link2 className="text-muted size-4 shrink-0" />
+        <span className="min-w-0 flex-1 truncate font-mono text-sm text-black dark:text-white">{path}</span>
+        <div className="flex shrink-0 gap-0.5">
+          <IconButton label={copied ? 'Copied' : 'Copy link'} onClick={copy} size="sm">
             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-            {copied ? 'Copied' : 'Copy link'}
-          </Button>
-          <Button
-            className="flex-1 sm:flex-none"
-            render={<Link href={path as Route} rel="noopener noreferrer" target="_blank" />}
-            variant="secondary"
-          >
+          </IconButton>
+          <IconButton external href={path} label="Preview booking link" size="sm">
             <ExternalLink className="size-4" />
-            Preview
-          </Button>
+          </IconButton>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { deleteEvent, updateEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
 import { colorStyle } from '../utils/colors';
+import { DURATION_OPTIONS } from '../utils/grid';
 import type { Calendar, CalendarEvent } from '../types/calendar';
 
 type EventEditorProps = {
@@ -36,6 +37,7 @@ type State = { error?: string; key?: number; values?: FormValues };
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 const disabledTimeBlock =
   'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
+const controlHeight = 'h-12';
 const titlePattern = '.*\\S.*';
 
 function durationLabel(minutes: number) {
@@ -43,6 +45,12 @@ function durationLabel(minutes: number) {
   if (minutes === 60) return '1 hour';
   if (minutes % 60 === 0) return `${minutes / 60} hours`;
   return `${Math.floor(minutes / 60)} hr ${minutes % 60} min`;
+}
+
+function durationOptions(value: string) {
+  const current = Number(value);
+  const options = Number.isFinite(current) ? [...DURATION_OPTIONS, current] : DURATION_OPTIONS;
+  return [...new Set(options)].sort((a, b) => a - b);
 }
 
 export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, onUpdated }: EventEditorProps) {
@@ -177,20 +185,18 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
               </p>
             </div>
           </div>
-          <div className="border-divider dark:border-divider-dark mt-auto flex items-center justify-between gap-3 border-t p-3">
-            <Button
+          <div className="border-divider dark:border-divider-dark mt-auto flex items-center justify-end gap-1 border-t p-3">
+            <IconButton
               className="text-danger hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger"
               disabled={busy}
+              label="Delete event"
               onClick={remove}
-              variant="ghost"
             >
               <Trash2 className="size-4" />
-              Delete
-            </Button>
-            <Button onClick={() => setMode('edit')}>
+            </IconButton>
+            <IconButton label="Edit event" onClick={() => setMode('edit')}>
               <Pencil className="size-4" />
-              Edit event
-            </Button>
+            </IconButton>
           </div>
         </>
       ) : (
@@ -210,6 +216,7 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
                 onInvalid={inputEvent => inputEvent.currentTarget.setCustomValidity('Add a title before saving.')}
                 pattern={titlePattern}
                 required
+                className={controlHeight}
               />
             </label>
             <label className="flex items-center gap-2 text-sm">
@@ -225,18 +232,28 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
             <div aria-disabled={allDay} className={`grid grid-cols-2 gap-3 ${allDay ? disabledTimeBlock : ''}`}>
               <label className="block">
                 <span className={fieldLabel}>Starts at</span>
-                <input defaultValue={values.start} disabled={allDay} name={allDay ? undefined : 'start'} type="time" />
+                <input
+                  className={controlHeight}
+                  defaultValue={values.start}
+                  disabled={allDay}
+                  name={allDay ? undefined : 'start'}
+                  type="time"
+                />
                 {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
               </label>
               <label className="block">
                 <span className={fieldLabel}>Duration</span>
-                <select defaultValue={values.duration} disabled={allDay} name={allDay ? undefined : 'duration'}>
-                  <option value="15">15 minutes</option>
-                  <option value="30">30 minutes</option>
-                  <option value="45">45 minutes</option>
-                  <option value="60">1 hour</option>
-                  <option value="90">90 minutes</option>
-                  <option value="120">2 hours</option>
+                <select
+                  className={controlHeight}
+                  defaultValue={values.duration}
+                  disabled={allDay}
+                  name={allDay ? undefined : 'duration'}
+                >
+                  {durationOptions(values.duration).map(duration => (
+                    <option key={duration} value={duration}>
+                      {durationLabel(duration)}
+                    </option>
+                  ))}
                 </select>
                 {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
               </label>

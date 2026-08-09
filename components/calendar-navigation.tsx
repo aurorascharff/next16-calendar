@@ -1,16 +1,10 @@
-import { CalendarDays, Link2, LogOut } from 'lucide-react';
+import { CalendarDays, Link2 } from 'lucide-react';
 import { ViewTransition } from 'react';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
-import { Crossfade } from '@/components/ui/crossfade';
 import { DaylineMark } from '@/components/ui/dayline-mark';
 import { GitHubIcon } from '@/components/ui/github-icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { NavLink } from '@/components/ui/nav-link';
-import { getCalendars } from '@/features/calendar/calendar-queries';
 import { CalendarHomeLink, CalendarHomeNavLink } from '@/features/calendar/components/calendar-home-link';
-import { CalendarManager } from '@/features/calendar/components/calendar-manager';
-import { signOut } from '@/features/user/user-actions';
-import { getCurrentUser } from '@/features/user/user-queries';
 
 const sidebarLink =
   'flex min-h-10 w-52 max-w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-muted transition-colors not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent-fade aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
@@ -45,36 +39,6 @@ export function WorkspaceNavigationLinks() {
         Booking link
       </NavLink>
     </nav>
-  );
-}
-
-export async function CalendarList() {
-  const calendars = await getCalendars();
-  return (
-    <Crossfade>
-      <CalendarManager calendars={calendars} />
-    </Crossfade>
-  );
-}
-
-export async function CurrentUserFooter() {
-  const user = await getCurrentUser();
-  if (!user) return null;
-
-  return (
-    <div className="flex items-center gap-1 px-3 py-3">
-      <span className="bg-accent grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold text-white uppercase">
-        {user.name.charAt(0)}
-      </span>
-      <form action={signOut}>
-        <IconButton label="Log out" size="sm" type="submit">
-          <LogOut className="size-4" />
-        </IconButton>
-      </form>
-      <div className="ml-auto">
-        <ThemeToggle />
-      </div>
-    </div>
   );
 }
 

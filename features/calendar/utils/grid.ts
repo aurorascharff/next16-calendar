@@ -10,7 +10,7 @@ export const GRID_HEIGHT = HOURS.length * HOUR_HEIGHT;
 export const DEFAULT_SCROLL_HOUR = START_HOUR;
 export const DEFAULT_SCROLL_TOP = (DEFAULT_SCROLL_HOUR * 60 - START_MINUTES) * (HOUR_HEIGHT / 60);
 export const SNAP_MINUTES = 15;
-export const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120];
+export const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120, 180, 240, 360, 480, 720, 24 * 60];
 const MIN_PACK_DURATION = Math.ceil((25 / HOUR_HEIGHT) * 60);
 
 export type Placement = { col: number; cols: number };
@@ -80,9 +80,7 @@ export function minutesToTime(minutes: number) {
 }
 
 export function nearestDuration(minutes: number) {
-  return DURATION_OPTIONS.reduce((best, option) =>
-    Math.abs(option - minutes) < Math.abs(best - minutes) ? option : best,
-  );
+  return Math.max(SNAP_MINUTES, Math.round(minutes / SNAP_MINUTES) * SNAP_MINUTES);
 }
 
 export function topFor(minutes: number) {

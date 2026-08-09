@@ -81,14 +81,14 @@ export function CalendarAllDayRow({
         return (
           <div
             className={cn(
-              'border-divider dark:border-divider-dark min-h-9 border-r p-1',
+              'border-divider dark:border-divider-dark min-h-12 border-r p-1',
               isToday && 'bg-card dark:bg-card-dark',
             )}
             key={day}
           >
             <button
               aria-label={`Add all-day event on ${formatDay(day)}`}
-              className="focus-visible:ring-accent group hover:bg-divider/70 focus-visible:bg-divider/70 dark:hover:bg-divider-dark dark:focus-visible:bg-divider-dark flex min-h-7 w-full flex-col justify-center gap-1 rounded-md text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-accent group hover:bg-divider/70 focus-visible:bg-divider/70 dark:hover:bg-divider-dark dark:focus-visible:bg-divider-dark flex min-h-10 w-full flex-col justify-center gap-1 rounded-md text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               onClick={event => onCreateAllDay(day, event)}
               type="button"
             >

@@ -20,18 +20,18 @@ export default function BookingPage() {
       </header>
       <section className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6">
         <BookingLinkCard>
-          <Crossfade>
-            <Suspense fallback={<BookingLinkDetailsSkeleton />}>
+          <Suspense fallback={<BookingLinkDetailsSkeleton />}>
+            <Crossfade>
               <BookingLinkDetails />
-            </Suspense>
-          </Crossfade>
+            </Crossfade>
+          </Suspense>
         </BookingLinkCard>
         <BookingSettingsCard>
-          <Crossfade>
-            <Suspense fallback={<BookingSettingsSkeleton />}>
+          <Suspense fallback={<BookingSettingsSkeleton />}>
+            <Crossfade>
               <BookingSettings />
-            </Suspense>
-          </Crossfade>
+            </Crossfade>
+          </Suspense>
         </BookingSettingsCard>
       </section>
     </main>

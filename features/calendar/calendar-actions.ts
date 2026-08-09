@@ -59,6 +59,10 @@ function invalidateCalendars(handle: string) {
   updateTag(bookingCache.tag(handle));
 }
 
+function validTimedDuration(duration: number) {
+  return duration >= 15 && duration <= 24 * 60;
+}
+
 export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
   const user = await requireUser();
   const event = await findEvent(sourceId);
@@ -98,6 +102,7 @@ export async function createEvent(input: CreateEventInput) {
   if (!isDateKey(input.day) || (!allDay && !timePattern.test(input.start))) {
     return { error: 'Choose a valid date and time.' };
   }
+  if (!allDay && !validTimedDuration(input.duration)) return { error: 'Choose a valid duration.' };
 
   const user = await requireUser();
 
@@ -138,6 +143,7 @@ export async function updateEvent(input: UpdateEventInput) {
   if (!title || (!allDay && !timePattern.test(input.start))) {
     return { error: 'Add a title and a valid start time.' };
   }
+  if (!allDay && !validTimedDuration(input.duration)) return { error: 'Choose a valid duration.' };
 
   const user = await requireUser();
   const event = await findEvent(input.eventId);
@@ -160,7 +166,7 @@ export async function updateEvent(input: UpdateEventInput) {
 }
 
 export async function resizeEvent({ duration, sourceId }: { duration: number; sourceId: string }) {
-  if (duration < 15 || duration > 24 * 60) return { error: 'Choose a valid duration.' };
+  if (!validTimedDuration(duration)) return { error: 'Choose a valid duration.' };
 
   const user = await requireUser();
   const event = await findEvent(sourceId);

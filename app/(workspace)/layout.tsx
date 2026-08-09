@@ -1,14 +1,15 @@
 import { Suspense, ViewTransition } from 'react';
 import {
-  CalendarList,
   CalendarSidebarBrand,
-  CurrentUserFooter,
   MobileWorkspaceNavigation,
   WorkspaceNavigationLinks,
 } from '@/components/calendar-navigation';
+import { Crossfade } from '@/components/ui/crossfade';
+import { CalendarList } from '@/features/calendar/components/calendar-list';
 import { CalendarManagerSkeleton, NewCalendarButton } from '@/features/calendar/components/calendar-manager';
 import { CalendarVisibilityProvider } from '@/features/calendar/components/calendar-visibility';
 import { MiniMonth } from '@/features/calendar/components/mini-month';
+import { CurrentUserFooter } from '@/features/user/components/current-user-footer';
 import type { ReactNode } from 'react';
 
 export default function WorkspaceLayout({ children }: { children: ReactNode }) {
@@ -32,7 +33,9 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
               <div className="relative min-h-0 flex-1 overflow-hidden">
                 <div className="h-full [scrollbar-gutter:stable] overflow-y-auto overscroll-contain pb-6">
                   <Suspense fallback={<CalendarManagerSkeleton />}>
-                    <CalendarList />
+                    <Crossfade>
+                      <CalendarList />
+                    </Crossfade>
                   </Suspense>
                 </div>
                 <div
