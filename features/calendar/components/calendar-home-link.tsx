@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
 import { NavLink } from '@/components/ui/nav-link';
 import { useTodayKey } from '../hooks/use-now';
@@ -16,32 +15,9 @@ type CalendarNavLinkProps = Omit<ComponentProps<typeof NavLink>, 'href' | 'match
   href?: Route;
 };
 
-function getCalendarDate(pathname: string | null) {
-  return pathname?.match(/^\/calendar\/(\d{4}-\d{2}-\d{2})/)?.[1] ?? null;
-}
-
-function getTransitionTypes(
-  pathname: string | null,
-  today: string | null,
-): ComponentProps<typeof Link>['transitionTypes'] {
-  const current = getCalendarDate(pathname);
-
-  if (!current || !today || current === today) {
-    return undefined;
-  }
-
-  return [today < current ? 'nav-back' : 'nav-forward'];
-}
-
 function useCalendarHomeLink() {
-  const pathname = usePathname();
   const today = useTodayKey();
-  const href = (today ? `/calendar/${today}` : '/') as Route;
-
-  return {
-    href,
-    transitionTypes: getTransitionTypes(pathname, today),
-  };
+  return (today ? `/calendar/${today}` : '/') as Route;
 }
 
 export function CalendarHomeLink(props: CalendarLinkProps) {
@@ -53,15 +29,9 @@ export function CalendarHomeLink(props: CalendarLinkProps) {
 }
 
 function CalendarHomeLinkInner({ href, ...props }: CalendarLinkProps) {
-  const home = useCalendarHomeLink();
+  const homeHref = useCalendarHomeLink();
 
-  return (
-    <Link
-      href={href ?? home.href}
-      transitionTypes={home.transitionTypes}
-      {...props}
-    />
-  );
+  return <Link href={href ?? homeHref} {...props} />;
 }
 
 function CalendarHomeLinkShell({ href, ...props }: CalendarLinkProps) {
@@ -77,16 +47,9 @@ export function CalendarHomeNavLink(props: CalendarNavLinkProps) {
 }
 
 function CalendarHomeNavLinkInner({ href, ...props }: CalendarNavLinkProps) {
-  const home = useCalendarHomeLink();
+  const homeHref = useCalendarHomeLink();
 
-  return (
-    <NavLink
-      href={href ?? home.href}
-      match="/calendar"
-      transitionTypes={home.transitionTypes}
-      {...props}
-    />
-  );
+  return <NavLink href={href ?? homeHref} match="/calendar" {...props} />;
 }
 
 function CalendarHomeNavLinkShell({ href, ...props }: CalendarNavLinkProps) {

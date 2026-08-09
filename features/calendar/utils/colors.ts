@@ -38,8 +38,9 @@ export function isCalendarColor(value: string): value is CalendarColor {
 type RGB = [number, number, number];
 const INK: RGB = [17, 17, 20];
 const MUTE: RGB = [115, 115, 125];
+const WHITE: RGB = [255, 255, 255];
 
-const MUTE_AMOUNT = 0.34;
+const MUTE_AMOUNT = 0.4;
 
 function toRgb(hex: string): RGB {
   return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
@@ -55,14 +56,20 @@ function toHex([r, g, b]: RGB): string {
 
 type Variants = { darkBg: string; darkText: string; lightBg: string; lightText: string };
 
-// Muted solid: pull the hue toward neutral gray so chips read as calm, dusty tones
-// (not neon), then deepen for dark. White text throughout.
+// Mode-specific solids: light mode uses soft fills with dark text; dark mode
+// uses deeper fills with a muted light tint, not pure white.
 const VARIANTS = Object.fromEntries(
   CALENDAR_COLORS.map(color => {
-    const muted = mixRgb(toRgb(CALENDAR_HEX[color]), MUTE, MUTE_AMOUNT);
+    const base = toRgb(CALENDAR_HEX[color]);
+    const muted = mixRgb(base, MUTE, MUTE_AMOUNT);
     return [
       color,
-      { darkBg: toHex(mixRgb(muted, INK, 0.3)), darkText: '#ffffff', lightBg: toHex(muted), lightText: '#ffffff' },
+      {
+        darkBg: toHex(mixRgb(muted, INK, 0.5)),
+        darkText: toHex(mixRgb(base, WHITE, 0.78)),
+        lightBg: toHex(mixRgb(muted, WHITE, 0.5)),
+        lightText: '#111114',
+      },
     ];
   }),
 ) as Record<CalendarColor, Variants>;

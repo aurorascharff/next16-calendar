@@ -2,7 +2,7 @@
 
 import { updateTag } from 'next/cache';
 import { bookingCache } from '@/features/booking/booking-queries';
-import { getCurrentUser, verifyAuth } from '@/features/user/user-queries';
+import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { calendarCache } from './calendar-queries';
 import { getWeekDays, isDateKey } from './calendar-utils';
@@ -39,11 +39,7 @@ const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', '
 const RECURRENCE_VALUES = new Set(['weekday', ...WEEKDAY_NAMES]);
 
 async function requireUser() {
-  const user = await getCurrentUser();
-  if (user) return user;
-
-  await verifyAuth();
-  throw new Error('Authentication redirect failed.');
+  return verifyAuth();
 }
 
 async function findEvent(id: string) {

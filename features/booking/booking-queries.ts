@@ -3,6 +3,7 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
+import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -29,7 +30,7 @@ export const bookingCache = {
   tag: (handle: string) => `booking:${handle}`,
 };
 
-export async function getBookingAvailability(handle: string, date?: string) {
+export async function getBookingAvailability(handle: string, date: string) {
   'use cache';
   cacheLife({ stale: 30 });
   cacheTag(bookingCache.tag(handle));
@@ -40,8 +41,9 @@ export async function getBookingAvailability(handle: string, date?: string) {
   });
 
   if (!bookingPage || !bookingPage.active) notFound();
+  if (!isDateKey(date)) notFound();
 
-  const day = date && isDateKey(date) ? date : dateKey(new Date());
+  const day = date;
   const dayStart = new Date(`${day}T00:00:00.000Z`);
   const dayEnd = new Date(`${day}T23:59:59.999Z`);
 
@@ -119,7 +121,7 @@ export async function getMyBookingProfile(handle: string) {
   };
 }
 
-export async function getMyBookingSettings(userId: string, handle: string) {
+async function getMyBookingSettingsForUser(userId: string, handle: string) {
   'use cache';
   cacheLife('hours');
   cacheTag(bookingCache.tag(handle));
@@ -144,4 +146,14 @@ export async function getMyBookingSettings(userId: string, handle: string) {
     startTime: bookingPage.startTime,
     title: bookingPage.title,
   };
+}
+
+export async function getMyBookingSummary() {
+  const user = await verifyAuth();
+  return getMyBookingProfile(user.handle);
+}
+
+export async function getMyBookingSettings() {
+  const user = await verifyAuth();
+  return getMyBookingSettingsForUser(user.id, user.handle);
 }

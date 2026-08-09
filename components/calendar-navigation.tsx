@@ -1,86 +1,58 @@
-import { CalendarDays, CalendarRange, Link2, LogOut } from 'lucide-react';
-import { Suspense, ViewTransition } from 'react';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { CalendarDays, Link2, LogOut } from 'lucide-react';
+import { ViewTransition } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
-import { GitHubIcon } from '@/components/ui/github-icon';
+import { DaylineMark } from '@/components/ui/dayline-mark';
 import { IconButton } from '@/components/ui/icon-button';
 import { NavLink } from '@/components/ui/nav-link';
 import { getCalendars } from '@/features/calendar/calendar-queries';
 import { CalendarHomeLink, CalendarHomeNavLink } from '@/features/calendar/components/calendar-home-link';
-import {
-  CalendarManager,
-  CalendarManagerSkeleton,
-  NewCalendarButton,
-} from '@/features/calendar/components/calendar-manager';
-import { MiniMonth } from '@/features/calendar/components/mini-month';
+import { CalendarManager } from '@/features/calendar/components/calendar-manager';
 import { signOut } from '@/features/user/user-actions';
 import { getCurrentUser } from '@/features/user/user-queries';
-
-const REPO_URL = 'https://github.com/aurorascharff/next16-calendar';
 
 const sidebarLink =
   'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent/10 aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
 
-export function CalendarNavigation() {
+export function CalendarSidebarBrand() {
   return (
-    <ViewTransition name="sidebar" default="none">
-      <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-64 shrink-0 flex-col border-r p-3 md:flex">
-        <CalendarHomeLink className="mb-6 flex items-center gap-2.5 px-2">
-          <span className="bg-accent grid size-8 place-items-center rounded-md text-white">
-            <CalendarRange className="size-4.5" strokeWidth={2.25} />
-          </span>
-          <span>
-            <span className="block font-semibold tracking-tight">Dayline</span>
-            <span className="text-muted block text-xs">Shape your day</span>
-          </span>
-        </CalendarHomeLink>
-
-        <nav className="flex flex-col gap-1">
-          <CalendarHomeNavLink className={sidebarLink}>
-            <CalendarDays className="size-4" />
-            Calendar
-          </CalendarHomeNavLink>
-          <NavLink href="/booking" className={sidebarLink}>
-            <Link2 className="size-4" />
-            Booking link
-          </NavLink>
-        </nav>
-
-        <div className="mt-6 px-1">
-          <MiniMonth />
-        </div>
-
-        <div className="mt-6">
-          <div className="mb-2 flex items-center justify-between px-3">
-            <p className="text-muted text-xs font-semibold tracking-wide uppercase">Calendars</p>
-            <NewCalendarButton />
-          </div>
-          <Suspense fallback={<CalendarManagerSkeleton />}>
-            <CalendarSection />
-          </Suspense>
-        </div>
-
-        <div className="mt-auto">
-          <div className="mb-3 flex items-center justify-between px-1">
-            <ThemeToggle />
-            <IconButton external href={REPO_URL} label="View source on GitHub" size="sm">
-              <GitHubIcon className="size-4" />
-            </IconButton>
-          </div>
-          <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t">
-            <Suspense fallback={<div className="h-[60px]" />}>
-              <UserFooter />
-            </Suspense>
-          </div>
-        </div>
-      </aside>
-    </ViewTransition>
+    <CalendarHomeLink className="mb-6 flex items-center gap-2.5 px-2">
+      <DaylineMark className="size-8 shrink-0" />
+      <span>
+        <span className="block font-semibold tracking-tight">Dayline</span>
+        <span className="text-muted block text-xs">Shape your day</span>
+      </span>
+    </CalendarHomeLink>
   );
 }
 
-async function UserFooter() {
+export function WorkspaceNavigationLinks() {
+  return (
+    <nav className="flex flex-col gap-1">
+      <CalendarHomeNavLink className={sidebarLink}>
+        <CalendarDays className="size-4" />
+        Calendar
+      </CalendarHomeNavLink>
+      <NavLink href="/booking" className={sidebarLink}>
+        <Link2 className="size-4" />
+        Booking link
+      </NavLink>
+    </nav>
+  );
+}
+
+export async function CalendarList() {
+  const calendars = await getCalendars();
+  return (
+    <Crossfade>
+      <CalendarManager calendars={calendars} />
+    </Crossfade>
+  );
+}
+
+export async function CurrentUserFooter() {
   const user = await getCurrentUser();
   if (!user) return null;
+
   return (
     <div className="flex items-center gap-2.5 px-3 py-3">
       <span className="bg-accent grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold text-white uppercase">
@@ -99,19 +71,10 @@ async function UserFooter() {
   );
 }
 
-async function CalendarSection() {
-  const calendars = await getCalendars();
-  return (
-    <Crossfade>
-      <CalendarManager calendars={calendars} />
-    </Crossfade>
-  );
-}
-
 const mobileTab =
   'flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted hover:text-black dark:hover:text-white aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
 
-export function MobileCalendarNavigation() {
+export function MobileWorkspaceNavigation() {
   return (
     <ViewTransition name="mobile-nav" default="none">
       <nav

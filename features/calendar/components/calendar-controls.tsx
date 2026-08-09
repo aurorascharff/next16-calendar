@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { useOptimistic, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
@@ -15,11 +16,6 @@ function calendarHref(date: string, view: CalendarView) {
   return `/calendar/${date}${view === 'day' ? '?view=day' : ''}` as Route;
 }
 
-function todayTransitionTypes(date: string, today: string) {
-  if (today === date) return undefined;
-  return [today < date ? 'nav-back' : 'nav-forward'];
-}
-
 export function CalendarControls({ date, view }: { date: string; view: CalendarView }) {
   const today = useTodayKey();
   const previous = view === 'day' ? shiftDay(date, -1) : shiftWeek(date, -1);
@@ -28,17 +24,7 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
   return (
     <div className="flex items-center gap-1">
       {today ? (
-        <Button
-          className="h-8 px-3"
-          render={
-            <Link
-              href={calendarHref(today, view)}
-              prefetch
-              transitionTypes={todayTransitionTypes(date, today)}
-            />
-          }
-          variant="ghost"
-        >
+        <Button className="h-8 px-3" render={<Link href={calendarHref(today, view)} prefetch />} variant="ghost">
           Today
         </Button>
       ) : (
@@ -49,17 +35,13 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
       <div className="flex items-center">
         <IconButton
           label={view === 'day' ? 'Previous day' : 'Previous week'}
-          render={
-            <Link href={calendarHref(previous, view)} prefetch transitionTypes={['nav-back']} />
-          }
+          render={<Link href={calendarHref(previous, view)} prefetch />}
         >
           <ChevronLeft className="size-4.5" />
         </IconButton>
         <IconButton
           label={view === 'day' ? 'Next day' : 'Next week'}
-          render={
-            <Link href={calendarHref(next, view)} prefetch transitionTypes={['nav-forward']} />
-          }
+          render={<Link href={calendarHref(next, view)} prefetch />}
         >
           <ChevronRight className="size-4.5" />
         </IconButton>
@@ -70,24 +52,33 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
 }
 
 export function ViewToggle({ date, view }: { date: string; view: CalendarView }) {
+  const [optimisticView, setOptimisticView] = useOptimistic(view);
+  const [, startTransition] = useTransition();
   const item = 'inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-sm font-medium transition-colors';
   const active = 'bg-card dark:bg-card-dark text-black dark:text-white';
   const inactive = 'text-muted hover:text-black dark:hover:text-white';
 
+  function markView(nextView: CalendarView) {
+    if (nextView === optimisticView) return;
+    startTransition(() => setOptimisticView(nextView));
+  }
+
   return (
     <div className="border-divider dark:border-divider-dark flex items-center rounded-md border p-0.5">
       <Link
-        aria-current={view === 'week' ? 'page' : undefined}
-        className={cn(item, view === 'week' ? active : inactive)}
+        aria-current={optimisticView === 'week' ? 'page' : undefined}
+        className={cn(item, optimisticView === 'week' ? active : inactive)}
         href={calendarHref(date, 'week')}
+        onNavigate={() => markView('week')}
         prefetch
       >
         Week
       </Link>
       <Link
-        aria-current={view === 'day' ? 'page' : undefined}
-        className={cn(item, view === 'day' ? active : inactive)}
+        aria-current={optimisticView === 'day' ? 'page' : undefined}
+        className={cn(item, optimisticView === 'day' ? active : inactive)}
         href={calendarHref(date, 'day')}
+        onNavigate={() => markView('day')}
         prefetch
       >
         Day

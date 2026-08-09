@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
+import { OfflineIndicator } from '@/components/offline-indicator';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { Toaster } from '@/components/toaster';
 import type { Metadata, Viewport } from 'next';
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           {children}
           <Toaster />
+          <OfflineIndicator />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

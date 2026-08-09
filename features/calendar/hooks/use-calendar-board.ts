@@ -1,11 +1,12 @@
 'use client';
 
 import * as Ariakit from '@ariakit/react';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useOptimistic, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { moveEvent, resizeEvent } from '../calendar-actions';
 import { dateKey, timeToMinutes } from '../calendar-utils';
 import { useCalendarVisibility } from '../components/calendar-visibility';
+import { applyEventAction } from '../utils/event-optimistic-reducer';
 import {
   END_MINUTES,
   HOUR_HEIGHT,
@@ -17,16 +18,7 @@ import {
 } from '../utils/grid';
 import { useNow } from './use-now';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarView } from '../types/calendar';
-
-type OptimisticAction =
-  | { event: CalendarEvent; type: 'create' }
-  | { day: string; id: string; start: string; type: 'move' }
-  | { sourceId: string; type: 'delete' }
-  | { duration: number; sourceId: string; type: 'resize' }
-  | {
-      event: Pick<CalendarEvent, 'allDay' | 'description' | 'duration' | 'sourceId' | 'start' | 'title'>;
-      type: 'update';
-    };
+import type { EventAction } from '../utils/event-optimistic-reducer';
 
 type MoveOrigin = {
   duration: number;
@@ -37,16 +29,6 @@ type MoveOrigin = {
   x0: number;
   y0: number;
 };
-
-function applyOptimisticAction(current: CalendarEvent[], next: OptimisticAction) {
-  if (next.type === 'create') return [next.event, ...current.filter(event => event.id !== next.event.id)];
-  if (next.type === 'delete') return current.filter(event => event.sourceId !== next.sourceId);
-  if (next.type === 'resize')
-    return current.map(event => (event.sourceId === next.sourceId ? { ...event, duration: next.duration } : event));
-  if (next.type === 'update')
-    return current.map(event => (event.sourceId === next.event.sourceId ? { ...event, ...next.event } : event));
-  return current.map(event => (event.id === next.id ? { ...event, day: next.day, start: next.start } : event));
-}
 
 export type SelectedEvent = { anchorRect?: DOMRect | null; event: CalendarEvent };
 export type CalendarBoardInteractions = {
@@ -88,7 +70,7 @@ export function useCalendarBoard({
   const { hidden } = useCalendarVisibility();
   const gridTemplate = `4.5rem repeat(${days.length}, minmax(0, 1fr))`;
   const gridMinWidth = view === 'week' ? 760 : undefined;
-  const [optimisticEvents, setOptimisticEvents] = useState(events);
+  const [optimisticEvents, addOptimisticEvent] = useOptimistic(events, applyEventAction);
   const [isPending, startTransition] = useTransition();
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
   const [dragMove, setDragMove] = useState<{ day: string; id: string; startMin: number } | null>(null);
@@ -119,25 +101,6 @@ export function useCalendarBoard({
   const now = useNow();
   const todayKey = now ? dateKey(now) : null;
   const nowMinutes = now ? now.getHours() * 60 + now.getMinutes() : 0;
-  const eventsKey = events
-    .map(event =>
-      [
-        event.id,
-        event.day,
-        event.start,
-        event.duration,
-        event.title,
-        event.allDay,
-        event.description ?? '',
-        event.recurrence ?? '',
-      ].join(':'),
-    )
-    .join('|');
-
-  useEffect(() => {
-    setOptimisticEvents(events);
-  }, [events, eventsKey]);
-
   const writable = calendars.filter(calendar => !calendar.isDemo);
   const defaultCalendar = writable[0] ?? calendars[0];
   const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));
@@ -216,11 +179,10 @@ export function useCalendarBoard({
     const start = minutesToTime(target.startMin);
     const { day, id } = target;
     const sourceId = origin.sourceId;
-    setOptimisticEvents(current => applyOptimisticAction(current, { day, id, start, type: 'move' }));
     startTransition(async () => {
+      addOptimisticEvent({ day, id, start, type: 'move' });
       const result = await moveEvent({ day, sourceId, start });
       if (result.error) {
-        setOptimisticEvents(events);
         toast.error(result.error);
       }
     });
@@ -256,11 +218,10 @@ export function useCalendarBoard({
     const duration = resize.endMin - resize.startMin;
     const sourceId = resize.sourceId;
     setResize(null);
-    setOptimisticEvents(current => applyOptimisticAction(current, { duration, sourceId, type: 'resize' }));
     startTransition(async () => {
+      addOptimisticEvent({ duration, sourceId, type: 'resize' });
       const result = await resizeEvent({ duration, sourceId });
       if (result.error) {
-        setOptimisticEvents(events);
         toast.error(result.error);
       }
     });
@@ -373,9 +334,7 @@ export function useCalendarBoard({
     isPending,
     nowMinutes,
     selectedEvent,
-    setOptimisticEvents: (action: OptimisticAction) => {
-      setOptimisticEvents(current => applyOptimisticAction(current, action));
-    },
+    addOptimisticEvent: addOptimisticEvent as (action: EventAction) => void,
     setSelectedEvent,
     todayKey,
     visibleEvents,

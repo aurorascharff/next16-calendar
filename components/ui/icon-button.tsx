@@ -36,7 +36,11 @@ export function IconButton({
   const classes = cn(base, sizes[size], className);
 
   if (render) {
-    return cloneElement(render, { 'aria-label': label, className: cn(classes, render.props?.className), ...props }, children);
+    return cloneElement(
+      render,
+      { 'aria-label': label, className: cn(classes, render.props?.className), ...props },
+      children,
+    );
   }
 
   if (href) {

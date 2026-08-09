@@ -3,7 +3,7 @@
 import { updateTag } from 'next/cache';
 import { calendarCache } from '@/features/calendar/calendar-queries';
 import { dateKey, getWeekDays, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
-import { getCurrentUser } from '@/features/user/user-queries';
+import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { bookingCache } from './booking-queries';
 
@@ -148,8 +148,7 @@ export async function updateBookingAvailability(input: AvailabilityInput) {
     return { error: 'Choose a valid meeting length.' };
   }
 
-  const user = await getCurrentUser();
-  if (!user) return { error: 'Your local profile is unavailable.' };
+  const user = await verifyAuth();
 
   const page = await prisma.bookingPage.upsert({
     create: {

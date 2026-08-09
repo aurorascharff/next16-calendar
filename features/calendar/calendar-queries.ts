@@ -3,7 +3,7 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { isSlowEnabled } from '@/components/demo/demo-slow';
-import { getCurrentUser } from '@/features/user/user-queries';
+import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { delay } from '@/lib/utils';
 import { dateKey, getWeekDays, isDateKey } from './calendar-utils';
@@ -30,8 +30,8 @@ type StoredEvent = {
 };
 
 async function getCurrentUserId() {
-  const user = await getCurrentUser();
-  return user?.id ?? null;
+  const user = await verifyAuth();
+  return user.id;
 }
 
 export async function getCalendars(): Promise<Calendar[]> {

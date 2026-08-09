@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { X } from 'lucide-react';
-import { useActionState, useState } from 'react';
+import { useActionState, useState, type KeyboardEvent } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
@@ -14,6 +14,7 @@ import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 const disabledTimeBlock =
   'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
+const titlePattern = '.*\\S.*';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const weekdayLabel = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'long' });
@@ -29,6 +30,10 @@ type FormValues = {
 };
 
 type State = { error?: string; key?: number; values?: FormValues };
+
+function optimisticEventId(day: string, values: Pick<FormValues, 'start' | 'title'>) {
+  return `optimistic:${day}:${values.start}:${values.title}:${Date.now()}`;
+}
 
 export function EventCreateDialog({
   store,
@@ -69,6 +74,26 @@ export function EventCreateDialog({
       title: String(formData.get('title')),
     };
     const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? weekday : null;
+    if (values.title.trim()) {
+      const tempId = optimisticEventId(day, values);
+      const calendarId = values.calendarId || writableCalendarId || '';
+      const calendar = calendarOptions.find(option => option.id === calendarId);
+      onCreated?.({
+        allDay,
+        calendarId,
+        color: (calendar?.color ?? 'blue') as CalendarColor,
+        day,
+        description: values.description.trim() || null,
+        duration: allDay ? 24 * 60 : Number(values.duration),
+        id: tempId,
+        isDemo: false,
+        recurrence,
+        recurring: Boolean(recurrence),
+        sourceId: tempId,
+        start: allDay ? '00:00' : values.start,
+        title: values.title.trim(),
+      });
+    }
     const result = await createEvent({
       allDay,
       calendarId: values.calendarId || undefined,
@@ -82,23 +107,6 @@ export function EventCreateDialog({
     if (result.error) return { error: result.error, key: Date.now(), values };
     const created = result.data;
     if (!created) return { error: 'Event was saved, but the response was empty.', key: Date.now(), values };
-    const calendarId = created.calendarId;
-    const calendar = calendarOptions.find(option => option.id === calendarId);
-    onCreated?.({
-      allDay,
-      calendarId,
-      color: (calendar?.color ?? 'blue') as CalendarColor,
-      day,
-      description: values.description.trim() || null,
-      duration: allDay ? 24 * 60 : Number(values.duration),
-      id: created.id,
-      isDemo: false,
-      recurrence,
-      recurring: Boolean(recurrence),
-      sourceId: created.id,
-      start: allDay ? '00:00' : values.start,
-      title: values.title.trim(),
-    });
     store.hide();
     toast.success('Event added to your calendar.');
     return {};
@@ -114,6 +122,13 @@ export function EventCreateDialog({
     title: '',
   };
   const [allDay, setAllDay] = useState(values.allDay);
+
+  function handleSubmitShortcut(event: KeyboardEvent<HTMLFormElement>) {
+    if (isPending || event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey)) return;
+
+    event.preventDefault();
+    event.currentTarget.requestSubmit();
+  }
 
   return (
     <Ariakit.Popover
@@ -142,10 +157,24 @@ export function EventCreateDialog({
           <X className="size-4" />
         </IconButton>
       </div>
-      <form action={formAction} className="mt-3 space-y-3" key={state.key ?? 'new-event'}>
+      <form
+        action={formAction}
+        className="mt-3 space-y-3"
+        key={state.key ?? 'new-event'}
+        onKeyDown={handleSubmitShortcut}
+      >
         <label className="block">
           <span className={fieldLabel}>Title</span>
-          <input autoFocus defaultValue={values.title} name="title" placeholder="What's happening?" />
+          <input
+            autoFocus
+            defaultValue={values.title}
+            name="title"
+            onInput={event => event.currentTarget.setCustomValidity('')}
+            onInvalid={event => event.currentTarget.setCustomValidity('Add a title before saving the event.')}
+            pattern={titlePattern}
+            placeholder="What's happening?"
+            required
+          />
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input

@@ -1,19 +1,20 @@
 import { NextResponse } from 'next/server';
-import { SESSION_COOKIE } from '@/features/user/session';
+import { SESSION_COOKIE, STALE_SESSION_COOKIES } from '@/features/user/session';
 import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublic = pathname === '/login' || pathname.startsWith('/book');
+  const isPublic = pathname === '/login' || pathname === '/logout' || pathname.startsWith('/book');
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
-  if (!hasSession && !isPublic) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  const response =
+    !hasSession && !isPublic ? NextResponse.redirect(new URL('/login', request.url)) : NextResponse.next();
+
+  for (const name of STALE_SESSION_COOKIES) {
+    if (request.cookies.has(name)) response.cookies.delete(name);
   }
-  if (hasSession && pathname === '/login') {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-  return NextResponse.next();
+
+  return response;
 }
 
 export const config = {

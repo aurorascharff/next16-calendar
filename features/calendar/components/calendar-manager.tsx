@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useActionState, useState, useTransition } from 'react';
+import { type ReactNode, useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
@@ -106,14 +106,21 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
   );
 }
 
-export function NewCalendarButton() {
+export function NewCalendarButton({ children, className }: { children?: ReactNode; className?: string }) {
   const store = Ariakit.useDialogStore();
 
   return (
     <>
-      <IconButton label="New calendar" onClick={store.show} size="sm">
-        <Plus className="size-4" />
-      </IconButton>
+      {children ? (
+        <Button className={className} onClick={store.show} size="sm" variant="secondary">
+          <Plus className="size-3.5" />
+          {children}
+        </Button>
+      ) : (
+        <IconButton className={className} label="New calendar" onClick={store.show} size="sm">
+          <Plus className="size-4" />
+        </IconButton>
+      )}
       <CalendarFormDialog calendar={null} colors={CALENDAR_COLORS} store={store} />
     </>
   );

@@ -36,6 +36,7 @@ type State = { error?: string; key?: number; values?: FormValues };
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 const disabledTimeBlock =
   'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
+const titlePattern = '.*\\S.*';
 
 function durationLabel(minutes: number) {
   if (minutes < 60) return `${minutes} minutes`;
@@ -72,16 +73,18 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
       start: values.start,
       title: values.title,
     };
+    if (input.title.trim()) {
+      onUpdated({
+        allDay,
+        description: input.description,
+        duration: input.duration,
+        sourceId: event.sourceId,
+        start: input.start,
+        title: input.title,
+      });
+    }
     const result = await updateEvent(input);
     if (result.error) return { error: result.error, key: Date.now(), values };
-    onUpdated({
-      allDay,
-      description: input.description,
-      duration: input.duration,
-      sourceId: event.sourceId,
-      start: input.start,
-      title: input.title,
-    });
     store.hide();
     toast.success('Event updated.');
     return {};
@@ -89,12 +92,12 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
 
   function remove() {
     startDelete(async () => {
+      onDeleted(event.sourceId);
       const result = await deleteEvent(event.sourceId);
       if (result.error) {
         toast.error(result.error);
         return;
       }
-      onDeleted(event.sourceId);
       store.hide();
       toast.success('Event removed.');
     });
@@ -199,7 +202,15 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-2 sm:flex-none sm:overflow-visible">
             <label className="block">
               <span className={fieldLabel}>Title</span>
-              <input autoFocus defaultValue={values.title} name="title" />
+              <input
+                autoFocus
+                defaultValue={values.title}
+                name="title"
+                onInput={inputEvent => inputEvent.currentTarget.setCustomValidity('')}
+                onInvalid={inputEvent => inputEvent.currentTarget.setCustomValidity('Add a title before saving.')}
+                pattern={titlePattern}
+                required
+              />
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input

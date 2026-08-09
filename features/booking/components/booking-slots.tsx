@@ -14,6 +14,7 @@ import type { BookingSlot } from '../booking-queries';
 import type { Route } from 'next';
 
 const dayHref = (handle: string, day: string) => `/book/${handle}?date=${day}` as Route;
+type SelectedSlot = { day: string; time: string };
 
 function DayNavigationIcon({ direction }: { direction: 'next' | 'previous' }) {
   const { pending } = useLinkStatus();
@@ -44,17 +45,22 @@ export function BookingSlots({
     return nextState;
   }, null);
   const [guestName, setGuestName] = useState('');
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [displayDay, setDisplayDay] = useOptimistic(day);
   const [, startTransition] = useTransition();
   const previousDay = shiftDay(day, -1);
   const nextDay = shiftDay(day, 1);
 
   const visibleSlots = slots.filter(slot => slot.reason !== 'calendar');
-  const selected = selectedSlot ? visibleSlots.find(slot => slot.time === selectedSlot) : null;
+  const selected = selectedSlot?.day === day ? visibleSlots.find(slot => slot.time === selectedSlot.time) : null;
   const selectedAvailable = selected && !selected.taken ? selected : null;
 
   const allTaken = visibleSlots.length === 0 || visibleSlots.every(slot => slot.taken);
+
+  function navigateDay(nextDay: string) {
+    setSelectedSlot(null);
+    startTransition(() => setDisplayDay(nextDay));
+  }
 
   return (
     <div className="min-h-0 w-full sm:min-w-[32rem]">
@@ -64,7 +70,7 @@ export function BookingSlots({
           render={
             <Link
               href={dayHref(handle, previousDay)}
-              onNavigate={() => startTransition(() => setDisplayDay(previousDay))}
+              onNavigate={() => navigateDay(previousDay)}
               prefetch
               transitionTypes={['nav-back']}
             />
@@ -80,7 +86,7 @@ export function BookingSlots({
           render={
             <Link
               href={dayHref(handle, nextDay)}
-              onNavigate={() => startTransition(() => setDisplayDay(nextDay))}
+              onNavigate={() => navigateDay(nextDay)}
               prefetch
               transitionTypes={['nav-forward']}
             />
@@ -125,15 +131,15 @@ export function BookingSlots({
                     </div>
                   ) : (
                     <button
-                      aria-pressed={selectedSlot === slot.time}
+                      aria-pressed={selectedSlot?.day === day && selectedSlot.time === slot.time}
                       className={cn(
-                        'rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100',
-                        selectedSlot === slot.time
-                          ? 'border-accent bg-accent/10 text-accent ring-accent/40 ring-1 ring-inset'
-                          : 'border-divider text-muted hover:border-accent hover:bg-accent/10 hover:text-accent dark:border-divider-dark',
+                        'focus-visible:ring-primary/30 dark:bg-surface-dark rounded-md border bg-white px-4 py-3 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100',
+                        selectedSlot?.day === day && selectedSlot.time === slot.time
+                          ? 'border-primary text-black shadow-[inset_0_0_0_1px_var(--color-primary)] dark:text-white'
+                          : 'border-divider text-muted hover:border-gray/45 dark:border-divider-dark dark:hover:border-gray/35 hover:text-black dark:hover:text-white',
                       )}
                       key={slot.time}
-                      onClick={() => setSelectedSlot(slot.time)}
+                      onClick={() => setSelectedSlot({ day, time: slot.time })}
                       type="button"
                     >
                       {slot.time}

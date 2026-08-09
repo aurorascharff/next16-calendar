@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { RouteTransition } from '@/components/ui/route-transition';
 import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header';
 import { CalendarWeek, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week';
 import type { CalendarView } from '@/features/calendar/types/calendar';
@@ -18,12 +17,9 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
         {params.then(({ date }) =>
           searchParams.then(({ view }) => {
             const calendarView = toView(view);
-
             return (
               <Suspense fallback={<CalendarWeekSkeleton date={date} view={calendarView} />}>
-                <RouteTransition slideKey={`${calendarView}:${date}`}>
-                  <CalendarWeek date={date} view={calendarView} />
-                </RouteTransition>
+                <CalendarWeek date={date} view={calendarView} />
               </Suspense>
             );
           }),

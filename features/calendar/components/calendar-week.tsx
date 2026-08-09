@@ -1,6 +1,7 @@
 import { getCalendars, getCalendarWeek } from '../calendar-queries';
 import { getWeekDays } from '../calendar-utils';
 import { CalendarBoard, CalendarBoardSkeleton } from './calendar-board';
+import { CalendarScrollSection } from './calendar-scroll-section';
 import type { CalendarView } from '../types/calendar';
 
 export async function CalendarWeek({ date, view }: { date: string; view: CalendarView }) {
@@ -8,9 +9,9 @@ export async function CalendarWeek({ date, view }: { date: string; view: Calenda
   const days = view === 'day' ? [date] : week.days;
 
   return (
-    <section className="min-h-0 flex-1 overflow-auto" data-calendar-scroll>
+    <CalendarScrollSection scrollKey={`${view}:${days.join(',')}`}>
       <CalendarBoard calendars={calendars} days={days} events={week.events} view={view} />
-    </section>
+    </CalendarScrollSection>
   );
 }
 
@@ -18,8 +19,8 @@ export function CalendarWeekSkeleton({ date, view = 'week' }: { date?: string; v
   const days = date ? (view === 'day' ? [date] : getWeekDays(date)) : undefined;
 
   return (
-    <section className="min-h-0 flex-1 overflow-auto" data-calendar-scroll>
+    <CalendarScrollSection scrollKey={days ? `${view}:${days.join(',')}` : `loading:${view}`}>
       <CalendarBoardSkeleton days={days} fallbackCount={view === 'day' ? 1 : 7} />
-    </section>
+    </CalendarScrollSection>
   );
 }

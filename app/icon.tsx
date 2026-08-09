@@ -6,33 +6,21 @@ export const contentType = 'image/png';
 
 export default function Icon() {
   return new ImageResponse(
-    <div
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 72 72"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
       style={{
-        alignItems: 'center',
-        background: 'transparent',
-        display: 'flex',
-        height: '100%',
-        justifyContent: 'center',
-        width: '100%',
+        height: '32px',
+        width: '32px',
       }}
     >
-      <svg
-        width="28"
-        height="28"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#1b50ff"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M5 17h14" />
-        <path d="M7.5 17a4.5 4.5 0 0 1 9 0" />
-        <path d="M12 5v3M5.6 10.6l2.1 2.1M18.4 10.6l-2.1 2.1" />
-        <path d="M4 21h16" />
-      </svg>
-    </div>,
+      <rect x="14" y="19" width="34" height="9" rx="4.5" fill="#1B50FF" />
+      <rect x="26" y="31.5" width="32" height="9" rx="4.5" fill="#1B50FF" />
+      <rect x="14" y="44" width="26" height="9" rx="4.5" fill="#1B50FF" />
+    </svg>,
     size,
   );
 }

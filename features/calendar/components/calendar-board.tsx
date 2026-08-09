@@ -1,11 +1,10 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
-import { dateKey, formatDay } from '../calendar-utils';
+import { formatDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
-import { DEFAULT_SCROLL_TOP, GRID_HEIGHT, HOURS } from '../utils/grid';
+import { GRID_HEIGHT, HOURS } from '../utils/grid';
 import { CalendarAllDayRow, CalendarDayHeaderRow } from './calendar-board-rows';
 import { DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
@@ -58,23 +57,14 @@ export function CalendarBoard({
     isPending,
     nowMinutes,
     selectedEvent,
-    setOptimisticEvents,
+    addOptimisticEvent,
     setSelectedEvent,
     todayKey,
     visibleEvents,
   } = useCalendarBoard({ calendars, days, events, view });
-  const rootRef = useRef<HTMLDivElement>(null);
-  const scrollKey = `${view}:${days.join(',')}`;
-
-  useLayoutEffect(() => {
-    const scrollContainer = rootRef.current?.closest('[data-calendar-scroll]');
-    if (scrollContainer instanceof HTMLElement) {
-      scrollContainer.scrollTop = DEFAULT_SCROLL_TOP;
-    }
-  }, [scrollKey]);
 
   return (
-    <div className="relative select-none" ref={rootRef}>
+    <div className="relative select-none">
       {isPending ? (
         <div
           aria-label="Saving calendar changes"
@@ -129,8 +119,8 @@ export function CalendarBoard({
           event={selectedEvent.event}
           key={selectedEvent.event.id}
           onClose={() => setSelectedEvent(null)}
-          onDeleted={sourceId => setOptimisticEvents({ sourceId, type: 'delete' })}
-          onUpdated={event => setOptimisticEvents({ event, type: 'update' })}
+          onDeleted={sourceId => addOptimisticEvent({ sourceId, type: 'delete' })}
+          onUpdated={event => addOptimisticEvent({ event, type: 'update' })}
         />
       ) : null}
       {createDraft ? (
@@ -145,7 +135,7 @@ export function CalendarBoard({
           key={`${createDraft.day}-${createDraft.start}-${createDraft.duration}-${createDraft.allDay}`}
           onCreated={event => {
             for (const createdEvent of optimisticCreatedEvents(event, days)) {
-              setOptimisticEvents({ event: createdEvent, type: 'create' });
+              addOptimisticEvent({ event: createdEvent, type: 'create' });
             }
           }}
           store={createStore}
@@ -157,7 +147,6 @@ export function CalendarBoard({
 
 export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: string[]; fallbackCount?: number }) {
   const dayKeys = days ?? Array.from({ length: fallbackCount }, () => null);
-  const todayKey = dateKey(new Date());
   const gridTemplate = `4.5rem repeat(${dayKeys.length}, minmax(0, 1fr))`;
   const minWidth = dayKeys.length > 1 ? 760 : undefined;
   return (
@@ -170,26 +159,15 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
           <div className="border-divider dark:border-divider-dark border-r" />
           {dayKeys.map((day, index) => {
             const [weekday, dayNumber] = day ? formatDay(day).split(' ') : ['', ''];
-            const isToday = day === todayKey;
             return (
               <div
-                className={cn(
-                  'border-divider dark:border-divider-dark flex items-center gap-1.5 border-r px-3 py-1.5 text-left',
-                  isToday && 'bg-card dark:bg-card-dark',
-                )}
+                className="border-divider dark:border-divider-dark flex items-center gap-1.5 border-r px-3 py-1.5 text-left"
                 key={index}
               >
                 {day ? (
                   <>
-                    <span className={cn('text-[11px] font-medium uppercase', isToday ? 'text-accent' : 'text-muted')}>
-                      {weekday}
-                    </span>
-                    <span
-                      className={cn(
-                        'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums',
-                        isToday && 'bg-accent text-white',
-                      )}
-                    >
+                    <span className="text-muted text-[11px] font-medium uppercase">{weekday}</span>
+                    <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums">
                       {dayNumber}
                     </span>
                   </>
@@ -205,18 +183,9 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
           <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-end border-r px-3 py-1.5 text-[11px] font-medium">
             All day
           </div>
-          {dayKeys.map((day, index) => {
-            const isToday = day === todayKey;
-            return (
-              <div
-                className={cn(
-                  'border-divider dark:border-divider-dark min-h-9 border-r p-1',
-                  isToday && 'bg-card dark:bg-card-dark',
-                )}
-                key={index}
-              />
-            );
-          })}
+          {dayKeys.map((_, index) => (
+            <div className="border-divider dark:border-divider-dark min-h-9 border-r p-1" key={index} />
+          ))}
         </div>
       </div>
       <div className="grid" style={{ gridTemplateColumns: gridTemplate, minWidth }}>
@@ -229,12 +198,9 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
             </div>
           ))}
         </div>
-        {dayKeys.map((day, dayIndex) => (
+        {dayKeys.map((_, dayIndex) => (
           <div
-            className={cn(
-              'border-divider dark:border-divider-dark border-r',
-              day === todayKey && 'bg-card/40 dark:bg-card-dark/40',
-            )}
+            className="border-divider dark:border-divider-dark border-r"
             key={dayIndex}
             style={{ height: GRID_HEIGHT }}
           >

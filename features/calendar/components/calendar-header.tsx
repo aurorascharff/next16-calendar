@@ -1,6 +1,7 @@
-import { CalendarRange } from 'lucide-react';
 import { Suspense } from 'react';
 import { SlowControl } from '@/components/demo/slow-control';
+import { DaylineMark } from '@/components/ui/dayline-mark';
+import { WorkspaceHeaderActions } from '@/components/workspace-header-actions';
 import { formatDayLong, formatMonth } from '../calendar-utils';
 import { CalendarControls, ViewToggle } from './calendar-controls';
 import { NewEventButton } from './new-event-button';
@@ -12,9 +13,7 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
       <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <div className="flex min-w-0 items-center gap-2.5 sm:w-52">
-            <span className="bg-accent grid size-8 shrink-0 place-items-center rounded-md text-white sm:hidden">
-              <CalendarRange className="size-4.5" strokeWidth={2.25} />
-            </span>
+            <DaylineMark className="size-8 shrink-0 sm:hidden" />
             <h1 className="truncate text-lg font-semibold tracking-tight">
               {view === 'day' ? formatDayLong(date) : formatMonth(date)}
             </h1>
@@ -26,6 +25,9 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <div className="hidden sm:block">
+            <WorkspaceHeaderActions />
+          </div>
+          <div className="hidden sm:block">
             <Suspense fallback={<div className="h-8 w-[5.5rem]" />}>
               <SlowControl />
             </Suspense>
@@ -35,7 +37,10 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
       </header>
       <div className="border-divider dark:border-divider-dark flex items-center justify-between gap-2 border-b px-4 py-2 sm:hidden">
         <CalendarControls date={date} view={view} />
-        <ViewToggle date={date} view={view} />
+        <div className="flex items-center gap-2">
+          <ViewToggle date={date} view={view} />
+          <WorkspaceHeaderActions />
+        </div>
       </div>
     </>
   );

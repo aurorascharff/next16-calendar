@@ -1,5 +1,6 @@
 'use client';
 
+import { Crossfade } from '@/components/ui/crossfade';
 import { cn } from '@/lib/utils';
 import { formatDay } from '../calendar-utils';
 import { chipStyle } from '../utils/colors';
@@ -93,19 +94,23 @@ export function CalendarAllDayRow({
               type="button"
             >
               {dayEvents.length ? (
-                dayEvents.map(event => (
-                  <span
-                    className="cal-chip flex min-w-0 items-center gap-1 rounded-[5px] px-2 py-1 text-xs font-semibold ring-1 ring-inset"
-                    key={event.id}
-                    onClick={click => {
-                      click.stopPropagation();
-                      onSelectEvent({ anchorRect: click.currentTarget.getBoundingClientRect(), event });
-                    }}
-                    style={chipStyle(event.color)}
-                  >
-                    <span className="truncate">{event.title}</span>
+                <Crossfade>
+                  <span className="flex min-w-0 flex-col gap-1">
+                    {dayEvents.map(event => (
+                      <span
+                        className="cal-chip flex min-w-0 items-center gap-1 rounded-[5px] px-2 py-1 text-xs font-semibold ring-1 ring-inset"
+                        key={event.id}
+                        onClick={click => {
+                          click.stopPropagation();
+                          onSelectEvent({ anchorRect: click.currentTarget.getBoundingClientRect(), event });
+                        }}
+                        style={chipStyle(event.color)}
+                      >
+                        <span className="truncate">{event.title}</span>
+                      </span>
+                    ))}
                   </span>
-                ))
+                </Crossfade>
               ) : (
                 <span className="sr-only">New all-day event</span>
               )}
