@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { Trash2, X } from 'lucide-react';
-import { useActionState, useTransition } from 'react';
+import { useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { deleteEvent, updateEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
@@ -80,6 +80,7 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
     start: event.start,
     title: event.title,
   };
+  const [allDay, setAllDay] = useState(values.allDay);
 
   return (
     <Ariakit.Popover
@@ -116,23 +117,31 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
           <input autoFocus defaultValue={values.title} name="title" />
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input className="size-4 w-auto" defaultChecked={values.allDay} name="allDay" type="checkbox" />
+          <input
+            checked={allDay}
+            className="size-4 w-auto"
+            name="allDay"
+            onChange={inputEvent => setAllDay(inputEvent.target.checked)}
+            type="checkbox"
+          />
           All day
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className={fieldLabel}>Starts at</span>
-            <input defaultValue={values.start} name="start" type="time" />
+            <input defaultValue={values.start} disabled={allDay} name={allDay ? undefined : 'start'} type="time" />
+            {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
           </label>
           <label className="block">
             <span className={fieldLabel}>Duration</span>
-            <select defaultValue={values.duration} name="duration">
+            <select defaultValue={values.duration} disabled={allDay} name={allDay ? undefined : 'duration'}>
               <option value="30">30 minutes</option>
               <option value="45">45 minutes</option>
               <option value="60">1 hour</option>
               <option value="90">90 minutes</option>
               <option value="120">2 hours</option>
             </select>
+            {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
           </label>
         </div>
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}

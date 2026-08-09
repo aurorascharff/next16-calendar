@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/logo.svg" alt="Cadence" width="72" height="72" />
+
 # Cadence
 
 A [Next.js 16.3](https://nextjs.org/blog/next-16-3) calendar workspace demonstrating [Instant Navigations](https://nextjs.org/docs/app/guides/instant-navigation).

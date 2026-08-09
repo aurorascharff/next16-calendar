@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { prisma } from '@/lib/db';
@@ -24,7 +25,15 @@ function occursOn(event: { day: Date; recurrence: string | null }, day: string) 
 
 export type BookingSlot = { taken: boolean; time: string };
 
+export const bookingCache = {
+  tag: (handle: string) => `booking:${handle}`,
+};
+
 export async function getBookingAvailability(handle: string, date?: string) {
+  'use cache';
+  cacheLife({ stale: 30 });
+  cacheTag(bookingCache.tag(handle));
+
   const bookingPage = await prisma.bookingPage.findUnique({
     include: { user: { select: { id: true, name: true } } },
     where: { handle },
@@ -80,6 +89,10 @@ export async function getBookingAvailability(handle: string, date?: string) {
 }
 
 export async function getMyBookingProfile(handle: string) {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(bookingCache.tag(handle));
+
   const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
   if (!bookingPage) return null;
 
@@ -94,6 +107,10 @@ export async function getMyBookingProfile(handle: string) {
 }
 
 export async function getMyBookingSettings(userId: string, handle: string) {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(bookingCache.tag(handle));
+
   const bookingPage = await prisma.bookingPage.findFirst({ where: { handle, userId } });
   if (!bookingPage) {
     return {

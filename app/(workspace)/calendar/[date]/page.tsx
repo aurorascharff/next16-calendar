@@ -3,7 +3,7 @@ import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/comp
 import { CalendarWeek, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week';
 import type { CalendarView } from '@/features/calendar/types/calendar';
 
-const weekTransition = {
+const weekSlide = {
   'calendar-back': 'week-back',
   'calendar-forward': 'week-forward',
   default: 'none',
@@ -19,11 +19,15 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
       <Suspense fallback={<CalendarHeaderSkeleton />}>
         {params.then(({ date }) => searchParams.then(({ view }) => <CalendarHeader date={date} view={toView(view)} />))}
       </Suspense>
-      <ViewTransition default="none" enter={weekTransition} exit={weekTransition} update={weekTransition}>
-        <Suspense fallback={<CalendarWeekSkeleton />}>
-          {params.then(({ date }) => searchParams.then(({ view }) => <CalendarWeek date={date} view={toView(view)} />))}
-        </Suspense>
-      </ViewTransition>
+      <Suspense fallback={<CalendarWeekSkeleton />}>
+        {params.then(({ date }) =>
+          searchParams.then(({ view }) => (
+            <ViewTransition default="none" enter={weekSlide} exit={weekSlide} key={date}>
+              <CalendarWeek date={date} view={toView(view)} />
+            </ViewTransition>
+          )),
+        )}
+      </Suspense>
     </main>
   );
 }

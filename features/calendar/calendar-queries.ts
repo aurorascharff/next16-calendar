@@ -2,8 +2,10 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
+import { isSlowEnabled } from '@/components/demo/demo-slow';
 import { getCurrentUser } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
+import { delay } from '@/lib/utils';
 import { dateKey, getWeekDays, isDateKey } from './calendar-utils';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarWeek } from './types/calendar';
 
@@ -58,10 +60,10 @@ export async function getCalendarWeek(date: string): Promise<CalendarWeek> {
   if (!isDateKey(date)) notFound();
 
   const userId = await getCurrentUserId();
-  return getCalendarWeekForUser(date, userId);
+  return getCalendarWeekForUser(date, userId, await isSlowEnabled());
 }
 
-async function getCalendarWeekForUser(date: string, userId: string | null): Promise<CalendarWeek> {
+async function getCalendarWeekForUser(date: string, userId: string | null, slow: boolean): Promise<CalendarWeek> {
   'use cache';
   const days = getWeekDays(date);
   const start = days[0];
@@ -69,6 +71,7 @@ async function getCalendarWeekForUser(date: string, userId: string | null): Prom
   cacheLife('hours');
   cacheTag(calendarCache.tag, calendarCache.weekTag(start));
 
+  await delay(650, slow);
   const rows = await prisma.calendarEvent.findMany({
     include: { calendar: { select: { color: true } } },
     orderBy: [{ start: 'asc' }, { title: 'asc' }],

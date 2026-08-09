@@ -1,8 +1,10 @@
 'use server';
 
+import { refresh, updateTag } from 'next/cache';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { getCurrentUser } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
+import { bookingCache } from './booking-queries';
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -36,6 +38,8 @@ export async function bookSlot({
   if (!isDateKey(day) || !timePattern.test(slot)) {
     return { error: 'Choose a valid booking time.' };
   }
+  const name = guestName.trim();
+  if (!name) return { error: 'Enter your name to book this time.' };
 
   const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
   if (!bookingPage || !bookingPage.active) {
@@ -64,7 +68,7 @@ export async function bookSlot({
     await prisma.booking.create({
       data: {
         bookingPageId: bookingPage.id,
-        guestName: guestName.trim() || 'Guest',
+        guestName: name,
         startsAt,
       },
     });
@@ -72,6 +76,7 @@ export async function bookSlot({
     return { error: 'That time was just booked. Choose another slot.' };
   }
 
+  updateTag(bookingCache.tag(handle));
   return { data: { slot, startsAt } };
 }
 
@@ -112,5 +117,7 @@ export async function updateBookingAvailability(input: AvailabilityInput) {
     where: { handle: user.handle },
   });
 
+  updateTag(bookingCache.tag(user.handle));
+  refresh();
   return { data: page };
 }

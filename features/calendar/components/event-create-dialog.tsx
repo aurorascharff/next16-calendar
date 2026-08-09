@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { X } from 'lucide-react';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { toast } from 'sonner';
 import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
@@ -84,6 +84,7 @@ export function EventCreateDialog({
     start: defaultStart,
     title: '',
   };
+  const [allDay, setAllDay] = useState(values.allDay);
 
   return (
     <Ariakit.Popover
@@ -119,23 +120,31 @@ export function EventCreateDialog({
           <input autoFocus defaultValue={values.title} name="title" placeholder="What's happening?" />
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input className="size-4 w-auto" defaultChecked={values.allDay} name="allDay" type="checkbox" />
+          <input
+            checked={allDay}
+            className="size-4 w-auto"
+            name="allDay"
+            onChange={event => setAllDay(event.target.checked)}
+            type="checkbox"
+          />
           All day
         </label>
         <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
           <label className="block">
             <span className={fieldLabel}>Starts at</span>
-            <input defaultValue={values.start} name="start" type="time" />
+            <input defaultValue={values.start} disabled={allDay} name={allDay ? undefined : 'start'} type="time" />
+            {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
           </label>
           <label className="block">
             <span className={fieldLabel}>Duration</span>
-            <select defaultValue={values.duration} name="duration">
+            <select defaultValue={values.duration} disabled={allDay} name={allDay ? undefined : 'duration'}>
               <option value="30">30 minutes</option>
               <option value="45">45 minutes</option>
               <option value="60">1 hour</option>
               <option value="90">90 minutes</option>
               <option value="120">2 hours</option>
             </select>
+            {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
           </label>
         </div>
         <div className={calendarOptions.length > 0 ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>

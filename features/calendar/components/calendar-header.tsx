@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+import { SlowControl } from '@/components/demo/slow-control';
 import { formatDayLong, formatMonth } from '../calendar-utils';
 import { CalendarControls, ViewToggle } from './calendar-controls';
 import { NewEventButton } from './new-event-button';
@@ -16,6 +18,11 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <div className="hidden sm:block">
+            <Suspense fallback={<div className="h-8 w-[5.5rem]" />}>
+              <SlowControl />
+            </Suspense>
+          </div>
           <ViewToggle date={date} view={view} />
           <NewEventButton day={date} />
         </div>

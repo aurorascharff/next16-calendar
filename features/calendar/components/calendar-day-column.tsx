@@ -6,65 +6,34 @@ import { chipStyle } from '../utils/colors';
 import { GRID_HEIGHT, HOUR_HEIGHT, HOURS, minutesToTime, packDay, SNAP_MINUTES, START_HOUR } from '../utils/grid';
 import { EventChip } from './calendar-event-chip';
 import { NowLine } from './calendar-now-line';
-import type { CalendarColor, CalendarEvent } from '../types/calendar';
-
-type PointerHandler = (day: string, event: React.PointerEvent<HTMLDivElement>) => void;
-type EventPointerHandler = (event: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) => void;
+import type { CalendarBoardInteractions } from '../hooks/use-calendar-board';
+import type { CalendarEvent } from '../types/calendar';
 
 export function DayColumn({
   day,
-  dragMove,
   events,
+  interaction,
   isToday,
   nowMinutes,
-  onCreateDown,
-  onCreateMove,
-  onCreateUp,
-  onEventSelect,
-  onMoveDown,
-  onMoveMove,
-  onMoveUp,
-  onMoveCancel,
-  onResizeDown,
-  onResizeMove,
-  onResizeUp,
-  resize,
-  selectionColor,
-  selectionHi,
-  selectionLo,
   showNow,
 }: {
   day: string;
-  dragMove: { day: string; id: string; startMin: number } | null;
   events: CalendarEvent[];
+  interaction: CalendarBoardInteractions;
   isToday: boolean;
   nowMinutes: number;
-  onCreateDown: PointerHandler;
-  onCreateMove: PointerHandler;
-  onCreateUp: PointerHandler;
-  onEventSelect: (event: CalendarEvent, anchorRect: DOMRect) => void;
-  onMoveDown: EventPointerHandler;
-  onMoveMove: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
-  onMoveUp: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
-  onMoveCancel: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
-  onResizeDown: EventPointerHandler;
-  onResizeMove: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
-  onResizeUp: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
-  resize: { endMin: number; sourceId: string; startMin: number } | null;
-  selectionColor: CalendarColor;
-  selectionHi: number | null;
-  selectionLo: number | null;
   showNow: boolean;
 }) {
   const layout = packDay(events);
+  const selection = interaction.getSelection(day);
 
   return (
     <div
       className={cn('border-divider dark:border-divider-dark relative border-r', isToday && 'bg-accent/[0.035]')}
       data-day-column
-      onPointerDown={event => onCreateDown(day, event)}
-      onPointerMove={event => onCreateMove(day, event)}
-      onPointerUp={event => onCreateUp(day, event)}
+      onPointerDown={event => interaction.create.onPointerDown(day, event)}
+      onPointerMove={event => interaction.create.onPointerMove(day, event)}
+      onPointerUp={event => interaction.create.onPointerUp(day, event)}
       style={{ height: GRID_HEIGHT }}
     >
       {HOURS.map(hour => (
@@ -72,10 +41,11 @@ export function DayColumn({
       ))}
       {showNow ? <NowLine minutes={nowMinutes} /> : null}
       {events.map(event => {
-        const startMin = dragMove?.id === event.id ? dragMove.startMin : timeToMinutes(event.start);
-        const isResizing = resize?.sourceId === event.sourceId;
-        const isDragging = dragMove?.id === event.id;
-        const displayDuration = isResizing ? resize!.endMin - resize!.startMin : event.duration;
+        const startMin =
+          interaction.dragMove?.id === event.id ? interaction.dragMove.startMin : timeToMinutes(event.start);
+        const isResizing = interaction.resize?.sourceId === event.sourceId;
+        const isDragging = interaction.dragMove?.id === event.id;
+        const displayDuration = isResizing ? interaction.resize!.endMin - interaction.resize!.startMin : event.duration;
         const height = Math.max(22, (displayDuration / 60) * HOUR_HEIGHT - 3);
         const place = layout.get(event.id) ?? { col: 0, cols: 1 };
         const widthPct = 100 / place.cols;
@@ -87,32 +57,34 @@ export function DayColumn({
             isResizing={isResizing}
             key={event.id}
             left={`calc(${place.col * widthPct}% + 2px)`}
-            onMoveDown={pointerEvent => onMoveDown(event, pointerEvent)}
-            onMoveMove={onMoveMove}
-            onMoveUp={onMoveUp}
-            onMoveCancel={onMoveCancel}
-            onResizeDown={pointerEvent => onResizeDown(event, pointerEvent)}
-            onResizeMove={onResizeMove}
-            onResizeUp={onResizeUp}
-            onSelect={anchorRect => onEventSelect(event, anchorRect)}
-            timeLabel={height >= 46 ? (isResizing ? minutesToTime(resize!.endMin) : minutesToTime(startMin)) : null}
+            onMoveDown={pointerEvent => interaction.move.onPointerDown(event, pointerEvent)}
+            onMoveMove={interaction.move.onPointerMove}
+            onMoveUp={interaction.move.onPointerUp}
+            onMoveCancel={interaction.move.onPointerCancel}
+            onResizeDown={pointerEvent => interaction.resizeHandlers.onPointerDown(event, pointerEvent)}
+            onResizeMove={interaction.resizeHandlers.onPointerMove}
+            onResizeUp={interaction.resizeHandlers.onPointerUp}
+            onSelect={anchorRect => interaction.onEventSelect(event, anchorRect)}
+            timeLabel={
+              height >= 46 ? (isResizing ? minutesToTime(interaction.resize!.endMin) : minutesToTime(startMin)) : null
+            }
             top={((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT}
             width={`calc(${widthPct}% - 4px)`}
           />
         );
       })}
-      {selectionLo !== null && selectionHi !== null ? (
+      {selection ? (
         <div
           aria-hidden
           className="cal-chip pointer-events-none absolute inset-x-1 z-30 flex flex-col overflow-hidden rounded-[5px] px-2 py-1 opacity-90 ring-1 ring-inset"
           style={{
-            ...chipStyle(selectionColor),
-            height: Math.max((SNAP_MINUTES / 60) * HOUR_HEIGHT, ((selectionHi - selectionLo) / 60) * HOUR_HEIGHT),
-            top: ((selectionLo - START_HOUR * 60) / 60) * HOUR_HEIGHT,
+            ...chipStyle(interaction.selectionColor),
+            height: Math.max((SNAP_MINUTES / 60) * HOUR_HEIGHT, ((selection.hi - selection.lo) / 60) * HOUR_HEIGHT),
+            top: ((selection.lo - START_HOUR * 60) / 60) * HOUR_HEIGHT,
           }}
         >
           <span className="text-xs leading-tight font-semibold">New event</span>
-          <span className="mt-0.5 text-[11px] tabular-nums opacity-70">{minutesToTime(selectionLo)}</span>
+          <span className="mt-0.5 text-[11px] tabular-nums opacity-70">{minutesToTime(selection.lo)}</span>
         </div>
       ) : null}
     </div>

@@ -33,7 +33,8 @@ export function BookingLink({ handle }: { handle: string }) {
       <Link
         className="border-divider text-muted hover:bg-card dark:border-divider-dark dark:hover:bg-card-dark inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:text-black dark:hover:text-white"
         href={path as Route}
-        prefetch
+        rel="noopener noreferrer"
+        target="_blank"
       >
         <ExternalLink className="size-4" />
         Preview

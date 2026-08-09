@@ -1,17 +1,24 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import Link, { useLinkStatus } from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Spinner } from '@/components/ui/spinner';
 import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
 import { cn } from '@/lib/utils';
 import { bookSlot } from '../booking-actions';
 import type { BookingSlot } from '../booking-queries';
 import type { Route } from 'next';
+import type { ReactNode } from 'react';
 
 const dayHref = (handle: string, day: string) => `/book/${handle}?date=${day}` as Route;
+
+function PendingSwap({ children }: { children: ReactNode }) {
+  const { pending } = useLinkStatus();
+  return pending ? <Spinner className="size-4" /> : children;
+}
 
 export function BookingSlots({
   day,
@@ -29,6 +36,10 @@ export function BookingSlots({
   const [guestName, setGuestName] = useState('');
 
   function selectSlot(slot: string) {
+    if (!guestName.trim()) {
+      toast.error('Enter your name to book this time.');
+      return;
+    }
     startTransition(async () => {
       const result = await bookSlot({ day, guestName, handle, slot });
       if (result.error) {
@@ -47,17 +58,27 @@ export function BookingSlots({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <Link aria-label="Previous day" className={navButton} href={dayHref(handle, shiftDay(day, -1))}>
-          <ChevronLeft className="size-4.5" />
+        <Link aria-label="Previous day" className={navButton} href={dayHref(handle, shiftDay(day, -1))} prefetch>
+          <PendingSwap>
+            <ChevronLeft className="size-4.5" />
+          </PendingSwap>
         </Link>
         <span className="text-sm font-semibold tabular-nums">{formatDayLong(day)}</span>
-        <Link aria-label="Next day" className={navButton} href={dayHref(handle, shiftDay(day, 1))}>
-          <ChevronRight className="size-4.5" />
+        <Link aria-label="Next day" className={navButton} href={dayHref(handle, shiftDay(day, 1))} prefetch>
+          <PendingSwap>
+            <ChevronRight className="size-4.5" />
+          </PendingSwap>
         </Link>
       </div>
       <label className="mb-4 block">
         <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-        <input onChange={event => setGuestName(event.target.value)} placeholder="Name" value={guestName} />
+        <input
+          autoComplete="name"
+          onChange={event => setGuestName(event.target.value)}
+          placeholder="Name"
+          required
+          value={guestName}
+        />
       </label>
       <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
       {allTaken ? (
