@@ -59,8 +59,7 @@ export function EventCreateDialog({
 }) {
   const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
   const calendarOptions = calendars ?? [];
-  const writableCalendarId =
-    defaultCalendarId ?? (calendarOptions.find(calendar => !calendar.isDemo) ?? calendarOptions[0])?.id;
+  const selectedCalendarId = defaultCalendarId ?? calendarOptions[0]?.id;
 
   async function submitAction(formData: FormData) {
     const repeat = String(formData.get('repeat'));
@@ -78,7 +77,7 @@ export function EventCreateDialog({
     let tempId: string | null = null;
     if (values.title.trim()) {
       tempId = optimisticEventId(day, values);
-      const calendarId = values.calendarId || writableCalendarId || '';
+      const calendarId = values.calendarId || selectedCalendarId || '';
       const calendar = calendarOptions.find(option => option.id === calendarId);
       onCreated?.({
         allDay,
@@ -88,7 +87,6 @@ export function EventCreateDialog({
         description: values.description.trim() || null,
         duration: allDay ? 24 * 60 : Number(values.duration),
         id: tempId,
-        isDemo: false,
         recurrence,
         recurring: Boolean(recurrence),
         sourceId: tempId,
@@ -123,7 +121,7 @@ export function EventCreateDialog({
 
   const values = {
     allDay: defaultAllDay,
-    calendarId: writableCalendarId ?? '',
+    calendarId: selectedCalendarId ?? '',
     description: '',
     duration: String(defaultDuration),
     repeat: '',
@@ -196,7 +194,7 @@ export function EventCreateDialog({
                   <span className={fieldLabel}>Calendar</span>
                   <CalendarPicker
                     calendars={calendarOptions}
-                    defaultValue={values.calendarId || writableCalendarId}
+                    defaultValue={values.calendarId || selectedCalendarId}
                     name="calendarId"
                   />
                 </div>

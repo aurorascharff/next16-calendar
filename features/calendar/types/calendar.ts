@@ -17,7 +17,6 @@ export type CalendarColor =
 export type Calendar = {
   color: CalendarColor;
   id: string;
-  isDemo: boolean;
   name: string;
 };
 
@@ -29,7 +28,6 @@ export type CalendarEvent = {
   description?: string | null;
   duration: number;
   id: string;
-  isDemo: boolean;
   isBooking?: boolean;
   recurrence?: string | null;
   recurring?: boolean;

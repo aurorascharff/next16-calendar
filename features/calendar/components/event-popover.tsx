@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { AlignLeft, CalendarDays, Pencil, Repeat2, Trash2, X } from 'lucide-react';
-import { type ReactNode, useActionState, useId, useState, useTransition } from 'react';
+import { type ReactNode, useActionState, useId, useState, useSyncExternalStore, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
@@ -36,11 +36,27 @@ type FormValues = {
 type FormState = { key?: number; values?: FormValues };
 
 const controlHeight = 'h-10';
+const mobileMedia = '(max-width: 639px)';
+
+function subscribeToMobile(callback: () => void) {
+  const query = window.matchMedia(mobileMedia);
+  query.addEventListener('change', callback);
+  return () => query.removeEventListener('change', callback);
+}
+
+function getMobileSnapshot() {
+  return window.matchMedia(mobileMedia).matches;
+}
+
+function getServerMobileSnapshot() {
+  return false;
+}
 
 export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, onUpdated }: EventPopoverProps) {
   const formId = useId();
   const [isDeleting, startDelete] = useTransition();
   const [mode, setMode] = useState<'details' | 'edit'>('details');
+  const isMobile = useSyncExternalStore(subscribeToMobile, getMobileSnapshot, getServerMobileSnapshot);
   const store = Ariakit.usePopoverStore({
     defaultOpen: true,
     placement: 'right-start',
@@ -119,7 +135,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
     <Boundary label="EventPopover" asChild>
       <Ariakit.Popover
         store={store}
-        modal
+        modal={isMobile}
         unmountOnHide
         fixed
         fitViewport

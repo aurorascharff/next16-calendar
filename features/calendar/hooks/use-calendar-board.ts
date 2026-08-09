@@ -100,8 +100,7 @@ export function useCalendarBoard({
   const now = useNow();
   const todayKey = now ? dateKey(now) : null;
   const nowMinutes = now ? now.getHours() * 60 + now.getMinutes() : 0;
-  const writable = calendars.filter(calendar => !calendar.isDemo);
-  const defaultCalendar = writable[0] ?? calendars[0];
+  const defaultCalendar = calendars[0];
   const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));
   const allDayEvents = visibleEvents.filter(event => event.allDay);
 

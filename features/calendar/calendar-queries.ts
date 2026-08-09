@@ -66,14 +66,13 @@ async function getCalendarsForUser(userId: string | null): Promise<Calendar[]> {
   cacheTag(calendarCache.calendarsTag);
 
   const rows = await prisma.calendar.findMany({
-    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    orderBy: [{ isDemo: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }],
     where: { OR: [{ userId }, { userId: null }] },
   });
 
   return rows.map(calendar => ({
     color: calendarColor(calendar),
     id: calendar.id,
-    isDemo: calendar.isDemo,
     name: calendar.name,
   }));
 }
@@ -205,7 +204,6 @@ function toCalendarEvent(event: StoredEvent, day: string, bookingMatches: Set<st
     isBooking: bookingMatches.has(
       bookingKey({ day, duration: event.duration, start: event.start, title: event.title, userId: event.userId }),
     ),
-    isDemo: event.demo,
     recurrence: event.recurrence,
     sourceId: event.id,
     start: event.start,

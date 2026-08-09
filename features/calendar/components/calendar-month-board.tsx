@@ -86,8 +86,7 @@ export function CalendarMonthBoard({
   });
   const today = useTodayKey();
   const month = date.slice(0, 7);
-  const writable = calendars.filter(calendar => !calendar.isDemo);
-  const defaultCalendar = writable[0] ?? calendars[0];
+  const defaultCalendar = calendars[0];
   const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));
 
   function updateOptimistically(action: EventAction) {

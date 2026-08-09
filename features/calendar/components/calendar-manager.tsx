@@ -18,7 +18,6 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
   const { hidden, toggle } = useCalendarVisibility();
   const [editing, setEditing] = useState<Calendar | null>(null);
   const [isDeleting, startDelete] = useTransition();
-  const demoColors = new Set(calendars.filter(calendar => calendar.isDemo).map(calendar => calendar.color));
   const store = Ariakit.useDialogStore({
     setOpen(open) {
       if (!open) setEditing(null);
@@ -97,7 +96,7 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
       {editing ? (
         <CalendarFormDialog
           calendar={editing}
-          colors={CALENDAR_COLORS.filter(color => !demoColors.has(color) || color === editing.color)}
+          colors={CALENDAR_COLORS}
           key={editing.id}
           store={store}
         />
