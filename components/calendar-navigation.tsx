@@ -1,6 +1,6 @@
 import { CalendarDays, Link2 } from 'lucide-react';
 import { ViewTransition } from 'react';
-import { DaylineMark } from '@/components/ui/dayline-mark';
+import { FlowMark } from '@/components/ui/flow-mark';
 import { GitHubIcon } from '@/components/ui/github-icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { NavLink } from '@/components/ui/nav-link';
@@ -14,9 +14,9 @@ export function CalendarSidebarBrand() {
   return (
     <div className="mb-6 flex items-center justify-between gap-2 px-2">
       <CalendarHomeLink className="flex min-w-0 items-center gap-2.5">
-        <DaylineMark className="size-8 shrink-0" />
+        <FlowMark className="size-8 shrink-0" />
         <span className="min-w-0">
-          <span className="block truncate font-semibold tracking-tight">Dayline</span>
+          <span className="block truncate font-semibold tracking-tight">Flow</span>
           <span className="text-muted block truncate text-xs">Shape your day</span>
         </span>
       </CalendarHomeLink>

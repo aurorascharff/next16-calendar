@@ -18,7 +18,7 @@ const description =
   'A Next.js 16.3 calendar demonstrating Instant Navigations with Cache Components and View Transitions.';
 
 export const metadata: Metadata = {
-  applicationName: 'Dayline',
+  applicationName: 'Flow',
   description,
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_BASE_URL ??
@@ -28,11 +28,11 @@ export const metadata: Metadata = {
   ),
   openGraph: {
     description,
-    siteName: 'Dayline',
-    title: 'Dayline',
+    siteName: 'Flow',
+    title: 'Flow',
     type: 'website',
   },
-  title: { default: 'Dayline', template: '%s · Dayline' },
+  title: { default: 'Flow', template: '%s · Flow' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

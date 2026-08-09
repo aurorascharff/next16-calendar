@@ -15,7 +15,7 @@ import type { Calendar, CalendarEvent } from '../types/calendar';
 import type { EventAction } from '../utils/event-optimistic-reducer';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const MAX_EVENT_ROWS = 4;
+const MAX_EVENT_ROWS = 5;
 
 function sortEvents(events: CalendarEvent[]) {
   return [...events].sort((left, right) => {
@@ -29,7 +29,7 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
     return (
       <button
         className={cn(
-          'cal-chip focus-visible:ring-accent flex h-5 w-full min-w-0 items-center gap-1 rounded-[4px] px-1.5 text-left text-[11px] leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none',
+          'cal-chip focus-visible:ring-accent flex h-6 w-full min-w-0 items-center gap-1 rounded-[5px] px-2 text-left text-xs leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none',
           event.isBooking && 'cal-chip-booking',
         )}
         onClick={clickEvent => onSelect(clickEvent.currentTarget.getBoundingClientRect())}
@@ -46,7 +46,7 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
   return (
     <button
       className={cn(
-        'hover:bg-card dark:hover:bg-card-dark focus-visible:ring-accent flex h-5 w-full min-w-0 items-center gap-1 rounded px-1 text-left text-[11px] focus-visible:ring-2 focus-visible:outline-none',
+        'hover:bg-card dark:hover:bg-card-dark focus-visible:ring-accent flex h-6 w-full min-w-0 items-center gap-1 rounded px-1.5 text-left text-xs focus-visible:ring-2 focus-visible:outline-none',
         event.isBooking && 'ring-divider dark:ring-divider-dark ring-1 ring-inset',
       )}
       onClick={clickEvent => onSelect(clickEvent.currentTarget.getBoundingClientRect())}
@@ -115,7 +115,7 @@ export function CalendarMonthBoard({
           </div>
         ))}
       </div>
-      <div className="grid min-h-[48rem] flex-1 grid-cols-7 grid-rows-6">
+      <div className="grid auto-rows-[11rem] grid-cols-7">
         {days.map(day => {
           const outside = !day.startsWith(month);
           const dayEvents = sortEvents(visibleEvents.filter(event => event.day === day));
@@ -125,7 +125,7 @@ export function CalendarMonthBoard({
           return (
             <div
               className={cn(
-                'group border-divider dark:border-divider-dark min-h-32 overflow-hidden border-r border-b p-1',
+                'group border-divider dark:border-divider-dark overflow-hidden border-r border-b p-1.5',
                 day === today && 'bg-card/45 dark:bg-card-dark/45',
                 outside && 'bg-card/25 dark:bg-card-dark/20',
               )}
@@ -150,7 +150,7 @@ export function CalendarMonthBoard({
                   <Plus className="size-4" />
                 </IconButton>
               </div>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {visible.map(event => (
                   <MonthEvent
                     event={event}
@@ -159,7 +159,7 @@ export function CalendarMonthBoard({
                   />
                 ))}
                 {remaining > 0 ? (
-                  <span className="text-muted block h-5 px-1 text-[11px] leading-5 font-medium">+{remaining} more</span>
+                  <span className="text-muted block h-6 px-1.5 text-xs leading-6 font-medium">+{remaining} more</span>
                 ) : null}
               </div>
             </div>

@@ -6,7 +6,7 @@ type Props = SVGProps<SVGSVGElement> & {
   gradient?: boolean;
 };
 
-export function DaylineMark({ animated = false, className, gradient = false, ...props }: Props) {
+export function FlowMark({ animated = false, className, gradient = false, ...props }: Props) {
   const gradientId = useId().replaceAll(':', '');
   const fill = gradient ? `url(#${gradientId})` : 'currentColor';
 
@@ -15,7 +15,7 @@ export function DaylineMark({ animated = false, className, gradient = false, ...
       viewBox="0 0 72 72"
       fill="none"
       aria-hidden="true"
-      className={cn('text-primary', animated && 'dayline-mark-enter', className)}
+      className={cn('text-primary', animated && 'flow-mark-enter', className)}
       {...props}
     >
       {gradient ? (

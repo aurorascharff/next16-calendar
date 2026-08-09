@@ -194,7 +194,7 @@ function DemoGuideDialog({
       >
         <Ariakit.DialogHeading className="text-xl font-bold">How this demo works</Ariakit.DialogHeading>
         <Ariakit.DialogDescription className="text-muted mt-2 text-sm leading-relaxed">
-          Dayline keeps the calendar shell stable while route data streams, prefetches, or intentionally slows down for
+          Flow keeps the calendar shell stable while route data streams, prefetches, or intentionally slows down for
           demos.
         </Ariakit.DialogDescription>
         <div className="mt-6 flex flex-col gap-4">

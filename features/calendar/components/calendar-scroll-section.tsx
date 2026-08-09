@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import { Boundary } from '@/components/internal/boundary';
-import { DaylineMark } from '@/components/ui/dayline-mark';
+import { FlowMark } from '@/components/ui/flow-mark';
 import { DEFAULT_SCROLL_TOP } from '../utils/grid';
 import type { ReactNode } from 'react';
 
@@ -18,7 +18,7 @@ export function CalendarViewFallback() {
   return (
     <CalendarBoardViewport>
       <div className="grid min-h-0 flex-1 place-items-center" role="status" aria-label="Loading calendar view">
-        <DaylineMark
+        <FlowMark
           animated
           gradient
           className="size-24 opacity-90 drop-shadow-[0_12px_28px_rgb(91_100_230/0.18)]"

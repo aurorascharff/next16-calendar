@@ -162,7 +162,7 @@ main:has([data-calendar-pending]) .calendar-pending-spinner {
   }
 }
 
-@keyframes dayline-mark-enter {
+@keyframes flow-mark-enter {
   from {
     opacity: 0;
     transform: translateX(-5px) scaleX(0.72);
@@ -173,17 +173,17 @@ main:has([data-calendar-pending]) .calendar-pending-spinner {
   }
 }
 
-.dayline-mark-enter rect {
+.flow-mark-enter rect {
   transform-box: fill-box;
   transform-origin: center;
-  animation: dayline-mark-enter 320ms ease-out both;
+  animation: flow-mark-enter 320ms ease-out both;
 }
 
-.dayline-mark-enter rect:nth-child(2) {
+.flow-mark-enter rect:nth-child(2) {
   animation-delay: 70ms;
 }
 
-.dayline-mark-enter rect:nth-child(3) {
+.flow-mark-enter rect:nth-child(3) {
   animation-delay: 140ms;
 }
 
@@ -349,7 +349,7 @@ html.boundary-mode :is([data-component], [data-sonner-toast]) {
     animation-delay: 0s !important;
   }
   .skeleton-animation,
-  .dayline-mark-enter rect,
+  .flow-mark-enter rect,
   [style*='now-pulse'] {
     animation: none !important;
   }

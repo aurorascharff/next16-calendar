@@ -30,11 +30,11 @@ export function CalendarMonthSkeleton({ date }: { date?: string }) {
           </div>
         ))}
       </div>
-      <div className="grid min-h-[48rem] flex-1 grid-cols-7 grid-rows-6">
+      <div className="grid auto-rows-[11rem] grid-cols-7">
         {days.map((day, index) => (
           <div
             className={cn(
-              'border-divider dark:border-divider-dark min-h-32 border-r border-b p-1',
+              'border-divider dark:border-divider-dark border-r border-b p-1.5',
               day && month && !day.startsWith(month) && 'bg-card/25 dark:bg-card-dark/20',
             )}
             key={day ?? index}

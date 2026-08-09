@@ -11,10 +11,10 @@ export async function generateMetadata({ params }: PageProps<'/book/[handle]'>):
   const booking = await getPublicBookingMetadata(handle);
   if (!booking) return { title: 'Booking' };
 
-  const description = `Book a ${booking.duration}-minute time on Dayline.`;
+  const description = `Book a ${booking.duration}-minute time on Flow.`;
   return {
     description,
-    openGraph: { description, siteName: 'Dayline', title: booking.title, type: 'website' },
+    openGraph: { description, siteName: 'Flow', title: booking.title, type: 'website' },
     title: booking.title,
   };
 }
@@ -28,7 +28,7 @@ export default function BookingPage({ params, searchParams }: PageProps<'/book/[
           href="/"
         >
           <ChevronLeft className="size-4" />
-          Dayline
+          Flow
         </Link>
         <div className="grid min-h-0 flex-1 grid-cols-[2.5rem_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-x-3 sm:grid-cols-[2.75rem_minmax(0,1fr)] sm:gap-x-4">
           <div className="bg-primary/15 text-primary grid size-10 place-items-center rounded-full sm:size-11">

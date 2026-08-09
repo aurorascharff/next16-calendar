@@ -1,4 +1,4 @@
-import { DaylineMark } from '@/components/ui/dayline-mark';
+import { FlowMark } from '@/components/ui/flow-mark';
 import { Spinner } from '@/components/ui/spinner';
 import { formatMonth } from '../calendar-utils';
 import { CalendarControls, CalendarViewShortcuts, ViewToggle } from './calendar-controls';
@@ -12,7 +12,7 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
       <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <div className="flex min-w-0 items-center gap-2.5 sm:w-52">
-            <DaylineMark className="size-8 shrink-0 sm:hidden" />
+            <FlowMark className="size-8 shrink-0 sm:hidden" />
             <h1 className="truncate text-lg font-semibold tracking-tight">{formatMonth(date)}</h1>
           </div>
           <div className="hidden items-center gap-2 sm:flex">

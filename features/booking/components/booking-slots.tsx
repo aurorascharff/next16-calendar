@@ -6,8 +6,8 @@ import { useActionState, useOptimistic, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
-import { DaylineMark } from '@/components/ui/dayline-mark';
 import { DirectionalSlide } from '@/components/ui/directional-slide';
+import { FlowMark } from '@/components/ui/flow-mark';
 import { IconButton } from '@/components/ui/icon-button';
 import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
 import { cn } from '@/lib/utils';
@@ -100,7 +100,7 @@ export function BookingSlots({
         {bookedTime ? (
           <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 rounded-lg border p-4">
             <div className="flex items-start gap-3">
-              <DaylineMark animated className="size-9 shrink-0" />
+              <FlowMark animated className="size-9 shrink-0" />
               <div className="min-w-0 pt-0.5">
                 <p className="text-sm font-semibold">You&apos;re booked</p>
                 <p className="text-muted mt-1 text-sm">

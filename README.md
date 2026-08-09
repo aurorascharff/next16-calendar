@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/logo.svg" alt="Dayline" width="72" height="72" />
+<img src="public/logo.svg" alt="Flow" width="72" height="72" />
 
-# Next 16 Calendar "Dayline"
+# Next 16 Calendar "Flow"
 
 A calendar and booking-link workspace that demonstrates [Instant Navigations](https://nextjs.org/docs/app/guides/instant-navigation) in [Next.js 16.3](https://nextjs.org/blog/next-16-3-instant-navigations).
 
@@ -27,7 +27,7 @@ The architecture follows the [Next.js App Architecture](https://github.com/auror
 
 ## Getting started
 
-Dayline runs on SQLite locally with zero setup:
+Flow runs on SQLite locally with zero setup:
 
 ```bash
 pnpm install
