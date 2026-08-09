@@ -153,12 +153,15 @@ function CalendarFormDialog({
   const [color, setColor] = useState<CalendarColor>(calendar?.color ?? colors[0] ?? 'indigo');
 
   const [state, formAction, isPending] = useActionState(
-    async (_prev: { error?: string; key?: number; values?: { name: string } }, formData: FormData) => {
+    async (_prev: { key?: number; values?: { name: string } }, formData: FormData) => {
       const name = String(formData.get('name'));
       const result = calendar
         ? await updateCalendar({ color, id: calendar.id, name })
         : await createCalendar({ color, name });
-      if (result.error) return { error: result.error, key: Date.now(), values: { name } };
+      if (result.error) {
+        toast.error(result.error);
+        return { key: Date.now(), values: { name } };
+      }
       store.hide();
       toast.success(calendar ? 'Calendar updated.' : 'Calendar created.');
       return {};
@@ -203,7 +206,6 @@ function CalendarFormDialog({
             ))}
           </div>
         </div>
-        {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex justify-end gap-2">
           <Button render={<Ariakit.DialogDismiss disabled={isPending} />} variant="ghost">
             Cancel

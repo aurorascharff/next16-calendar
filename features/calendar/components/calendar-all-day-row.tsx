@@ -23,7 +23,7 @@ export function CalendarAllDayRow({
   const eventsByDay = new Map(days.map(day => [day, events.filter(event => getEffectiveDay(event) === day)]));
   const canExpand = Array.from(eventsByDay.values()).some(dayEvents => dayEvents.length > 1);
 
-  const preview = (
+  const content = (
     <div className="grid min-h-8" style={{ gridTemplateColumns: gridTemplate }}>
       <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-center border-r">
         {canExpand ? (
@@ -38,24 +38,31 @@ export function CalendarAllDayRow({
         return (
           <div
             className={cn(
-              'border-divider dark:border-divider-dark flex min-w-0 items-center gap-1 border-r p-1 group-open:pb-0.5',
+              'border-divider dark:border-divider-dark flex min-w-0 flex-col gap-0.5 border-r p-1',
               day === todayKey && 'bg-card dark:bg-card-dark',
             )}
             key={day}
           >
-            {dayEvents[0] ? (
-              <span className="min-w-0 flex-1">
-                <AllDayEventButton event={dayEvents[0]} onSelectEvent={onSelectEvent} preventToggle={canExpand} />
+            <div className="flex min-w-0 gap-1">
+              {dayEvents[0] ? (
+                <span className="min-w-0 flex-1">
+                  <AllDayEventButton event={dayEvents[0]} onSelectEvent={onSelectEvent} preventToggle={canExpand} />
+                </span>
+              ) : null}
+              {hiddenEventCount > 0 ? (
+                <span
+                  aria-label={`${hiddenEventCount} more all-day events on ${formatDay(day)}`}
+                  className="bg-card text-muted dark:bg-card-dark ring-divider dark:ring-divider-dark h-6 shrink-0 rounded-[5px] px-2 text-[11px] leading-6 font-semibold ring-1 group-open:hidden"
+                >
+                  +{hiddenEventCount}
+                </span>
+              ) : null}
+            </div>
+            {dayEvents.slice(1).map(event => (
+              <span className="hidden group-open:block" key={event.id}>
+                <AllDayEventButton event={event} onSelectEvent={onSelectEvent} preventToggle />
               </span>
-            ) : null}
-            {hiddenEventCount > 0 ? (
-              <span
-                aria-label={`${hiddenEventCount} more all-day events on ${formatDay(day)}`}
-                className="bg-card text-muted dark:bg-card-dark ring-divider dark:ring-divider-dark h-6 shrink-0 rounded-[5px] px-2 text-[11px] leading-6 font-semibold ring-1 group-open:hidden"
-              >
-                +{hiddenEventCount}
-              </span>
-            ) : null}
+            ))}
           </div>
         );
       })}
@@ -64,7 +71,7 @@ export function CalendarAllDayRow({
 
   if (!canExpand) {
     return (
-      <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark border-b">{preview}</div>
+      <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark border-b">{content}</div>
     );
   }
 
@@ -74,27 +81,8 @@ export function CalendarAllDayRow({
         aria-label="Toggle all-day events"
         className="group/summary list-none focus-visible:outline-none [&::-webkit-details-marker]:hidden"
       >
-        {preview}
+        {content}
       </summary>
-      <div className="grid" style={{ gridTemplateColumns: gridTemplate }}>
-        <div className="border-divider dark:border-divider-dark border-r" />
-        {days.map(day => {
-          const remainingEvents = (eventsByDay.get(day) ?? []).slice(1);
-          return (
-            <div
-              className={cn(
-                'border-divider dark:border-divider-dark flex min-w-0 flex-col gap-0.5 border-r px-1 pb-1',
-                day === todayKey && 'bg-card dark:bg-card-dark',
-              )}
-              key={day}
-            >
-              {remainingEvents.map(event => (
-                <AllDayEventButton event={event} key={event.id} onSelectEvent={onSelectEvent} />
-              ))}
-            </div>
-          );
-        })}
-      </div>
     </details>
   );
 }
