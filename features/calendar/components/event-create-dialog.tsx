@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { X } from 'lucide-react';
-import { useActionState, useState, type KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,7 @@ export function EventCreateDialog({
   const writableCalendarId =
     defaultCalendarId ?? (calendarOptions.find(calendar => !calendar.isDemo) ?? calendarOptions[0])?.id;
 
-  const [, formAction] = useActionState(async (_prev: null, formData: FormData) => {
+  async function submitAction(formData: FormData) {
     const repeat = String(formData.get('repeat'));
     const allDay = formData.get('allDay') === 'on';
     const values = {
@@ -109,17 +109,16 @@ export function EventCreateDialog({
     if (result.error) {
       if (tempId) onCreateFailed?.(tempId);
       toast.error(result.error);
-      return null;
+      return;
     }
     const created = result.data;
     if (!created) {
       if (tempId) onCreateFailed?.(tempId);
       toast.error('Event was saved, but the response was empty.');
-      return null;
+      return;
     }
     toast.success('Event added to your calendar.');
-    return null;
-  }, null);
+  }
 
   const values = {
     allDay: defaultAllDay,
@@ -168,7 +167,7 @@ export function EventCreateDialog({
           </IconButton>
         </div>
         <form
-          action={formAction}
+          action={submitAction}
           className="mt-3 space-y-3"
           data-calendar-editing
           onKeyDown={handleSubmitShortcut}

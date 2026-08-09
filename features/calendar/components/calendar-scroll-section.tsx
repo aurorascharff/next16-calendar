@@ -20,7 +20,8 @@ export function CalendarViewFallback() {
       <div className="grid min-h-0 flex-1 place-items-center" role="status" aria-label="Loading calendar view">
         <DaylineMark
           animated
-          className="bg-primary ring-primary/25 shadow-soft size-24 rounded-2xl p-3 text-white ring-1"
+          gradient
+          className="size-24 opacity-90 drop-shadow-[0_12px_28px_rgb(91_100_230/0.18)]"
         />
       </div>
     </CalendarBoardViewport>
