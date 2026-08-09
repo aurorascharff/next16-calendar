@@ -18,31 +18,32 @@ model User {
 }
 
 model Calendar {
-  id        String          @id @default(cuid())
-  name      String
-  color     String
-  isDemo    Boolean         @default(false)
-  userId    String?
-  createdAt DateTime        @default(now())
-  user      User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  events    CalendarEvent[]
+  id           String          @id @default(cuid())
+  name         String
+  color        String
+  isDemo       Boolean         @default(false)
+  userId       String?
+  createdAt    DateTime        @default(now())
+  user         User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events       CalendarEvent[]
+  bookingPages BookingPage[]
 
   @@index([userId])
 }
 
 model CalendarEvent {
-  id         String   @id @default(cuid())
-  title      String
+  id          String   @id @default(cuid())
+  title       String
   description String?
-  day        DateTime
-  allDay     Boolean  @default(false)
-  start      String
-  duration   Int      @default(60)
-  recurrence String?
-  demo       Boolean  @default(false)
-  calendarId String
-  userId     String?
-  createdAt  DateTime @default(now())
+  day         DateTime
+  allDay      Boolean  @default(false)
+  start       String
+  duration    Int      @default(60)
+  recurrence  String?
+  demo        Boolean  @default(false)
+  calendarId  String
+  userId      String?
+  createdAt   DateTime @default(now())
 
   user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   calendar Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
@@ -52,25 +53,29 @@ model CalendarEvent {
 }
 
 model BookingPage {
-  id          String    @id @default(cuid())
-  handle      String    @unique
-  title       String
-  duration    Int       @default(30)
-  startTime   String    @default("09:30")
-  endTime     String    @default("16:00")
-  active      Boolean   @default(true)
-  userId      String
-  createdAt   DateTime  @default(now())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bookings    Booking[]
+  id         String    @id @default(cuid())
+  handle     String    @unique
+  title      String
+  duration   Int       @default(30)
+  startTime  String    @default("09:30")
+  endTime    String    @default("16:00")
+  active     Boolean   @default(true)
+  calendarId String?
+  userId     String
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  calendar   Calendar? @relation(fields: [calendarId], references: [id], onDelete: SetNull)
+  bookings   Booking[]
+
+  @@index([calendarId])
 }
 
 model Booking {
-  id            String      @id @default(cuid())
+  id            String   @id @default(cuid())
   guestName     String
   startsAt      DateTime
   bookingPageId String
-  createdAt     DateTime    @default(now())
+  createdAt     DateTime @default(now())
 
   bookingPage BookingPage @relation(fields: [bookingPageId], references: [id], onDelete: Cascade)
 

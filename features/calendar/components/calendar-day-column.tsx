@@ -1,6 +1,6 @@
 'use client';
 
-import { Crossfade } from '@/components/ui/crossfade';
+import { ViewTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { timeToMinutes } from '../calendar-utils';
 import { chipStyle } from '../utils/colors';
@@ -24,20 +24,18 @@ function CalendarEventLayer({
   const layout = packDay(events);
 
   return (
-    <Crossfade>
-      <div className="pointer-events-none absolute inset-0 z-10">
-        {events.map(event => {
-          const startMin =
-            interaction.dragMove?.id === event.id ? interaction.dragMove.startMin : timeToMinutes(event.start);
-          const isResizing = interaction.resize?.sourceId === event.sourceId;
-          const isDragging = interaction.dragMove?.id === event.id;
-          const displayDuration = isResizing
-            ? interaction.resize!.endMin - interaction.resize!.startMin
-            : event.duration;
-          const height = eventHeight(displayDuration);
-          const place = layout.get(event.id) ?? { col: 0, cols: 1 };
-          const widthPct = 100 / place.cols;
-          return (
+    <div className="pointer-events-none absolute inset-0 z-10">
+      {events.map(event => {
+        const startMin =
+          interaction.dragMove?.id === event.id ? interaction.dragMove.startMin : timeToMinutes(event.start);
+        const isResizing = interaction.resize?.sourceId === event.sourceId;
+        const isDragging = interaction.dragMove?.id === event.id;
+        const displayDuration = isResizing ? interaction.resize!.endMin - interaction.resize!.startMin : event.duration;
+        const height = eventHeight(displayDuration);
+        const place = layout.get(event.id) ?? { col: 0, cols: 1 };
+        const widthPct = 100 / place.cols;
+        return (
+          <ViewTransition default="auto" enter="auto" exit="auto" key={event.id}>
             <EventChip
               event={event}
               height={height}
@@ -59,10 +57,10 @@ function CalendarEventLayer({
               top={((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT}
               width={`calc(${widthPct}% - 4px)`}
             />
-          );
-        })}
-      </div>
-    </Crossfade>
+          </ViewTransition>
+        );
+      })}
+    </div>
   );
 }
 

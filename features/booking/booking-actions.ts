@@ -12,6 +12,7 @@ const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', '
 
 type AvailabilityInput = {
   active: boolean;
+  calendarId: string;
   duration: number;
   endTime: string;
   startTime: string;
@@ -90,10 +91,14 @@ export async function bookSlot({
   const startsAt = new Date(`${day}T${slot}:00.000Z`);
   try {
     await prisma.$transaction(async tx => {
-      const calendar = await tx.calendar.findFirst({
-        orderBy: { createdAt: 'desc' },
-        where: { isDemo: false, userId: bookingPage.userId },
-      });
+      const calendar = bookingPage.calendarId
+        ? await tx.calendar.findFirst({
+            where: { id: bookingPage.calendarId, isDemo: false, userId: bookingPage.userId },
+          })
+        : await tx.calendar.findFirst({
+            orderBy: { createdAt: 'desc' },
+            where: { isDemo: false, userId: bookingPage.userId },
+          });
 
       if (!calendar) {
         throw new Error('calendar-not-enabled');
@@ -136,7 +141,9 @@ export async function bookSlot({
 
 export async function updateBookingAvailability(input: AvailabilityInput) {
   const title = input.title.trim();
+  const calendarId = input.calendarId.trim();
   if (!title) return { error: 'Give your booking page a title.' };
+  if (!calendarId) return { error: 'Choose a calendar for bookings.' };
   if (!timePattern.test(input.startTime) || !timePattern.test(input.endTime)) {
     return { error: 'Choose a valid time window.' };
   }
@@ -149,10 +156,16 @@ export async function updateBookingAvailability(input: AvailabilityInput) {
   }
 
   const user = await verifyAuth();
+  const calendar = await prisma.calendar.findFirst({
+    select: { id: true },
+    where: { id: calendarId, isDemo: false, userId: user.id },
+  });
+  if (!calendar) return { error: 'Choose one of your calendars for bookings.' };
 
   const page = await prisma.bookingPage.upsert({
     create: {
       active: input.active,
+      calendarId: calendar.id,
       duration: input.duration,
       endTime: input.endTime,
       handle: user.handle,
@@ -162,6 +175,7 @@ export async function updateBookingAvailability(input: AvailabilityInput) {
     },
     update: {
       active: input.active,
+      calendarId: calendar.id,
       duration: input.duration,
       endTime: input.endTime,
       startTime: input.startTime,

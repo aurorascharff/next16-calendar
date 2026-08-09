@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
+import { calendarCache } from '@/features/calendar/calendar-queries';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
@@ -57,11 +58,16 @@ export async function getBookingAvailability(handle: string, date: string) {
       where: { OR: [{ userId: bookingPage.user.id }, { userId: null }] },
     }),
   ]);
-  const calendar = await prisma.calendar.findFirst({
-    orderBy: { createdAt: 'desc' },
-    select: { name: true },
-    where: { isDemo: false, userId: bookingPage.user.id },
-  });
+  const calendarId =
+    bookingPage.calendarId ??
+    (
+      await prisma.calendar.findFirst({
+        orderBy: { createdAt: 'desc' },
+        select: { id: true },
+        where: { isDemo: false, userId: bookingPage.user.id },
+      })
+    )?.id ??
+    null;
 
   const bookedMinutes = new Set(
     bookings.map(booking => booking.startsAt.getUTCHours() * 60 + booking.startsAt.getUTCMinutes()),
@@ -85,11 +91,11 @@ export async function getBookingAvailability(handle: string, date: string) {
   );
 
   return {
-    calendarName: calendar?.name ?? null,
     day,
     duration: bookingPage.duration,
     endTime: bookingPage.endTime,
     handle: bookingPage.handle,
+    hasCalendar: Boolean(calendarId),
     name: bookingPage.user.name,
     slots,
     startTime: bookingPage.startTime,
@@ -105,10 +111,16 @@ export async function getMyBookingProfile(handle: string) {
   const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
   if (!bookingPage) return null;
 
-  const calendar = await prisma.calendar.findFirst({
-    select: { id: true },
-    where: { isDemo: false, userId: bookingPage.userId },
-  });
+  const calendar = bookingPage.calendarId
+    ? await prisma.calendar.findFirst({
+        select: { id: true },
+        where: { id: bookingPage.calendarId, isDemo: false, userId: bookingPage.userId },
+      })
+    : await prisma.calendar.findFirst({
+        orderBy: { createdAt: 'desc' },
+        select: { id: true },
+        where: { isDemo: false, userId: bookingPage.userId },
+      });
 
   return {
     active: bookingPage.active,
@@ -121,15 +133,30 @@ export async function getMyBookingProfile(handle: string) {
   };
 }
 
+async function getWritableCalendars(userId: string) {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(calendarCache.calendarsTag);
+
+  return prisma.calendar.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: { color: true, id: true, name: true },
+    where: { isDemo: false, userId },
+  });
+}
+
 async function getMyBookingSettingsForUser(userId: string, handle: string) {
   'use cache';
   cacheLife('hours');
   cacheTag(bookingCache.tag(handle));
 
+  const calendars = await getWritableCalendars(userId);
   const bookingPage = await prisma.bookingPage.findFirst({ where: { handle, userId } });
   if (!bookingPage) {
     return {
       active: true,
+      calendarId: calendars[0]?.id ?? '',
+      calendars,
       duration: 30,
       endTime: '16:00',
       handle,
@@ -140,6 +167,8 @@ async function getMyBookingSettingsForUser(userId: string, handle: string) {
 
   return {
     active: bookingPage.active,
+    calendarId: bookingPage.calendarId ?? calendars[0]?.id ?? '',
+    calendars,
     duration: bookingPage.duration,
     endTime: bookingPage.endTime,
     handle: bookingPage.handle,

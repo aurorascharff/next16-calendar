@@ -32,9 +32,8 @@ export async function BookingProfile({ date, handle }: { date?: string; handle: 
           </div>
         </div>
         <div className="border-divider dark:border-divider-dark mt-8 border-t pt-6">
-          {availability.calendarName ? (
+          {availability.hasCalendar ? (
             <BookingSlots
-              calendarName={availability.calendarName}
               day={availability.day}
               duration={availability.duration}
               handle={availability.handle}
@@ -63,33 +62,18 @@ export function BookingProfileSkeleton() {
   return (
     <main className="bg-surface dark:bg-surface-dark grid min-h-dvh items-start justify-items-center px-4 py-8">
       <section className="w-full max-w-xl p-5 sm:p-8">
-        <div className="skeleton-animation mb-7 h-4 w-24 rounded-full" />
+        <div className="skeleton-animation mb-7 h-4 w-20 rounded-full" />
         <div className="flex items-start gap-4">
           <div className="skeleton-animation size-11 rounded-full" />
           <div className="min-w-0 flex-1">
-            <div className="skeleton-animation h-3 w-28 rounded-full" />
-            <div className="skeleton-animation mt-3 h-5 w-2/3 rounded-full" />
-            <div className="skeleton-animation mt-3 h-3 w-44 rounded-full" />
+            <div className="skeleton-animation h-3 w-32 rounded-full" />
+            <div className="skeleton-animation mt-3 h-5 w-3/4 max-w-80 rounded-full" />
+            <div className="skeleton-animation mt-3 h-3 w-48 max-w-full rounded-full" />
           </div>
         </div>
-        <div className="mt-8 pt-6">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div className="skeleton-animation h-4 w-4 rounded-full" />
-            <div className="skeleton-animation h-4 w-32 rounded-full" />
-            <div className="skeleton-animation h-4 w-4 rounded-full" />
-          </div>
-          <div className="mb-4 space-y-2">
-            <div className="skeleton-animation h-3 w-20 rounded-full" />
-            <div className="skeleton-animation h-3 w-36 rounded-full" />
-          </div>
-          <div className="skeleton-animation mb-2 h-3 w-24 rounded-full" />
-          <div className="min-h-80 pt-3">
-            <div className="grid gap-5 sm:grid-cols-2">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div className="skeleton-animation h-3 w-24 rounded-full" key={index} />
-              ))}
-            </div>
-          </div>
+        <div className="mt-10 space-y-3">
+          <div className="skeleton-animation h-3 w-28 rounded-full" />
+          <div className="skeleton-animation h-3 w-full max-w-sm rounded-full" />
         </div>
       </section>
     </main>

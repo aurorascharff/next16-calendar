@@ -24,13 +24,11 @@ function DayNavigationIcon({ direction }: { direction: 'next' | 'previous' }) {
 }
 
 export function BookingSlots({
-  calendarName,
   day,
   duration,
   handle,
   slots,
 }: {
-  calendarName: string;
   day: string;
   duration: number;
   handle: string;
@@ -154,7 +152,7 @@ export function BookingSlots({
           <div className="min-w-0">
             <p className="text-sm font-semibold tabular-nums">{selectedAvailable?.time ?? 'Choose a time'}</p>
             <p className="text-muted text-xs">
-              {selectedAvailable ? `${duration} minutes on ${calendarName}` : `${duration}-minute meeting`}
+              {selectedAvailable ? `${duration} minutes` : `${duration}-minute meeting`}
             </p>
           </div>
           <Button className="h-10 shrink-0 px-4" type="submit">
