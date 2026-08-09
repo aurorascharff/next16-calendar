@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Link, { useLinkStatus } from 'next/link';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { shiftDay, shiftWeek } from '../calendar-utils';
 import { useTodayKey } from '../hooks/use-now';
@@ -16,6 +16,11 @@ function calendarHref(date: string, view: CalendarView) {
   return `/calendar/${date}${view === 'day' ? '?view=day' : ''}` as Route;
 }
 
+function todayTransitionTypes(date: string, today: string) {
+  if (today === date) return undefined;
+  return [today < date ? 'nav-back' : 'nav-forward'];
+}
+
 export function CalendarControls({ date, view }: { date: string; view: CalendarView }) {
   const today = useTodayKey();
   const previous = view === 'day' ? shiftDay(date, -1) : shiftWeek(date, -1);
@@ -27,7 +32,12 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
   return (
     <div className="flex items-center gap-1">
       {today ? (
-        <Link className={todayButton} href={calendarHref(today, view)} prefetch>
+        <Link
+          className={todayButton}
+          href={calendarHref(today, view)}
+          prefetch
+          transitionTypes={todayTransitionTypes(date, today)}
+        >
           Today
         </Link>
       ) : (
@@ -41,9 +51,7 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
           prefetch
           transitionTypes={['nav-back']}
         >
-          <PendingGlimmer>
-            <ChevronLeft className="size-4.5" />
-          </PendingGlimmer>
+          <ChevronLeft className="size-4.5" />
         </Link>
         <Link
           aria-label={view === 'day' ? 'Next day' : 'Next week'}
@@ -52,9 +60,7 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
           prefetch
           transitionTypes={['nav-forward']}
         >
-          <PendingGlimmer>
-            <ChevronRight className="size-4.5" />
-          </PendingGlimmer>
+          <ChevronRight className="size-4.5" />
         </Link>
       </div>
       <DatePicker date={date} />
@@ -75,7 +81,7 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
         href={calendarHref(date, 'week')}
         prefetch
       >
-        <PendingGlimmer>Week</PendingGlimmer>
+        Week
       </Link>
       <Link
         aria-current={view === 'day' ? 'page' : undefined}
@@ -83,15 +89,8 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
         href={calendarHref(date, 'day')}
         prefetch
       >
-        <PendingGlimmer>Day</PendingGlimmer>
+        Day
       </Link>
     </div>
-  );
-}
-
-function PendingGlimmer({ children }: { children: React.ReactNode }) {
-  const { pending } = useLinkStatus();
-  return (
-    <span className={cn('inline-flex items-center gap-1.5', pending && 'text-accent animate-pulse')}>{children}</span>
   );
 }

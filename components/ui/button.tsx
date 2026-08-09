@@ -15,7 +15,7 @@ type Props = {
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex items-center justify-center gap-2 rounded-md font-semibold whitespace-nowrap transition-[background-color,box-shadow,transform,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100';
 
 const sizes: Record<Size, string> = {
   default: 'px-3.5 py-2 text-sm',
@@ -29,6 +29,18 @@ const variants: Record<Variant, string> = {
   secondary:
     'border border-divider bg-white text-black hover:bg-card dark:border-divider-dark dark:bg-transparent dark:text-white dark:hover:bg-card-dark',
 };
+
+export function buttonClasses({
+  className,
+  size = 'default',
+  variant = 'primary',
+}: {
+  className?: string;
+  size?: Size;
+  variant?: Variant;
+} = {}) {
+  return cn(base, sizes[size], variants[variant], className);
+}
 
 export function Button({
   children,
@@ -47,7 +59,7 @@ export function Button({
     <button
       type={type}
       disabled={isDisabled}
-      className={cn(base, sizes[size], variants[variant], className)}
+      className={buttonClasses({ className, size, variant })}
       {...props}
     >
       {isSubmit && pending && <Spinner />}

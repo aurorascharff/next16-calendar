@@ -61,22 +61,18 @@ export function CalendarBoard({
           <Spinner className="size-4" />
         </div>
       ) : null}
-      <CalendarDayHeaderRow
-        days={days}
-        gridMinWidth={gridMinWidth}
-        gridTemplate={gridTemplate}
-        todayKey={todayKey}
-      />
-      <CalendarAllDayRow
-        days={days}
-        events={allDayEvents}
-        getEffectiveDay={effectiveDay}
-        gridMinWidth={gridMinWidth}
-        gridTemplate={gridTemplate}
-        onCreateAllDay={handleAllDayCreate}
-        onSelectEvent={setSelectedEvent}
-        todayKey={todayKey}
-      />
+      <div className="sticky top-0 z-30" style={{ minWidth: gridMinWidth }}>
+        <CalendarDayHeaderRow days={days} gridTemplate={gridTemplate} todayKey={todayKey} />
+        <CalendarAllDayRow
+          days={days}
+          events={allDayEvents}
+          getEffectiveDay={effectiveDay}
+          gridTemplate={gridTemplate}
+          onCreateAllDay={handleAllDayCreate}
+          onSelectEvent={setSelectedEvent}
+          todayKey={todayKey}
+        />
+      </div>
       <div className="grid pt-3" ref={gridRef} style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
         <div className="border-divider dark:border-divider-dark border-r">
           {HOURS.map(hour => (
@@ -122,7 +118,7 @@ export function CalendarBoard({
           defaultCalendarId={defaultCalendar?.id}
           defaultDuration={createDraft.duration}
           defaultStart={createDraft.start}
-          key={`${createDraft.day}-${createDraft.start}-${createDraft.duration}`}
+          key={`${createDraft.day}-${createDraft.start}-${createDraft.duration}-${createDraft.allDay}`}
           store={createStore}
         />
       ) : null}
@@ -135,28 +131,30 @@ export function CalendarBoardSkeleton({ days = 7 }: { days?: number }) {
   const minWidth = days > 1 ? 760 : undefined;
   return (
     <div>
-      <div
-        className="border-divider dark:border-divider-dark grid border-b"
-        style={{ gridTemplateColumns: gridTemplate, minWidth }}
-      >
-        <div />
-        {Array.from({ length: days }).map((_, index) => (
-          <div className="flex items-center gap-1.5 px-3 py-1.5" key={index}>
-            <div className="skeleton-animation h-3 w-6 rounded" />
-            <div className="skeleton-animation size-7 rounded-full" />
-          </div>
-        ))}
-      </div>
-      <div
-        className="border-divider dark:border-divider-dark bg-surface/70 dark:bg-surface-dark/70 grid border-b"
-        style={{ gridTemplateColumns: gridTemplate, minWidth }}
-      >
-        <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-end border-r px-3 py-1.5 text-[11px] font-medium">
-          All day
+      <div className="sticky top-0 z-30" style={{ minWidth }}>
+        <div
+          className="border-divider bg-surface/90 dark:border-divider-dark dark:bg-surface-dark/90 grid border-b backdrop-blur"
+          style={{ gridTemplateColumns: gridTemplate }}
+        >
+          <div />
+          {Array.from({ length: days }).map((_, index) => (
+            <div className="flex items-center gap-1.5 px-3 py-1.5" key={index}>
+              <div className="skeleton-animation h-3 w-6 rounded" />
+              <div className="skeleton-animation size-7 rounded-full" />
+            </div>
+          ))}
         </div>
-        {Array.from({ length: days }).map((_, index) => (
-          <div className="border-divider dark:border-divider-dark min-h-9 border-r p-1" key={index} />
-        ))}
+        <div
+          className="border-divider dark:border-divider-dark bg-surface/70 dark:bg-surface-dark/70 grid border-b"
+          style={{ gridTemplateColumns: gridTemplate }}
+        >
+          <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-end border-r px-3 py-1.5 text-[11px] font-medium">
+            All day
+          </div>
+          {Array.from({ length: days }).map((_, index) => (
+            <div className="border-divider dark:border-divider-dark min-h-9 border-r p-1" key={index} />
+          ))}
+        </div>
       </div>
       <div className="grid pt-3" style={{ gridTemplateColumns: gridTemplate, minWidth }}>
         <div className="border-divider dark:border-divider-dark border-r">

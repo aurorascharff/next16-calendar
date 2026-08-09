@@ -31,6 +31,9 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
+
+  --shadow-soft: 0 2px 8px -2px rgb(24 24 27 / 0.12), 0 4px 16px -4px rgb(24 24 27 / 0.1);
+  --shadow-accent: 0 1px 2px 0 rgb(27 80 255 / 0.28), 0 2px 8px -2px rgb(27 80 255 / 0.35);
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -57,7 +60,7 @@
   input:disabled,
   textarea:disabled,
   select:disabled {
-    @apply bg-card text-muted opacity-60 dark:bg-card-dark;
+    @apply bg-card text-muted dark:bg-card-dark opacity-60;
     cursor: not-allowed;
   }
 

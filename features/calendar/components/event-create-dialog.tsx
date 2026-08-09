@@ -4,6 +4,7 @@ import * as Ariakit from '@ariakit/react';
 import { X } from 'lucide-react';
 import { useActionState, useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
 import { CalendarPicker } from './calendar-picker';
@@ -114,7 +115,7 @@ export function EventCreateDialog({
         </div>
         <Ariakit.PopoverDismiss
           aria-label="Close"
-          className="text-muted hover:bg-card dark:hover:bg-card-dark -mr-1 inline-grid size-8 place-items-center rounded-md transition-colors hover:text-black dark:hover:text-white"
+          className="text-muted hover:bg-card focus-visible:ring-accent dark:hover:bg-card-dark -mr-1 inline-grid size-8 place-items-center rounded-md transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none dark:hover:text-white"
           disabled={isPending}
         >
           <X className="size-4" />
@@ -189,18 +190,14 @@ export function EventCreateDialog({
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex justify-end gap-2">
           <Ariakit.PopoverDismiss
-            className="text-muted rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black disabled:opacity-50 dark:hover:text-white"
+            className="text-muted focus-visible:ring-accent rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:hover:text-white"
             disabled={isPending}
           >
             Cancel
           </Ariakit.PopoverDismiss>
-          <button
-            className="bg-accent hover:bg-accent-hover rounded-md px-3.5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-60"
-            disabled={isPending}
-            type="submit"
-          >
+          <Button disabled={isPending} type="submit">
             {isPending ? 'Saving…' : 'Create event'}
-          </button>
+          </Button>
         </div>
       </form>
     </Ariakit.Popover>

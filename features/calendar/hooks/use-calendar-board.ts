@@ -97,9 +97,10 @@ export function useCalendarBoard({
     y0: number;
   } | null>(null);
   const resizeColTopRef = useRef(0);
+  const dragMoveRef = useRef<{ day: string; id: string; startMin: number } | null>(null);
   const suppressClickRef = useRef(false);
   const createStore = Ariakit.usePopoverStore({
-    placement: 'bottom-start',
+    placement: 'top-start',
     setOpen(open) {
       if (!open) {
         setCreateDraft(null);
@@ -163,7 +164,9 @@ export function useCalendarBoard({
     const raw = pointToMinutes(pointerEvent.clientY) - origin.grabOffsetMin;
     const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES;
     const startMin = Math.max(START_HOUR * 60, Math.min(END_MINUTES - origin.duration, snapped));
-    setDragMove({ day, id: origin.id, startMin });
+    const target = { day, id: origin.id, startMin };
+    dragMoveRef.current = target;
+    setDragMove(target);
   }
 
   function handleMoveUp(pointerEvent: React.PointerEvent<HTMLElement>) {
@@ -172,13 +175,14 @@ export function useCalendarBoard({
     try {
       pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId);
     } catch {}
-    const target = dragMove;
+    const target = dragMoveRef.current;
+    dragMoveRef.current = null;
     setDragMove(null);
     if (!origin || !origin.moved || !target) return;
     suppressClickRef.current = true;
-    requestAnimationFrame(() => {
+    window.setTimeout(() => {
       suppressClickRef.current = false;
-    });
+    }, 120);
     const start = minutesToTime(target.startMin);
     const { day, id } = target;
     const sourceId = origin.sourceId;
@@ -191,6 +195,7 @@ export function useCalendarBoard({
 
   function handleMoveCancel() {
     moveRef.current = null;
+    dragMoveRef.current = null;
     setDragMove(null);
   }
 

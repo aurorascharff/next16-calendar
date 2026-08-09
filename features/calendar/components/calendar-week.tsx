@@ -1,3 +1,4 @@
+import { RouteTransition } from '@/components/ui/route-transition';
 import { getCalendars, getCalendarWeek } from '../calendar-queries';
 import { CalendarBoard, CalendarBoardSkeleton } from './calendar-board';
 import type { CalendarView } from '../types/calendar';
@@ -7,9 +8,11 @@ export async function CalendarWeek({ date, view }: { date: string; view: Calenda
   const days = view === 'day' ? [date] : week.days;
 
   return (
-    <section className="min-h-0 flex-1 overflow-auto" data-calendar-scroll>
-      <CalendarBoard calendars={calendars} days={days} events={week.events} view={view} />
-    </section>
+    <RouteTransition slideKey={date}>
+      <section className="min-h-0 flex-1 overflow-auto" data-calendar-scroll>
+        <CalendarBoard calendars={calendars} days={days} events={week.events} view={view} />
+      </section>
+    </RouteTransition>
   );
 }
 

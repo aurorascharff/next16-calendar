@@ -1,11 +1,11 @@
 import { CalendarDays, Link2, LogOut } from 'lucide-react';
-import Link from 'next/link';
 import { Suspense, ViewTransition } from 'react';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Crossfade } from '@/components/ui/crossfade';
 import { GitHubIcon } from '@/components/ui/github-icon';
 import { NavLink } from '@/components/ui/nav-link';
 import { getCalendars } from '@/features/calendar/calendar-queries';
+import { CalendarHomeLink, CalendarHomeNavLink } from '@/features/calendar/components/calendar-home-link';
 import { CalendarManager } from '@/features/calendar/components/calendar-manager';
 import { MiniMonth } from '@/features/calendar/components/mini-month';
 import { signOut } from '@/features/user/user-actions';
@@ -20,21 +20,21 @@ export function CalendarNavigation() {
   return (
     <ViewTransition name="sidebar" default="none">
       <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-64 shrink-0 flex-col border-r p-3 md:flex">
-        <Link href="/" className="mb-6 flex items-center gap-2.5 px-2">
+        <CalendarHomeLink className="mb-6 flex items-center gap-2.5 px-2">
           <span className="bg-accent grid size-8 place-items-center rounded-md text-white">
             <CalendarDays className="size-4.5" strokeWidth={2.25} />
           </span>
           <span>
-            <span className="block font-semibold tracking-tight">Cadence</span>
+            <span className="block font-semibold tracking-tight">Pace</span>
             <span className="text-muted block text-xs">Calendar workspace</span>
           </span>
-        </Link>
+        </CalendarHomeLink>
 
         <nav className="flex flex-col gap-1">
-          <NavLink href="/" match="/calendar" className={sidebarLink}>
+          <CalendarHomeNavLink className={sidebarLink}>
             <CalendarDays className="size-4" />
             Calendar
-          </NavLink>
+          </CalendarHomeNavLink>
           <NavLink href="/booking" className={sidebarLink}>
             <Link2 className="size-4" />
             Booking link
@@ -123,10 +123,10 @@ export function MobileCalendarNavigation() {
         aria-label="Primary"
         className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark fixed inset-x-0 bottom-0 z-30 flex border-t pb-[env(safe-area-inset-bottom)] md:hidden"
       >
-        <NavLink href="/" match="/calendar" className={mobileTab}>
+        <CalendarHomeNavLink className={mobileTab}>
           <CalendarDays className="size-5" />
           Calendar
-        </NavLink>
+        </CalendarHomeNavLink>
         <NavLink href="/booking" className={mobileTab}>
           <Link2 className="size-5" />
           Booking

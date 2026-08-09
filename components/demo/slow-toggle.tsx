@@ -16,7 +16,7 @@ export function SlowToggle({ enabled }: { enabled: boolean }) {
       className={cn(
         'inline-flex h-8 items-center gap-2 rounded-full border px-2.5 text-xs font-medium transition-colors',
         optimisticEnabled
-          ? 'border-transparent bg-accent-fade text-accent'
+          ? 'bg-accent-fade text-accent border-transparent'
           : 'border-divider dark:border-divider-dark text-muted hover:text-black dark:hover:text-white',
       )}
       onClick={() =>

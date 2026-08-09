@@ -4,6 +4,7 @@ import * as Ariakit from '@ariakit/react';
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { createCalendar, deleteCalendar, updateCalendar } from '../calendar-actions';
@@ -181,13 +182,9 @@ function CalendarFormDialog({
           >
             Cancel
           </Ariakit.DialogDismiss>
-          <button
-            className="bg-accent hover:bg-accent-hover rounded-md px-3.5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-60"
-            disabled={isPending}
-            type="submit"
-          >
+          <Button disabled={isPending} type="submit">
             {isPending ? 'Saving…' : calendar ? 'Save' : 'Create'}
-          </button>
+          </Button>
         </div>
       </form>
     </Dialog>

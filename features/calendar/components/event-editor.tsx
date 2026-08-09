@@ -4,6 +4,7 @@ import * as Ariakit from '@ariakit/react';
 import { Trash2, X } from 'lucide-react';
 import { useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { deleteEvent, updateEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
 import type { CalendarEvent } from '../types/calendar';
@@ -36,7 +37,7 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
   const [isDeleting, startDelete] = useTransition();
   const store = Ariakit.usePopoverStore({
     defaultOpen: true,
-    placement: 'bottom-start',
+    placement: 'top-start',
     setOpen(open) {
       if (!open) onClose();
     },
@@ -120,7 +121,7 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
         </div>
         <Ariakit.PopoverDismiss
           aria-label="Close"
-          className="text-muted hover:bg-card dark:hover:bg-card-dark -mr-1 rounded-md p-1 transition-colors hover:text-black dark:hover:text-white"
+          className="text-muted hover:bg-card focus-visible:ring-accent dark:hover:bg-card-dark -mr-1 rounded-md p-1 transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none dark:hover:text-white"
           disabled={busy}
         >
           <X className="size-4" />
@@ -182,18 +183,14 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
           </button>
           <div className="flex gap-2">
             <Ariakit.PopoverDismiss
-              className="text-muted rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black disabled:opacity-50 dark:hover:text-white"
+              className="text-muted focus-visible:ring-accent rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:hover:text-white"
               disabled={busy}
             >
               Cancel
             </Ariakit.PopoverDismiss>
-            <button
-              className="bg-accent hover:bg-accent-hover rounded-md px-3.5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-60"
-              disabled={busy}
-              type="submit"
-            >
+            <Button disabled={busy} type="submit">
               {isSaving ? 'Saving…' : 'Save changes'}
-            </button>
+            </Button>
           </div>
         </div>
       </form>

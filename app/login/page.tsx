@@ -1,23 +1,32 @@
 import { CalendarDays } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import { SignInForm } from '@/features/user/components/sign-in-form';
 import { getCurrentUser } from '@/features/user/user-queries';
 
-export default async function LoginPage() {
+export default function LoginPage() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <LoginRedirect />
+      </Suspense>
+      <main className="bg-surface dark:bg-surface-dark grid min-h-dvh place-items-center px-6">
+        <div className="w-full max-w-sm">
+          <div className="mb-6 flex items-center justify-center gap-2 text-2xl font-bold tracking-tight">
+            <span className="bg-accent grid size-8 place-items-center rounded-md text-white">
+              <CalendarDays className="size-5" strokeWidth={2.25} />
+            </span>
+            <span>Pace</span>
+          </div>
+          <SignInForm />
+        </div>
+      </main>
+    </>
+  );
+}
+
+async function LoginRedirect() {
   const user = await getCurrentUser();
   if (user) redirect('/');
-
-  return (
-    <main className="bg-surface dark:bg-surface-dark grid min-h-dvh place-items-center px-6">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex items-center justify-center gap-2 text-2xl font-bold tracking-tight">
-          <span className="bg-accent grid size-8 place-items-center rounded-md text-white">
-            <CalendarDays className="size-5" strokeWidth={2.25} />
-          </span>
-          <span>Cadence</span>
-        </div>
-        <SignInForm />
-      </div>
-    </main>
-  );
+  return null;
 }

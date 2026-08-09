@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { updateBookingAvailability } from '../booking-actions';
 
 type Settings = {
@@ -98,13 +99,9 @@ export function BookingSettingsForm({ settings }: { settings: Settings }) {
       </div>
       {state.error ? <p className="text-danger mt-4 text-sm">{state.error}</p> : null}
       <div className="mt-5 flex justify-end">
-        <button
-          className="bg-accent hover:bg-accent-hover rounded-md px-3.5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-60"
-          disabled={isPending}
-          type="submit"
-        >
-          {isPending ? 'Saving...' : 'Save settings'}
-        </button>
+        <Button disabled={isPending} type="submit">
+          {isPending ? 'Saving…' : 'Save settings'}
+        </Button>
       </div>
     </form>
   );

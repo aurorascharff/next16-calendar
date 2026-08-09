@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { Spinner } from '@/components/ui/spinner';
+import { Button } from '@/components/ui/button';
 import { signIn } from '../user-actions';
 
 export function SignInForm() {
@@ -26,14 +26,9 @@ export function SignInForm() {
           {state.error}
         </p>
       ) : null}
-      <button
-        className="bg-accent hover:bg-accent-hover mt-1 inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-50"
-        disabled={isPending}
-        type="submit"
-      >
-        {isPending ? <Spinner /> : null}
+      <Button className="mt-1 w-full py-2.5" disabled={isPending} type="submit">
         {isPending ? 'Signing in…' : 'Continue'}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -1,9 +1,10 @@
 'use client';
 
-import { Check, Copy, ExternalLink } from 'lucide-react';
+import { Check, Copy, ExternalLink, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { buttonClasses } from '@/components/ui/button';
 import type { Route } from 'next';
 
 export function BookingLink({ handle }: { handle: string }) {
@@ -19,26 +20,27 @@ export function BookingLink({ handle }: { handle: string }) {
 
   return (
     <div className="border-divider dark:border-divider-dark mt-5 border-t pt-4">
-      <p className="text-muted text-xs font-medium">Share link</p>
-      <div className="mt-1 flex flex-wrap items-center gap-2">
-        <p className="min-w-0 flex-1 truncate text-sm font-semibold text-black dark:text-white">{path}</p>
-        <button
-          className="bg-accent hover:bg-accent-hover inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-white transition-colors"
-          onClick={copy}
-          type="button"
-        >
-          {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-          {copied ? 'Copied' : 'Copy link'}
-        </button>
-        <Link
-          className="border-divider text-muted hover:bg-card dark:border-divider-dark dark:hover:bg-card-dark inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:text-black dark:hover:text-white"
-          href={path as Route}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <ExternalLink className="size-4" />
-          Preview
-        </Link>
+      <p className="text-muted mb-2 text-xs font-medium">Share link</p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/50 flex min-w-0 flex-1 items-center gap-2 rounded-md border px-3 py-2">
+          <Link2 className="text-muted size-4 shrink-0" />
+          <span className="min-w-0 flex-1 truncate font-mono text-sm text-black dark:text-white">{path}</span>
+        </div>
+        <div className="flex gap-2">
+          <button className={buttonClasses({ className: 'flex-1 sm:flex-none' })} onClick={copy} type="button">
+            {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+            {copied ? 'Copied' : 'Copy link'}
+          </button>
+          <Link
+            className={buttonClasses({ className: 'flex-1 sm:flex-none', variant: 'secondary' })}
+            href={path as Route}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <ExternalLink className="size-4" />
+            Preview
+          </Link>
+        </div>
       </div>
     </div>
   );

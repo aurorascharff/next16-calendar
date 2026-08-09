@@ -6,8 +6,6 @@ export function isCalendarColor(value: string): value is CalendarColor {
   return (CALENDAR_COLORS as string[]).includes(value);
 }
 
-// Cool jewel-tone bases. Chips are a solid saturated fill with white text; dark
-// mode deepens the fill slightly so it reads richly against the near-black grid.
 const BASE_HEX: Record<CalendarColor, string> = {
   blue: '#2563eb',
   indigo: '#4f46e5',
