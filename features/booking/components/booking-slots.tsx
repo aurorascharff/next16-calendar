@@ -6,7 +6,6 @@ import { useActionState, useOptimistic, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
-import { RouteTransition } from '@/components/ui/route-transition';
 import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
 import { cn } from '@/lib/utils';
 import { bookSlotAction, type BookSlotState } from '../booking-actions';
@@ -24,11 +23,13 @@ function DayNavigationIcon({ direction }: { direction: 'next' | 'previous' }) {
 }
 
 export function BookingSlots({
+  booked,
   day,
   duration,
   handle,
   slots,
 }: {
+  booked?: string;
   day: string;
   duration: number;
   handle: string;
@@ -38,11 +39,9 @@ export function BookingSlots({
     const nextState = await bookSlotAction(previousState, formData);
 
     if (nextState?.error) toast.error(nextState.error);
-    if (nextState?.success) toast.success(nextState.success);
 
     return nextState;
   }, null);
-  const [guestName, setGuestName] = useState('');
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [displayDay, setDisplayDay] = useOptimistic(day);
   const [, startTransition] = useTransition();
@@ -52,6 +51,7 @@ export function BookingSlots({
   const visibleSlots = slots.filter(slot => slot.reason !== 'calendar');
   const selected = selectedSlot?.day === day ? visibleSlots.find(slot => slot.time === selectedSlot.time) : null;
   const selectedAvailable = selected && !selected.taken ? selected : null;
+  const bookedTime = booked && /^([01]\d|2[0-3]):[0-5]\d$/.test(booked) ? booked : null;
 
   const allTaken = visibleSlots.length === 0 || visibleSlots.every(slot => slot.taken);
 
@@ -65,14 +65,7 @@ export function BookingSlots({
       <div className="mb-4 flex items-center justify-between gap-3">
         <IconButton
           label="Previous day"
-          render={
-            <Link
-              href={dayHref(handle, previousDay)}
-              onNavigate={() => navigateDay(previousDay)}
-              prefetch
-              transitionTypes={['nav-back']}
-            />
-          }
+          render={<Link href={dayHref(handle, previousDay)} onNavigate={() => navigateDay(previousDay)} prefetch />}
         >
           <DayNavigationIcon direction="previous" />
         </IconButton>
@@ -81,35 +74,35 @@ export function BookingSlots({
         </span>
         <IconButton
           label="Next day"
-          render={
-            <Link
-              href={dayHref(handle, nextDay)}
-              onNavigate={() => navigateDay(nextDay)}
-              prefetch
-              transitionTypes={['nav-forward']}
-            />
-          }
+          render={<Link href={dayHref(handle, nextDay)} onNavigate={() => navigateDay(nextDay)} prefetch />}
         >
           <DayNavigationIcon direction="next" />
         </IconButton>
       </div>
-      <form action={formAction} className="flex min-h-0 flex-col">
-        <input name="day" type="hidden" value={day} />
-        <input name="handle" type="hidden" value={handle} />
-        <input name="slot" type="hidden" value={selectedAvailable?.time ?? ''} />
-        <label className="mb-4 block">
-          <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-          <input
-            autoComplete="name"
-            name="guestName"
-            onChange={event => setGuestName(event.target.value)}
-            placeholder="Name"
-            required
-            value={guestName}
-          />
-        </label>
-        <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
-        <RouteTransition slideKey={day}>
+      {bookedTime ? (
+        <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 rounded-lg border p-4">
+          <p className="text-sm font-semibold">You&apos;re booked</p>
+          <p className="text-muted mt-1 text-sm">
+            {formatDayLong(day)} at{' '}
+            <span className="font-medium text-black tabular-nums dark:text-white">{bookedTime}</span>
+          </p>
+          <p className="text-muted mt-1 text-xs">{duration} minutes. A confirmation is on its way.</p>
+          <div className="mt-4 flex justify-end">
+            <Button render={<Link href={dayHref(handle, day)} />} variant="secondary">
+              Book another
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <form action={formAction} className="flex min-h-0 flex-col">
+          <input name="day" type="hidden" value={day} />
+          <input name="handle" type="hidden" value={handle} />
+          <input name="slot" type="hidden" value={selectedAvailable?.time ?? ''} />
+          <label className="mb-4 block">
+            <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
+            <input autoComplete="name" name="guestName" placeholder="Name" required />
+          </label>
+          <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
           <div className="min-h-0 [scrollbar-gutter:stable] overflow-y-auto pr-1 sm:h-80">
             {allTaken ? (
               <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm sm:h-full sm:min-h-0">
@@ -147,19 +140,19 @@ export function BookingSlots({
               </div>
             )}
           </div>
-        </RouteTransition>
-        <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 mt-4 flex min-h-16 items-center justify-between gap-3 rounded-lg border p-3">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold tabular-nums">{selectedAvailable?.time ?? 'Choose a time'}</p>
-            <p className="text-muted text-xs">
-              {selectedAvailable ? `${duration} minutes` : `${duration}-minute meeting`}
-            </p>
+          <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 mt-4 flex min-h-16 items-center justify-between gap-3 rounded-lg border p-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold tabular-nums">{selectedAvailable?.time ?? 'Choose a time'}</p>
+              <p className="text-muted text-xs">
+                {selectedAvailable ? `${duration} minutes` : `${duration}-minute meeting`}
+              </p>
+            </div>
+            <Button className="h-10 shrink-0 px-4" disabled={!selectedAvailable} type="submit">
+              Book
+            </Button>
           </div>
-          <Button className="h-10 shrink-0 px-4" type="submit">
-            Book
-          </Button>
-        </div>
-      </form>
+        </form>
+      )}
     </div>
   );
 }

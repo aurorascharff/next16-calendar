@@ -1,6 +1,5 @@
 'use client';
 
-import { ViewTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { formatDay } from '../calendar-utils';
 import { chipStyle } from '../utils/colors';
@@ -96,18 +95,17 @@ export function CalendarAllDayRow({
               {dayEvents.length ? (
                 <span className="flex min-w-0 flex-col gap-1">
                   {dayEvents.map(event => (
-                    <ViewTransition default="auto" enter="auto" exit="auto" key={event.id}>
-                      <span
-                        className="cal-chip flex min-w-0 items-center gap-1 rounded-[5px] px-2 py-1 text-xs font-semibold ring-1 ring-inset"
-                        onClick={click => {
-                          click.stopPropagation();
-                          onSelectEvent({ anchorRect: click.currentTarget.getBoundingClientRect(), event });
-                        }}
-                        style={chipStyle(event.color)}
-                      >
-                        <span className="truncate">{event.title}</span>
-                      </span>
-                    </ViewTransition>
+                    <span
+                      className="cal-chip flex min-w-0 items-center gap-1 rounded-[5px] px-2 py-1 text-xs font-semibold ring-1 ring-inset"
+                      key={event.id}
+                      onClick={click => {
+                        click.stopPropagation();
+                        onSelectEvent({ anchorRect: click.currentTarget.getBoundingClientRect(), event });
+                      }}
+                      style={chipStyle(event.color)}
+                    >
+                      <span className="truncate">{event.title}</span>
+                    </span>
                   ))}
                 </span>
               ) : (

@@ -1,8 +1,9 @@
 import { ViewTransition } from 'react';
+import type { ReactNode } from 'react';
 
-export function Crossfade({ children }: { children: React.ReactNode }) {
+export function Crossfade({ children }: { children: ReactNode }) {
   return (
-    <ViewTransition enter="auto" exit="auto" default="none">
+    <ViewTransition default="auto" enter="auto" exit="auto">
       {children}
     </ViewTransition>
   );

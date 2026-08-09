@@ -138,6 +138,7 @@ export function CalendarBoard({
               addOptimisticEvent({ event: createdEvent, type: 'create' });
             }
           }}
+          onCreateFailed={sourceId => addOptimisticEvent({ sourceId, type: 'delete' })}
           store={createStore}
         />
       ) : null}

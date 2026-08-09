@@ -11,7 +11,7 @@ import { signOut } from '@/features/user/user-actions';
 import { getCurrentUser } from '@/features/user/user-queries';
 
 const sidebarLink =
-  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent/10 aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
+  'flex min-h-10 w-52 max-w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-muted transition-colors not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent-fade aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
 
 export function CalendarSidebarBrand() {
   return (
@@ -72,7 +72,7 @@ export async function CurrentUserFooter() {
 }
 
 const mobileTab =
-  'flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted hover:text-black dark:hover:text-white aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
+  'flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted not-aria-[current=page]:hover:text-accent aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
 
 export function MobileWorkspaceNavigation() {
   return (

@@ -1,6 +1,7 @@
 'use server';
 
 import { updateTag } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { calendarCache } from '@/features/calendar/calendar-queries';
 import { dateKey, getWeekDays, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { verifyAuth } from '@/features/user/user-queries';
@@ -21,7 +22,6 @@ type AvailabilityInput = {
 
 export type BookSlotState = {
   error?: string;
-  success?: string;
 } | null;
 
 function occursOn(event: { day: Date; recurrence: string | null }, day: string) {
@@ -32,18 +32,18 @@ function occursOn(event: { day: Date; recurrence: string | null }, day: string) 
 }
 
 export async function bookSlotAction(_state: BookSlotState, formData: FormData): Promise<BookSlotState> {
+  const day = String(formData.get('day') ?? '');
+  const handle = String(formData.get('handle') ?? '');
   const result = await bookSlot({
-    day: String(formData.get('day') ?? ''),
+    day,
     guestName: String(formData.get('guestName') ?? ''),
-    handle: String(formData.get('handle') ?? ''),
+    handle,
     slot: String(formData.get('slot') ?? ''),
   });
 
   if ('error' in result) return { error: result.error };
 
-  return {
-    success: `Booked ${result.data.slot}. A confirmation is on its way.`,
-  };
+  redirect(`/book/${handle}?date=${day}&booked=${encodeURIComponent(result.data.slot)}`);
 }
 
 export async function bookSlot({

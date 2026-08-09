@@ -1,6 +1,5 @@
 'use client';
 
-import { ViewTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { timeToMinutes } from '../calendar-utils';
 import { chipStyle } from '../utils/colors';
@@ -35,29 +34,27 @@ function CalendarEventLayer({
         const place = layout.get(event.id) ?? { col: 0, cols: 1 };
         const widthPct = 100 / place.cols;
         return (
-          <ViewTransition default="auto" enter="auto" exit="auto" key={event.id}>
-            <EventChip
-              event={event}
-              height={height}
-              isDragging={isDragging}
-              isResizing={isResizing}
-              key={event.id}
-              left={`calc(${place.col * widthPct}% + 2px)`}
-              onMoveDown={pointerEvent => interaction.move.onPointerDown(event, pointerEvent)}
-              onMoveMove={interaction.move.onPointerMove}
-              onMoveUp={interaction.move.onPointerUp}
-              onMoveCancel={interaction.move.onPointerCancel}
-              onResizeDown={pointerEvent => interaction.resizeHandlers.onPointerDown(event, pointerEvent)}
-              onResizeMove={interaction.resizeHandlers.onPointerMove}
-              onResizeUp={interaction.resizeHandlers.onPointerUp}
-              onSelect={anchorRect => interaction.onEventSelect(event, anchorRect)}
-              timeLabel={
-                height >= 46 ? (isResizing ? minutesToTime(interaction.resize!.endMin) : minutesToTime(startMin)) : null
-              }
-              top={((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT}
-              width={`calc(${widthPct}% - 4px)`}
-            />
-          </ViewTransition>
+          <EventChip
+            event={event}
+            height={height}
+            isDragging={isDragging}
+            isResizing={isResizing}
+            key={event.id}
+            left={`calc(${place.col * widthPct}% + 2px)`}
+            onMoveDown={pointerEvent => interaction.move.onPointerDown(event, pointerEvent)}
+            onMoveMove={interaction.move.onPointerMove}
+            onMoveUp={interaction.move.onPointerUp}
+            onMoveCancel={interaction.move.onPointerCancel}
+            onResizeDown={pointerEvent => interaction.resizeHandlers.onPointerDown(event, pointerEvent)}
+            onResizeMove={interaction.resizeHandlers.onPointerMove}
+            onResizeUp={interaction.resizeHandlers.onPointerUp}
+            onSelect={anchorRect => interaction.onEventSelect(event, anchorRect)}
+            timeLabel={
+              height >= 46 ? (isResizing ? minutesToTime(interaction.resize!.endMin) : minutesToTime(startMin)) : null
+            }
+            top={((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT}
+            width={`calc(${widthPct}% - 4px)`}
+          />
         );
       })}
     </div>

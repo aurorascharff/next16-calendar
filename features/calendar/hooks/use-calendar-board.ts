@@ -334,7 +334,7 @@ export function useCalendarBoard({
     isPending,
     nowMinutes,
     selectedEvent,
-    addOptimisticEvent: addOptimisticEvent as (action: EventAction) => void,
+    addOptimisticEvent: (action: EventAction) => startTransition(() => addOptimisticEvent(action)),
     setSelectedEvent,
     todayKey,
     visibleEvents,

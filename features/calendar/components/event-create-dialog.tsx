@@ -45,6 +45,7 @@ export function EventCreateDialog({
   defaultStart = '10:00',
   defaultDuration = 60,
   onCreated,
+  onCreateFailed,
 }: {
   store: Ariakit.PopoverStore;
   day: string;
@@ -55,13 +56,14 @@ export function EventCreateDialog({
   defaultStart?: string;
   defaultDuration?: number;
   onCreated?: (event: CalendarEvent) => void;
+  onCreateFailed?: (sourceId: string) => void;
 }) {
   const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
   const calendarOptions = calendars ?? [];
   const writableCalendarId =
     defaultCalendarId ?? (calendarOptions.find(calendar => !calendar.isDemo) ?? calendarOptions[0])?.id;
 
-  const [state, formAction, isPending] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
+  const [state, formAction] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
     const repeat = String(formData.get('repeat'));
     const allDay = formData.get('allDay') === 'on';
     const values = {
@@ -74,8 +76,9 @@ export function EventCreateDialog({
       title: String(formData.get('title')),
     };
     const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? weekday : null;
+    let tempId: string | null = null;
     if (values.title.trim()) {
-      const tempId = optimisticEventId(day, values);
+      tempId = optimisticEventId(day, values);
       const calendarId = values.calendarId || writableCalendarId || '';
       const calendar = calendarOptions.find(option => option.id === calendarId);
       onCreated?.({
@@ -93,6 +96,7 @@ export function EventCreateDialog({
         start: allDay ? '00:00' : values.start,
         title: values.title.trim(),
       });
+      store.hide();
     }
     const result = await createEvent({
       allDay,
@@ -104,10 +108,17 @@ export function EventCreateDialog({
       start: values.start,
       title: values.title,
     });
-    if (result.error) return { error: result.error, key: Date.now(), values };
+    if (result.error) {
+      if (tempId) onCreateFailed?.(tempId);
+      toast.error(result.error);
+      return {};
+    }
     const created = result.data;
-    if (!created) return { error: 'Event was saved, but the response was empty.', key: Date.now(), values };
-    store.hide();
+    if (!created) {
+      if (tempId) onCreateFailed?.(tempId);
+      toast.error('Event was saved, but the response was empty.');
+      return {};
+    }
     toast.success('Event added to your calendar.');
     return {};
   }, {});
@@ -124,7 +135,7 @@ export function EventCreateDialog({
   const [allDay, setAllDay] = useState(values.allDay);
 
   function handleSubmitShortcut(event: KeyboardEvent<HTMLFormElement>) {
-    if (isPending || event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey)) return;
+    if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey)) return;
 
     event.preventDefault();
     event.currentTarget.requestSubmit();
@@ -141,8 +152,6 @@ export function EventCreateDialog({
       portal
       getAnchorRect={anchorRect ? () => anchorRect : undefined}
       gutter={10}
-      hideOnEscape={!isPending}
-      hideOnInteractOutside={!isPending}
       className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border p-4 shadow-2xl outline-none"
       style={{ viewTransitionName: 'dialog' }}
     >
@@ -153,7 +162,7 @@ export function EventCreateDialog({
             {formatDay(day)}
           </Ariakit.PopoverDescription>
         </div>
-        <IconButton className="-mr-1" label="Close" render={<Ariakit.PopoverDismiss disabled={isPending} />}>
+        <IconButton className="-mr-1" label="Close" render={<Ariakit.PopoverDismiss />}>
           <X className="size-4" />
         </IconButton>
       </div>
@@ -240,7 +249,7 @@ export function EventCreateDialog({
         </div>
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-4 flex justify-end gap-2">
-          <Button render={<Ariakit.PopoverDismiss disabled={isPending} />} variant="ghost">
+          <Button render={<Ariakit.PopoverDismiss />} variant="ghost">
             Cancel
           </Button>
           <Button type="submit">Create event</Button>
