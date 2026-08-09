@@ -1,10 +1,11 @@
 'use client';
 
 import * as Ariakit from '@ariakit/react';
-import { AlignLeft, ArrowLeft, CalendarDays, Check, Pencil, Repeat2, Trash2, X } from 'lucide-react';
+import { AlignLeft, CalendarDays, Pencil, Repeat2, Trash2, X } from 'lucide-react';
 import { type ReactNode, useActionState, useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
+import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { deleteEvent, updateEvent } from '../calendar-actions';
@@ -144,38 +145,30 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
           <>
             <EventPopoverHeader busy={busy} event={event} />
             <EventDetails calendar={calendar} event={event} />
-            <div className="border-divider dark:border-divider-dark flex justify-end gap-1 border-t px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] max-sm:[&_button]:size-11 max-sm:[&_svg]:size-5">
-              <IconButton disabled={busy} label="Edit event" onClick={() => setMode('edit')} size="sm">
-                <Pencil className="size-4" />
-              </IconButton>
-              <IconButton
-                className="text-danger hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger"
+            <EventPopoverFooter>
+              <Button
+                className="border-danger/35 text-danger hover:border-danger/60 hover:bg-danger/10 hover:text-danger dark:border-danger/40 dark:hover:border-danger/65 dark:hover:bg-danger/10 dark:hover:text-danger max-sm:flex-1"
                 disabled={busy}
-                label="Delete event"
                 onClick={remove}
-                size="sm"
+                variant="secondary"
               >
                 <Trash2 className="size-4" />
-              </IconButton>
-            </div>
+                Delete
+              </Button>
+              <Button
+                className="max-sm:flex-1"
+                disabled={busy}
+                onClick={() => setMode('edit')}
+                variant="secondary"
+              >
+                <Pencil className="size-4" />
+                Edit
+              </Button>
+            </EventPopoverFooter>
           </>
         ) : (
           <>
-            <EventPopoverHeader busy={busy} event={event}>
-              <IconButton disabled={busy} label="Back to event details" onClick={() => setMode('details')} size="sm">
-                <ArrowLeft className="size-4" />
-              </IconButton>
-              <IconButton
-                className="text-accent hover:bg-accent/10 hover:text-accent dark:hover:bg-accent/10 dark:hover:text-accent"
-                disabled={busy}
-                form={formId}
-                label="Save changes"
-                size="sm"
-                type="submit"
-              >
-                <Check className="size-4" />
-              </IconButton>
-            </EventPopoverHeader>
+            <EventPopoverHeader busy={busy} event={event} />
             <EventEditForm
               allDay={allDay}
               busy={busy}
@@ -185,6 +178,19 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
               state={state}
               values={values}
             />
+            <EventPopoverFooter>
+              <Button
+                className="max-sm:flex-1"
+                disabled={busy}
+                onClick={() => setMode('details')}
+                variant="secondary"
+              >
+                Cancel
+              </Button>
+              <Button className="max-sm:flex-1" disabled={busy} form={formId} type="submit">
+                Save changes
+              </Button>
+            </EventPopoverFooter>
           </>
         )}
       </Ariakit.Popover>
@@ -194,11 +200,9 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
 
 function EventPopoverHeader({
   busy,
-  children,
   event,
 }: {
   busy: boolean;
-  children?: ReactNode;
   event: CalendarEvent;
 }) {
   return (
@@ -213,11 +217,18 @@ function EventPopoverHeader({
         </Ariakit.PopoverDescription>
       </div>
       <div className="-mr-1 flex shrink-0 items-center gap-0.5">
-        {children}
         <IconButton label="Close" render={<Ariakit.PopoverDismiss disabled={busy} />} size="sm">
           <X className="size-4" />
         </IconButton>
       </div>
+    </div>
+  );
+}
+
+function EventPopoverFooter({ children }: { children: ReactNode }) {
+  return (
+    <div className="border-divider dark:border-divider-dark flex justify-end gap-2 border-t px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+      {children}
     </div>
   );
 }

@@ -63,10 +63,19 @@
   }
 
   input[type='time'] {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
     display: block;
     inline-size: 100%;
     min-inline-size: 0;
     max-inline-size: 100%;
+    overflow: hidden;
+  }
+
+  input[type='time']::-webkit-date-and-time-value {
+    min-height: 1em;
+    text-align: left;
   }
 
   select {

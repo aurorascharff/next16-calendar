@@ -74,10 +74,10 @@ export function EventFields({
         aria-disabled={allDay}
         className={`grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${allDay ? disabledTimeBlock : ''}`}
       >
-        <label className="min-w-0">
+        <label className="min-w-0 overflow-hidden">
           <span className={fieldLabel}>Starts at</span>
           <input
-            className={`${controlHeight} min-w-0`}
+            className={`${controlHeight} block w-full max-w-full min-w-0 overflow-hidden`}
             defaultValue={values.start}
             disabled={allDay || busy}
             name={allDay ? undefined : 'start'}
