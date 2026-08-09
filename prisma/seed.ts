@@ -5,9 +5,8 @@ import { normalizeDatabaseUrl } from '../lib/database-url';
 
 const demoCalendars = [
   { color: 'blue', key: 'work', name: 'Work' },
-  { color: 'amber', key: 'personal', name: 'Personal' },
-  { color: 'indigo', key: 'reminders', name: 'Reminders' },
-  { color: 'sky', key: 'side-project', name: 'Side project' },
+  { color: 'pink', key: 'personal', name: 'Personal' },
+  { color: 'violet', key: 'side-project', name: 'Side project' },
 ] as const;
 
 type DemoEvent = {
@@ -65,6 +64,16 @@ const demoEvents = [
   {
     allDay: false,
     calendar: 'work',
+    day: '2026-08-12',
+    description: 'Tighten the onboarding flow before it reaches implementation.',
+    duration: 60,
+    recurrence: null,
+    start: '13:30',
+    title: 'Onboarding design crit',
+  },
+  {
+    allDay: false,
+    calendar: 'work',
     day: '2026-08-13',
     description: 'Walk through monitoring, rollback, support, and the final release checklist.',
     duration: 45,
@@ -81,6 +90,16 @@ const demoEvents = [
     recurrence: null,
     start: '14:00',
     title: 'Release window',
+  },
+  {
+    allDay: false,
+    calendar: 'personal',
+    day: '2026-08-11',
+    description: 'Easy loop before notifications and meetings begin.',
+    duration: 45,
+    recurrence: 'tuesday',
+    start: '07:00',
+    title: 'Run before stand-up',
   },
   {
     allDay: false,
@@ -124,7 +143,7 @@ const demoEvents = [
   },
   {
     allDay: false,
-    calendar: 'reminders',
+    calendar: 'personal',
     day: '2026-08-10',
     description: 'Submit last month’s travel and equipment receipts.',
     duration: 15,
@@ -134,7 +153,7 @@ const demoEvents = [
   },
   {
     allDay: false,
-    calendar: 'reminders',
+    calendar: 'personal',
     day: '2026-08-12',
     description: 'Call and schedule the next check-up.',
     duration: 15,
@@ -144,7 +163,7 @@ const demoEvents = [
   },
   {
     allDay: false,
-    calendar: 'reminders',
+    calendar: 'personal',
     day: '2026-08-14',
     description: 'Put the recycling by the door before dinner.',
     duration: 15,
@@ -154,13 +173,23 @@ const demoEvents = [
   },
   {
     allDay: false,
-    calendar: 'reminders',
+    calendar: 'personal',
     day: '2026-08-16',
     description: 'Water the plants before leaving for the day.',
     duration: 15,
     recurrence: 'sunday',
     start: '10:00',
     title: 'Water plants',
+  },
+  {
+    allDay: false,
+    calendar: 'personal',
+    day: '2026-08-13',
+    description: 'Try the noodle place that just opened around the corner.',
+    duration: 90,
+    recurrence: null,
+    start: '18:30',
+    title: 'Noodles with Mira',
   },
   {
     allDay: false,
@@ -171,6 +200,26 @@ const demoEvents = [
     recurrence: 'tuesday',
     start: '19:00',
     title: 'Side project build session',
+  },
+  {
+    allDay: false,
+    calendar: 'side-project',
+    day: '2026-08-12',
+    description: 'Explain what changed, why it matters, and what comes next.',
+    duration: 60,
+    recurrence: null,
+    start: '19:30',
+    title: 'Write the v0.4 release post',
+  },
+  {
+    allDay: false,
+    calendar: 'side-project',
+    day: '2026-08-13',
+    description: 'Record the short walkthrough for launch day.',
+    duration: 60,
+    recurrence: null,
+    start: '20:00',
+    title: 'Record the launch demo',
   },
   {
     allDay: false,

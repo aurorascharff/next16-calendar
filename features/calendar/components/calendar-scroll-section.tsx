@@ -18,7 +18,7 @@ export function CalendarViewFallback() {
   return (
     <CalendarBoardViewport>
       <div className="grid min-h-0 flex-1 place-items-center" role="status" aria-label="Loading calendar view">
-        <DaylineMark animated className="text-primary/45 size-11" />
+        <DaylineMark animated className="bg-primary/10 text-primary size-16 rounded-xl p-2" />
       </div>
     </CalendarBoardViewport>
   );
