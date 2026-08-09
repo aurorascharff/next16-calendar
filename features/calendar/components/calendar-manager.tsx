@@ -15,8 +15,6 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
   const { hidden, toggle } = useCalendarVisibility()
   const [editing, setEditing] = useState<Calendar | 'new' | null>(null)
   const [isDeleting, startDelete] = useTransition()
-  // Colors used by demo calendars are off-limits for custom ones, so they stay
-  // visually distinct (an edited calendar keeps its own color as an option).
   const demoColors = new Set(calendars.filter((calendar) => calendar.isDemo).map((calendar) => calendar.color))
   const store = Ariakit.useDialogStore({
     setOpen(open) {

@@ -1,0 +1,7 @@
+node_modules
+.next
+generated
+pnpm-lock.yaml
+public
+playwright-report
+test-results

@@ -2,6 +2,7 @@
 
 import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/db'
+import { getCurrentUser } from '@/features/user/user-queries'
 import { isCalendarColor } from './utils/colors'
 import { calendarCache } from './calendar-queries'
 import { getWeekDays, isDateKey } from './calendar-utils'
@@ -13,6 +14,7 @@ type MoveEventInput = {
 }
 
 type CreateEventInput = {
+  allDay?: boolean
   calendarId: string
   day: string
   duration: number
@@ -22,6 +24,7 @@ type CreateEventInput = {
 }
 
 type UpdateEventInput = {
+  allDay?: boolean
   duration: number
   eventId: string
   start: string
@@ -33,7 +36,7 @@ const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', '
 const RECURRENCE_VALUES = new Set(['weekday', ...WEEKDAY_NAMES])
 
 async function requireUserId() {
-  const user = await prisma.user.findUnique({ select: { id: true }, where: { handle: 'aurora' } })
+  const user = await getCurrentUser()
   return user?.id ?? null
 }
 
@@ -48,14 +51,15 @@ function invalidateWeek(day: Date | string) {
 }
 
 export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
-  if (!timePattern.test(start)) return { error: 'Choose a valid time.' }
-
   const event = await findEvent(sourceId)
   if (!event) return { error: 'This event no longer exists.' }
   if (event.demo) return { error: 'Create your own calendar to make changes.' }
+  if (!event.allDay && !timePattern.test(start)) return { error: 'Choose a valid time.' }
+
+  const eventStart = event.allDay ? '00:00' : start
 
   if (event.recurrence) {
-    const data: { recurrence?: string; start: string } = { start }
+    const data: { recurrence?: string; start: string } = { start: eventStart }
     if (event.recurrence !== 'weekday' && isDateKey(day)) {
       data.recurrence = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()]
     }
@@ -68,7 +72,7 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
 
   const previousDay = event.day
   const updated = await prisma.calendarEvent.update({
-    data: { day: new Date(`${day}T00:00:00.000Z`), start },
+    data: { day: new Date(`${day}T00:00:00.000Z`), start: eventStart },
     where: { id: sourceId },
   })
   invalidateWeek(previousDay)
@@ -78,8 +82,9 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
 
 export async function createEvent(input: CreateEventInput) {
   const title = input.title.trim()
+  const allDay = Boolean(input.allDay)
   if (!title) return { error: 'Add a title before saving the event.' }
-  if (!isDateKey(input.day) || !timePattern.test(input.start)) {
+  if (!isDateKey(input.day) || (!allDay && !timePattern.test(input.start))) {
     return { error: 'Choose a valid date and time.' }
   }
 
@@ -88,16 +93,18 @@ export async function createEvent(input: CreateEventInput) {
 
   const calendar = await prisma.calendar.findFirst({ where: { id: input.calendarId, userId } })
   if (!calendar) return { error: 'Choose a calendar for this event.' }
+  if (calendar.isDemo) return { error: 'Create your own calendar to make changes.' }
 
   const recurrence = input.recurrence && RECURRENCE_VALUES.has(input.recurrence) ? input.recurrence : null
 
   const event = await prisma.calendarEvent.create({
     data: {
       calendarId: input.calendarId,
+      allDay,
       day: new Date(`${input.day}T00:00:00.000Z`),
-      duration: input.duration,
+      duration: allDay ? 24 * 60 : input.duration,
       recurrence,
-      start: input.start,
+      start: allDay ? '00:00' : input.start,
       title,
       userId,
     },
@@ -108,7 +115,8 @@ export async function createEvent(input: CreateEventInput) {
 
 export async function updateEvent(input: UpdateEventInput) {
   const title = input.title.trim()
-  if (!title || !timePattern.test(input.start)) {
+  const allDay = Boolean(input.allDay)
+  if (!title || (!allDay && !timePattern.test(input.start))) {
     return { error: 'Add a title and a valid start time.' }
   }
 
@@ -117,7 +125,12 @@ export async function updateEvent(input: UpdateEventInput) {
   if (event.demo) return { error: 'Create your own calendar to make changes.' }
 
   const updated = await prisma.calendarEvent.update({
-    data: { duration: input.duration, start: input.start, title },
+    data: {
+      allDay,
+      duration: allDay ? 24 * 60 : input.duration,
+      start: allDay ? '00:00' : input.start,
+      title,
+    },
     where: { id: input.eventId },
   })
   invalidateWeek(event.day)
@@ -130,6 +143,7 @@ export async function resizeEvent({ duration, sourceId }: { duration: number; so
   const event = await findEvent(sourceId)
   if (!event) return { error: 'This event no longer exists.' }
   if (event.demo) return { error: 'Create your own calendar to make changes.' }
+  if (event.allDay) return { error: 'All-day events do not resize.' }
 
   const updated = await prisma.calendarEvent.update({ data: { duration }, where: { id: sourceId } })
   invalidateWeek(event.day)
@@ -184,4 +198,3 @@ export async function deleteCalendar(id: string) {
   updateTag(calendarCache.tag)
   return { data: { id } }
 }
-

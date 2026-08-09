@@ -1,10 +1,9 @@
 'use client'
 
 import * as Ariakit from '@ariakit/react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, X } from 'lucide-react'
 import { useActionState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Dialog } from '@/components/ui/dialog'
 import { deleteEvent, updateEvent } from '../calendar-actions'
 import type { CalendarEvent } from '../types/calendar'
 import { formatDay } from '../calendar-utils'
@@ -13,7 +12,7 @@ type EventEditorProps = {
   event: CalendarEvent
   onClose: () => void
   onDeleted: (sourceId: string) => void
-  onUpdated: (event: Pick<CalendarEvent, 'duration' | 'sourceId' | 'start' | 'title'>) => void
+  onUpdated: (event: Pick<CalendarEvent, 'allDay' | 'duration' | 'sourceId' | 'start' | 'title'>) => void
 }
 
 type State = { error?: string }
@@ -22,15 +21,18 @@ const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium'
 
 export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEditorProps) {
   const [isDeleting, startDelete] = useTransition()
-  const store = Ariakit.useDialogStore({
+  const store = Ariakit.usePopoverStore({
     defaultOpen: true,
+    placement: 'bottom-start',
     setOpen(open) {
       if (!open) onClose()
     },
   })
 
   const [state, formAction, isSaving] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
+    const allDay = formData.get('allDay') === 'on'
     const input = {
+      allDay,
       duration: Number(formData.get('duration')),
       eventId: event.sourceId,
       start: String(formData.get('start')),
@@ -38,7 +40,7 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
     }
     const result = await updateEvent(input)
     if (result.error) return { error: result.error }
-    onUpdated({ ...input, sourceId: event.sourceId })
+    onUpdated({ allDay, duration: input.duration, sourceId: event.sourceId, start: input.start, title: input.title })
     store.hide()
     toast.success('Event updated.')
     return {}
@@ -60,11 +62,41 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
   const busy = isSaving || isDeleting
 
   return (
-    <Dialog store={store} title="Edit event" description={`${formatDay(event.day)} · ${event.start}`} busy={busy}>
+    <Ariakit.Popover
+      store={store}
+      unmountOnHide
+      fixed
+      fitViewport
+      gutter={10}
+      hideOnEscape={!busy}
+      hideOnInteractOutside={!busy}
+      className="border-divider z-50 w-[min(24rem,calc(100vw-2rem))] rounded-lg border bg-surface p-4 shadow-2xl outline-none dark:border-divider-dark dark:bg-surface-dark"
+      style={{ viewTransitionName: 'dialog' }}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <Ariakit.PopoverHeading className="text-base font-semibold tracking-tight">Edit event</Ariakit.PopoverHeading>
+          <Ariakit.PopoverDescription className="text-muted mt-0.5 text-sm">
+            {formatDay(event.day)}
+            {event.allDay ? ' · All day' : ` · ${event.start}`}
+          </Ariakit.PopoverDescription>
+        </div>
+        <Ariakit.PopoverDismiss
+          aria-label="Close"
+          className="text-muted -mr-1 rounded-md p-1 transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
+          disabled={busy}
+        >
+          <X className="size-4" />
+        </Ariakit.PopoverDismiss>
+      </div>
       <form action={formAction} className="mt-4 space-y-4">
         <label className="block">
           <span className={fieldLabel}>Title</span>
           <input autoFocus defaultValue={event.title} name="title" />
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input className="size-4 w-auto" defaultChecked={event.allDay} name="allDay" type="checkbox" />
+          All day
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
@@ -94,12 +126,12 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
             Delete
           </button>
           <div className="flex gap-2">
-            <Ariakit.DialogDismiss
+            <Ariakit.PopoverDismiss
               className="text-muted rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black disabled:opacity-50 dark:hover:text-white"
               disabled={busy}
             >
               Cancel
-            </Ariakit.DialogDismiss>
+            </Ariakit.PopoverDismiss>
             <button
               className="rounded-md bg-accent px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
               disabled={busy}
@@ -110,6 +142,6 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
           </div>
         </div>
       </form>
-    </Dialog>
+    </Ariakit.Popover>
   )
 }

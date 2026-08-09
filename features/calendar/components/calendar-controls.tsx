@@ -2,8 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { startTransition } from 'react'
+import { useEffect, useState } from 'react'
 import type { Route } from 'next'
 import { cn } from '@/lib/utils'
 import type { CalendarView } from '../types/calendar'
@@ -11,30 +10,32 @@ import { dateKey, shiftDay, shiftWeek } from '../calendar-utils'
 import { DatePicker } from './date-picker'
 
 const iconButton =
-  'flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white'
+  'flex size-8 items-center justify-center rounded-md text-muted hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white'
 
 function calendarHref(date: string, view: CalendarView) {
   return `/calendar/${date}${view === 'day' ? '?view=day' : ''}` as Route
 }
 
 export function CalendarControls({ date, view }: { date: string; view: CalendarView }) {
-  const router = useRouter()
+  const [today, setToday] = useState<string | null>(null)
   const previous = view === 'day' ? shiftDay(date, -1) : shiftWeek(date, -1)
   const next = view === 'day' ? shiftDay(date, 1) : shiftWeek(date, 1)
 
-  function goToday() {
-    startTransition(() => router.push(calendarHref(dateKey(new Date()), view)))
-  }
+  useEffect(() => {
+    setToday(dateKey(new Date()))
+  }, [])
+
+  const todayButton = 'text-muted h-8 rounded-md px-3 text-sm font-medium hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white'
 
   return (
     <div className="flex items-center gap-1">
-      <button
-        className="text-muted h-8 rounded-md px-3 text-sm font-medium transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
-        onClick={goToday}
-        type="button"
-      >
-        Today
-      </button>
+      {today ? (
+        <Link className={todayButton} href={calendarHref(today, view)} prefetch>
+          Today
+        </Link>
+      ) : (
+        <span className={cn(todayButton, 'opacity-50')}>Today</span>
+      )}
       <div className="flex items-center">
         <Link aria-label={view === 'day' ? 'Previous day' : 'Previous week'} className={iconButton} href={calendarHref(previous, view)} prefetch transitionTypes={['calendar-back']}>
           <ChevronLeft className="size-4.5" />

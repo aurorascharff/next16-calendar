@@ -1,82 +1,84 @@
-'use client'
+'use client';
 
-import * as Ariakit from '@ariakit/react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { startTransition, useEffect, useState } from 'react'
-import { cn } from '@/lib/utils'
-import { dateKey } from '../calendar-utils'
+import * as Ariakit from '@ariakit/react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { dateKey } from '../calendar-utils';
+import type { Route } from 'next';
 
-const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-const monthLabel = new Intl.DateTimeFormat('en-GB', { month: 'long', timeZone: 'UTC', year: 'numeric' })
-const triggerLabel = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC', year: 'numeric' })
+const monthLabel = new Intl.DateTimeFormat('en-GB', { month: 'long', timeZone: 'UTC', year: 'numeric' });
+const triggerLabel = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+  year: 'numeric',
+});
 
 function fromKey(value: string) {
-  return new Date(`${value}T00:00:00.000Z`)
+  return new Date(`${value}T00:00:00.000Z`);
 }
 
 function monthGrid(year: number, month: number) {
-  const first = new Date(Date.UTC(year, month, 1))
-  const offset = (first.getUTCDay() + 6) % 7
-  const start = new Date(first)
-  start.setUTCDate(first.getUTCDate() - offset)
+  const first = new Date(Date.UTC(year, month, 1));
+  const offset = (first.getUTCDay() + 6) % 7;
+  const start = new Date(first);
+  start.setUTCDate(first.getUTCDate() - offset);
   return Array.from({ length: 42 }, (_, index) => {
-    const day = new Date(start)
-    day.setUTCDate(start.getUTCDate() + index)
-    return day
-  })
+    const day = new Date(start);
+    day.setUTCDate(start.getUTCDate() + index);
+    return day;
+  });
 }
 
 export function DatePicker({ date }: { date: string }) {
-  const router = useRouter()
-  const selected = fromKey(date)
-  const [view, setView] = useState(() => ({ month: selected.getUTCMonth(), year: selected.getUTCFullYear() }))
-  const store = Ariakit.usePopoverStore()
-  const open = Ariakit.useStoreState(store, 'open')
+  const selected = fromKey(date);
+  const [view, setView] = useState(() => ({ month: selected.getUTCMonth(), year: selected.getUTCFullYear() }));
+  const store = Ariakit.usePopoverStore();
+  const open = Ariakit.useStoreState(store, 'open');
 
   useEffect(() => {
-    if (open) setView({ month: selected.getUTCMonth(), year: selected.getUTCFullYear() })
+    if (open) setView({ month: selected.getUTCMonth(), year: selected.getUTCFullYear() });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, date])
+  }, [open, date]);
 
-  const todayKey = dateKey(new Date())
-  const days = monthGrid(view.year, view.month)
+  const todayKey = dateKey(new Date());
+  const days = monthGrid(view.year, view.month);
 
   function shiftMonth(delta: number) {
-    setView((current) => {
-      const next = new Date(Date.UTC(current.year, current.month + delta, 1))
-      return { month: next.getUTCMonth(), year: next.getUTCFullYear() }
-    })
-  }
-
-  function pick(day: Date) {
-    store.hide()
-    startTransition(() => router.push(`/calendar/${dateKey(day)}`))
+    setView(current => {
+      const next = new Date(Date.UTC(current.year, current.month + delta, 1));
+      return { month: next.getUTCMonth(), year: next.getUTCFullYear() };
+    });
   }
 
   return (
     <Ariakit.PopoverProvider store={store}>
-      <Ariakit.PopoverDisclosure className="text-muted flex h-8 items-center gap-1.5 rounded px-2 text-sm font-medium tabular-nums transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white">
+      <Ariakit.PopoverDisclosure className="text-muted hover:bg-card dark:hover:bg-card-dark flex h-8 items-center gap-1.5 rounded px-2 text-sm font-medium tabular-nums transition-colors hover:text-black dark:hover:text-white">
         {triggerLabel.format(selected)}
       </Ariakit.PopoverDisclosure>
       <Ariakit.Popover
         gutter={8}
-        className="border-divider z-50 w-64 rounded-xl border bg-surface p-3 shadow-xl outline-none dark:border-divider-dark dark:bg-surface-dark"
+        className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 w-64 rounded-xl border p-3 shadow-xl outline-none"
       >
         <div className="mb-2 flex items-center justify-between">
           <button
             aria-label="Previous month"
-            className="text-muted rounded p-1 transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
+            className="text-muted hover:bg-card dark:hover:bg-card-dark rounded p-1 transition-colors hover:text-black dark:hover:text-white"
             onClick={() => shiftMonth(-1)}
             type="button"
           >
             <ChevronLeft className="size-4" />
           </button>
-          <span className="text-sm font-semibold">{monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}</span>
+          <span className="text-sm font-semibold">
+            {monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}
+          </span>
           <button
             aria-label="Next month"
-            className="text-muted rounded p-1 transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
+            className="text-muted hover:bg-card dark:hover:bg-card-dark rounded p-1 transition-colors hover:text-black dark:hover:text-white"
             onClick={() => shiftMonth(1)}
             type="button"
           >
@@ -89,31 +91,30 @@ export function DatePicker({ date }: { date: string }) {
           ))}
         </div>
         <div className="grid grid-cols-7 gap-0.5">
-          {days.map((day) => {
-            const key = dateKey(day)
-            const isSelected = key === date
-            const isToday = key === todayKey
-            const isOutside = day.getUTCMonth() !== view.month
+          {days.map(day => {
+            const key = dateKey(day);
+            const isSelected = key === date;
+            const isToday = key === todayKey;
+            const isOutside = day.getUTCMonth() !== view.month;
             return (
-              <button
+              <Link
                 className={cn(
-                  'grid size-8 place-items-center rounded-md text-sm tabular-nums transition-colors',
-                  isSelected
-                    ? 'bg-accent font-semibold text-white'
-                    : 'hover:bg-card dark:hover:bg-card-dark',
+                  'relative grid size-8 place-items-center rounded-md text-sm tabular-nums',
+                  isSelected ? 'bg-accent font-semibold text-white' : 'hover:bg-card dark:hover:bg-card-dark',
                   !isSelected && isToday && 'text-accent font-semibold',
                   !isSelected && isOutside && 'text-muted/50',
                 )}
+                href={`/calendar/${key}` as Route}
                 key={key}
-                onClick={() => pick(day)}
-                type="button"
+                onNavigate={() => store.hide()}
+                prefetch={false}
               >
                 {day.getUTCDate()}
-              </button>
-            )
+              </Link>
+            );
           })}
         </div>
       </Ariakit.Popover>
     </Ariakit.PopoverProvider>
-  )
+  );
 }

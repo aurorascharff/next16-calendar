@@ -1,43 +1,32 @@
 'use client'
 
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import type { Route } from 'next'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
+import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils'
 import { bookSlot } from '../booking-actions'
+import type { BookingSlot } from '../booking-queries'
 
-function toDateKey(date: Date) {
-  return date.toISOString().slice(0, 10)
-}
-
-function slotsBetween(startTime: string, endTime: string, duration: number) {
-  const toMinutes = (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number)
-    return hours * 60 + minutes
-  }
-
-  return Array.from(
-    { length: Math.floor((toMinutes(endTime) - toMinutes(startTime)) / duration) },
-    (_, index) => {
-      const minutes = toMinutes(startTime) + index * duration
-      return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
-    },
-  )
-}
+const dayHref = (handle: string, day: string) => `/book/${handle}?date=${day}` as Route
 
 export function BookingSlots({
+  day,
   duration,
-  endTime,
   handle,
-  startTime,
+  slots,
 }: {
+  day: string
   duration: number
-  endTime: string
   handle: string
-  startTime: string
+  slots: BookingSlot[]
 }) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [day, setDay] = useState(() => toDateKey(new Date()))
   const [guestName, setGuestName] = useState('')
-  const slots = slotsBetween(startTime, endTime, duration)
 
   function selectSlot(slot: string) {
     startTransition(async () => {
@@ -47,44 +36,54 @@ export function BookingSlots({
         return
       }
       toast.success(`Booked ${slot}. A confirmation is on its way.`)
+      router.refresh()
     })
   }
 
+  const navButton = 'text-muted flex size-8 items-center justify-center rounded-md hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white'
+  const allTaken = slots.every((slot) => slot.taken)
+
   return (
     <div>
-      <div className="mb-4 grid gap-3 sm:grid-cols-2">
-        <label>
-          <span className="text-muted mb-1.5 block text-xs font-medium">Date</span>
-          <input
-            className="border-divider h-10 w-full rounded-md border bg-transparent px-3 text-sm outline-none focus:border-primary dark:border-divider-dark"
-            min={toDateKey(new Date())}
-            onChange={(event) => setDay(event.target.value)}
-            type="date"
-            value={day}
-          />
-        </label>
-        <label>
-          <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-          <input
-            className="border-divider h-10 w-full rounded-md border bg-transparent px-3 text-sm outline-none focus:border-primary dark:border-divider-dark"
-            onChange={(event) => setGuestName(event.target.value)}
-            placeholder="Name"
-            value={guestName}
-          />
-        </label>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <Link aria-label="Previous day" className={navButton} href={dayHref(handle, shiftDay(day, -1))}>
+          <ChevronLeft className="size-4.5" />
+        </Link>
+        <span className="text-sm font-semibold tabular-nums">{formatDayLong(day)}</span>
+        <Link aria-label="Next day" className={navButton} href={dayHref(handle, shiftDay(day, 1))}>
+          <ChevronRight className="size-4.5" />
+        </Link>
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {slots.map((slot) => (
-          <button
-            className="border-divider text-muted rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent disabled:cursor-not-allowed disabled:opacity-60 dark:border-divider-dark"
-            disabled={isPending}
-            key={slot}
-            onClick={() => selectSlot(slot)}
-          >
-            {slot}
-          </button>
-        ))}
-      </div>
+      <label className="mb-4 block">
+        <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
+        <input onChange={(event) => setGuestName(event.target.value)} placeholder="Name" value={guestName} />
+      </label>
+      <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
+      {allTaken ? (
+        <p className="text-muted rounded-md border border-dashed border-divider py-8 text-center text-sm dark:border-divider-dark">
+          No open {duration}-minute slots on this day. Try another date.
+        </p>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {slots.map((slot) => (
+            <button
+              className={cn(
+                'rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums transition-colors',
+                slot.taken
+                  ? 'border-divider text-muted/50 line-through dark:border-divider-dark'
+                  : 'border-divider text-muted hover:border-accent hover:bg-accent/10 hover:text-accent disabled:opacity-60 dark:border-divider-dark',
+              )}
+              disabled={slot.taken || isPending}
+              key={slot.time}
+              onClick={() => selectSlot(slot.time)}
+              type="button"
+            >
+              {slot.time}
+              {slot.taken ? <span className="ml-2 text-[11px] no-underline">Busy</span> : null}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -34,6 +34,7 @@ model CalendarEvent {
   id         String   @id @default(cuid())
   title      String
   day        DateTime
+  allDay     Boolean  @default(false)
   start      String
   duration   Int      @default(60)
   recurrence String?

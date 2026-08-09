@@ -1,9 +1,9 @@
 import { CalendarCheck } from 'lucide-react'
-import { getBookingProfile } from '../booking-queries'
+import { getBookingAvailability } from '../booking-queries'
 import { BookingSlots } from './booking-slots'
 
-export async function BookingProfile({ handle }: { handle: string }) {
-  const profile = await getBookingProfile(handle)
+export async function BookingProfile({ date, handle }: { date?: string; handle: string }) {
+  const availability = await getBookingAvailability(handle, date)
 
   return (
     <main className="grid min-h-dvh place-items-center bg-surface px-4 py-8 dark:bg-surface-dark">
@@ -13,17 +13,19 @@ export async function BookingProfile({ handle }: { handle: string }) {
             <CalendarCheck className="size-5" />
           </div>
           <div>
-            <p className="text-muted text-sm">{profile.name}</p>
-            <h1 className="mt-1 text-xl font-semibold tracking-tight">{profile.title}</h1>
+            <p className="text-muted text-sm">{availability.name}</p>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight">{availability.title}</h1>
+            <p className="text-muted mt-1 text-sm">
+              {availability.duration}-minute slots, {availability.startTime}–{availability.endTime}
+            </p>
           </div>
         </div>
         <div className="border-divider mt-8 border-t pt-6 dark:border-divider-dark">
-          <p className="text-muted mb-3 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
           <BookingSlots
-            duration={profile.duration}
-            endTime={profile.endTime}
-            handle={profile.handle}
-            startTime={profile.startTime}
+            day={availability.day}
+            duration={availability.duration}
+            handle={availability.handle}
+            slots={availability.slots}
           />
         </div>
       </section>

@@ -4,6 +4,7 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { delay } from '@/lib/utils'
+import { getCurrentUser } from '@/features/user/user-queries'
 import type { Calendar, CalendarColor, CalendarEvent, CalendarWeek } from './types/calendar'
 import { dateKey, getWeekDays, isDateKey } from './calendar-utils'
 
@@ -14,6 +15,7 @@ export const calendarCache = {
 }
 
 type StoredEvent = {
+  allDay: boolean
   calendar: { color: string }
   calendarId: string
   day: Date
@@ -26,12 +28,7 @@ type StoredEvent = {
 }
 
 async function getCurrentUserId() {
-  'use cache'
-  cacheLife('hours')
-  const user = await prisma.user.findUnique({
-    select: { id: true },
-    where: { handle: 'aurora' },
-  })
+  const user = await getCurrentUser()
   return user?.id ?? null
 }
 
@@ -125,6 +122,7 @@ function matchesRecurrence(recurrence: string, day: string) {
 function toCalendarEvent(event: StoredEvent, day: string): CalendarEvent {
   return {
     calendarId: event.calendarId,
+    allDay: event.allDay,
     color: event.calendar.color as CalendarColor,
     day,
     duration: event.duration,
@@ -136,4 +134,3 @@ function toCalendarEvent(event: StoredEvent, day: string): CalendarEvent {
     title: event.title,
   }
 }
-

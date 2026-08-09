@@ -73,6 +73,19 @@
   }
 }
 
+/* Calendar event chip: light/dark variants derived from one base hue. Light is
+   a soft tint with deep colored text; dark is a deep fill with light text. */
+.cal-chip {
+  background-color: var(--cal-lb);
+  color: var(--cal-lt);
+  --tw-ring-color: rgb(0 0 0 / 0.06);
+}
+.dark .cal-chip {
+  background-color: var(--cal-db);
+  color: var(--cal-dt);
+  --tw-ring-color: rgb(255 255 255 / 0.08);
+}
+
 /* Skeleton shimmer */
 .skeleton-animation {
   background: rgba(150, 150, 150, 0.15);
@@ -138,10 +151,7 @@
   }
 }
 
-/* Directional week slide. The pinned header/controls stay live; only the grid
-   region animates. Forward: old week slides out to the left while the new week
-   slides in from the right. Back: the mirror. This is the whole trick — a plain
-   left/right carousel keyed off the navigation direction. */
+/* Directional week slide, keyed off navigation direction. */
 @keyframes slide-in-right {
   from {
     transform: translateX(22px);
@@ -204,12 +214,10 @@
   animation: var(--duration-enter) ease-out var(--duration-exit) both fade;
 }
 
-/* let cursor/clicks pass through the snapshot overlay to live content */
 ::view-transition {
   pointer-events: none;
 }
 
-/* No root cross-fade: keep unnamed chrome live during transitions. */
 ::view-transition-old(root) {
   display: none;
 }
@@ -217,8 +225,6 @@
   animation: none;
 }
 
-/* Persistent chrome is excluded from transition animation so it stays put and
-   keeps its exact footprint while only the schedule grid animates. */
 ::view-transition-group(sidebar),
 ::view-transition-group(mobile-nav),
 ::view-transition-group(calendar-controls),
@@ -250,8 +256,6 @@
   animation: none;
 }
 
-/* backdrop-blur element: hide the old snapshot so two translucent layers
-   don't stack during the transition. */
 ::view-transition-old(dialog-backdrop) {
   display: none;
 }

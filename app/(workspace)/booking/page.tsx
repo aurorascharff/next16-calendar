@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { BookingLinkPanel, BookingLinkPanelSkeleton } from '@/features/booking/components/booking-link-panel'
+import { BookingSettings, BookingSettingsSkeleton } from '@/features/booking/components/booking-settings'
 
 export default function BookingPage() {
   return (
@@ -10,9 +11,12 @@ export default function BookingPage() {
           <h1 className="mt-0.5 text-lg font-semibold">Booking link</h1>
         </div>
       </header>
-      <section className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
+      <section className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6">
         <Suspense fallback={<BookingLinkPanelSkeleton />}>
           <BookingLinkPanel />
+        </Suspense>
+        <Suspense fallback={<BookingSettingsSkeleton />}>
+          <BookingSettings />
         </Suspense>
       </section>
     </main>

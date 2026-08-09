@@ -12,7 +12,8 @@
     "prisma.seed": "prisma db seed",
     "prisma.studio": "prisma studio",
     "prisma.reset": "prisma db push --force-reset && pnpm prisma.seed",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ariakit/react": "^0.4.28",

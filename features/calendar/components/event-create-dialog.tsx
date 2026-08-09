@@ -3,7 +3,6 @@
 import * as Ariakit from '@ariakit/react'
 import { useActionState } from 'react'
 import { toast } from 'sonner'
-import { Dialog } from '@/components/ui/dialog'
 import { createEvent } from '../calendar-actions'
 import type { Calendar } from '../types/calendar'
 import { formatDay } from '../calendar-utils'
@@ -20,21 +19,28 @@ export function EventCreateDialog({
   store,
   day,
   calendars,
+  defaultAllDay = false,
+  defaultCalendarId,
   defaultStart = '10:00',
   defaultDuration = 60,
 }: {
-  store: Ariakit.DialogStore
+  store: Ariakit.PopoverStore
   day: string
   calendars: Calendar[]
+  defaultAllDay?: boolean
+  defaultCalendarId?: string
   defaultStart?: string
   defaultDuration?: number
 }) {
   const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()]
+  const writableCalendarId = defaultCalendarId ?? (calendars.find((calendar) => !calendar.isDemo) ?? calendars[0])?.id
 
   const [state, formAction, isPending] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
     const repeat = String(formData.get('repeat'))
+    const allDay = formData.get('allDay') === 'on'
     const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? weekday : null
     const result = await createEvent({
+      allDay,
       calendarId: String(formData.get('calendarId')),
       day,
       duration: Number(formData.get('duration')),
@@ -49,11 +55,38 @@ export function EventCreateDialog({
   }, {})
 
   return (
-    <Dialog store={store} title="New event" description={formatDay(day)} busy={isPending}>
+    <Ariakit.Popover
+      store={store}
+      unmountOnHide
+      fixed
+      fitViewport
+      gutter={10}
+      hideOnEscape={!isPending}
+      hideOnInteractOutside={!isPending}
+      className="border-divider z-50 w-[min(24rem,calc(100vw-2rem))] rounded-lg border bg-surface p-4 shadow-2xl outline-none dark:border-divider-dark dark:bg-surface-dark"
+      style={{ viewTransitionName: 'dialog' }}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <Ariakit.PopoverHeading className="text-base font-semibold tracking-tight">New event</Ariakit.PopoverHeading>
+          <Ariakit.PopoverDescription className="text-muted mt-0.5 text-sm">{formatDay(day)}</Ariakit.PopoverDescription>
+        </div>
+        <Ariakit.PopoverDismiss
+          aria-label="Close"
+          className="text-muted -mr-1 rounded-md p-1 transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
+          disabled={isPending}
+        >
+          ×
+        </Ariakit.PopoverDismiss>
+      </div>
       <form action={formAction} className="mt-4 space-y-4">
         <label className="block">
           <span className={fieldLabel}>Title</span>
           <input autoFocus name="title" placeholder="What's happening?" />
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input className="size-4 w-auto" defaultChecked={defaultAllDay} name="allDay" type="checkbox" />
+          All day
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
@@ -74,7 +107,7 @@ export function EventCreateDialog({
         <div className="grid grid-cols-2 gap-3">
           <div className="block">
             <span className={fieldLabel}>Calendar</span>
-            <CalendarPicker calendars={calendars} defaultValue={calendars[0]?.id} name="calendarId" />
+            <CalendarPicker calendars={calendars} defaultValue={writableCalendarId} name="calendarId" />
           </div>
           <label className="block">
             <span className={fieldLabel}>Repeat</span>
@@ -87,12 +120,12 @@ export function EventCreateDialog({
         </div>
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex justify-end gap-2">
-          <Ariakit.DialogDismiss
+          <Ariakit.PopoverDismiss
             className="text-muted rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black disabled:opacity-50 dark:hover:text-white"
             disabled={isPending}
           >
             Cancel
-          </Ariakit.DialogDismiss>
+          </Ariakit.PopoverDismiss>
           <button
             className="rounded-md bg-accent px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
             disabled={isPending}
@@ -102,6 +135,6 @@ export function EventCreateDialog({
           </button>
         </div>
       </form>
-    </Dialog>
+    </Ariakit.Popover>
   )
 }

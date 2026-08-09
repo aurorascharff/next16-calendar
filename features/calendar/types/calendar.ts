@@ -9,6 +9,7 @@ export type Calendar = {
 }
 
 export type CalendarEvent = {
+  allDay: boolean
   calendarId: string
   color: CalendarColor
   day: string

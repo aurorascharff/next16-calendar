@@ -8,11 +8,13 @@ import { Crossfade } from '@/components/ui/crossfade'
 import { getCalendars } from '@/features/calendar/calendar-queries'
 import { CalendarManager } from '@/features/calendar/components/calendar-manager'
 import { MiniMonth } from '@/features/calendar/components/mini-month'
+import { signOut } from '@/features/user/user-actions'
+import { getCurrentUser } from '@/features/user/user-queries'
 
 const REPO_URL = 'https://github.com/aurorascharff/next16-calendar'
 
 const sidebarLink =
-  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent/10 aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]'
+  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent/10 aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]'
 
 export function CalendarNavigation() {
   return (
@@ -57,32 +59,44 @@ export function CalendarNavigation() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View source on GitHub"
-              className="text-muted rounded-md p-1.5 transition-colors hover:text-black dark:hover:text-white"
+              className="text-muted rounded-md p-1.5 hover:text-black dark:hover:text-white"
             >
               <GitHubIcon className="size-4" />
             </a>
           </div>
           <div className="-mx-3 -mb-3 border-t border-divider dark:border-divider-dark">
-            <div className="flex items-center gap-2.5 px-3 py-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent text-sm font-semibold text-white">
-                A
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">Aurora Scharff</p>
-                <p className="text-muted truncate text-xs">@aurora</p>
-              </div>
-              <Link
-                href="/login"
-                aria-label="Log out"
-                className="text-muted rounded-md p-1.5 transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
-              >
-                <LogOut className="size-4" />
-              </Link>
-            </div>
+            <Suspense fallback={<div className="h-[60px]" />}>
+              <UserFooter />
+            </Suspense>
           </div>
         </div>
       </aside>
     </ViewTransition>
+  )
+}
+
+async function UserFooter() {
+  const user = await getCurrentUser()
+  if (!user) return null
+  return (
+    <div className="flex items-center gap-2.5 px-3 py-3">
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent text-sm font-semibold text-white uppercase">
+        {user.name.charAt(0)}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{user.name}</p>
+        <p className="text-muted truncate text-xs">@{user.handle}</p>
+      </div>
+      <form action={signOut}>
+        <button
+          aria-label="Log out"
+          className="text-muted rounded-md p-1.5 hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
+          type="submit"
+        >
+          <LogOut className="size-4" />
+        </button>
+      </form>
+    </div>
   )
 }
 
@@ -102,7 +116,7 @@ function CalendarsFallback() {
 }
 
 const mobileTab =
-  'flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted transition-colors hover:text-black dark:hover:text-white aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]'
+  'flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted hover:text-black dark:hover:text-white aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]'
 
 export function MobileCalendarNavigation() {
   return (

@@ -14,8 +14,6 @@ export const DURATION_OPTIONS = [30, 45, 60, 90, 120];
 
 export type Placement = { col: number; cols: number };
 
-// Google-Calendar-style column packing: events overlapping in time share the
-// width side by side; independent clusters each get the full width back.
 export function packDay(events: CalendarEvent[]): Map<string, Placement> {
   const items = events
     .map((event) => ({
