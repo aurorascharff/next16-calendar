@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 const directionalSlide = {
   'nav-back': 'nav-back',
+  'nav-crossfade': 'nav-crossfade',
   'nav-forward': 'nav-forward',
   default: 'none',
 };

@@ -141,6 +141,7 @@ function MiniMonthCalendar({
                   if (key === optimisticSelected) return;
                   startTransition(() => setOptimisticSelected(key));
                 }}
+                transitionTypes={['nav-crossfade']}
               >
                 <span
                   className={cn(

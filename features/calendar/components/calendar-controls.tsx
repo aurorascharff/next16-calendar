@@ -122,6 +122,7 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
           href={calendarHref(date, 'week')}
           onNavigate={() => markView('week')}
           prefetch
+          transitionTypes={['nav-crossfade']}
         >
           Week
         </Link>
@@ -132,6 +133,7 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
           href={calendarHref(date, 'month')}
           onNavigate={() => markView('month')}
           prefetch
+          transitionTypes={['nav-crossfade']}
         >
           Month
         </Link>

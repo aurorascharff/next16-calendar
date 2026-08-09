@@ -213,6 +213,22 @@ main:has([data-calendar-pending]) .calendar-pending-spinner {
   }
 }
 
+@keyframes opacity-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+::view-transition-old(.nav-crossfade) {
+  animation: var(--duration-exit) ease-in both opacity-fade reverse;
+}
+::view-transition-new(.nav-crossfade) {
+  animation: var(--duration-enter) ease-out var(--duration-exit) both opacity-fade;
+}
+
 ::view-transition-old(.nav-forward) {
   --slide-offset: -60px;
   animation:
