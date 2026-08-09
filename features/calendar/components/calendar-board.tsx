@@ -6,7 +6,8 @@ import { useOptimistic, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { moveEvent, resizeEvent } from '../calendar-actions'
-import type { CalendarEvent, CalendarName } from '../types/calendar'
+import { chipClass } from '../calendar-colors'
+import type { Calendar, CalendarEvent } from '../types/calendar'
 import { dateKey, formatDay, timeToMinutes } from '../calendar-utils'
 import {
   END_MINUTES,
@@ -25,13 +26,17 @@ import { EventCreateDialog } from './event-create-dialog'
 import { EventEditor } from './event-editor'
 import { useCalendarVisibility } from './calendar-visibility'
 
-const calendarChip: Record<CalendarName, string> = {
-  focus: 'bg-indigo-500 text-white ring-black/5 shadow-sm dark:bg-indigo-600',
-  personal: 'bg-rose-500 text-white ring-black/5 shadow-sm dark:bg-rose-600',
-  team: 'bg-accent text-white ring-black/5 shadow-sm dark:bg-accent-hover',
-}
-
-export function CalendarBoard({ days, events, view }: { days: string[]; events: CalendarEvent[]; view: 'day' | 'week' }) {
+export function CalendarBoard({
+  calendars,
+  days,
+  events,
+  view,
+}: {
+  calendars: Calendar[]
+  days: string[]
+  events: CalendarEvent[]
+  view: 'day' | 'week'
+}) {
   const { hidden } = useCalendarVisibility()
   const gridTemplate = `4.5rem repeat(${days.length}, minmax(0, 1fr))`
   const gridMinWidth = view === 'week' ? 760 : undefined
@@ -43,7 +48,7 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
         | { day: string; everyWeekday?: boolean; recurring?: boolean; sourceId: string; start: string; type: 'move' }
         | { sourceId: string; type: 'delete' }
         | { duration: number; sourceId: string; type: 'resize' }
-        | { event: Pick<CalendarEvent, 'color' | 'duration' | 'sourceId' | 'start' | 'title'>; type: 'update' },
+        | { event: Pick<CalendarEvent, 'duration' | 'sourceId' | 'start' | 'title'>; type: 'update' },
     ) => {
       if (next.type === 'delete') {
         return current.filter((event) => event.sourceId !== next.sourceId)
@@ -109,7 +114,7 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
   // Pointer-based move: the event block itself follows the cursor (snapped to the
   // grid) and drops into whichever day column it's over — no floating HTML5 ghost.
   function handleMoveDown(calendarEvent: CalendarEvent, pointerEvent: React.PointerEvent<HTMLButtonElement>) {
-    if (pointerEvent.button !== 0 || calendarEvent.recurring) return
+    if (pointerEvent.button !== 0 || calendarEvent.isDemo) return
     if ((pointerEvent.target as HTMLElement).closest('[data-resize-handle]')) return
     pointerEvent.stopPropagation()
     pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId)
@@ -264,7 +269,7 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
         {days.map((day) => {
           const isToday = day === todayKey
           const showNow = isToday && nowMinutes >= START_HOUR * 60 && nowMinutes <= END_MINUTES
-          const dayEvents = optimisticEvents.filter((event) => effectiveDay(event) === day && !hidden.has(event.calendar))
+          const dayEvents = optimisticEvents.filter((event) => effectiveDay(event) === day && !hidden.has(event.calendarId))
           const layout = packDay(dayEvents)
           const selectionLo = createSel?.day === day ? Math.min(createSel.aMin, createSel.bMin) : null
           const selectionHi = createSel?.day === day ? Math.max(createSel.aMin, createSel.bMin) : null
@@ -313,8 +318,8 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
                     className={cn(
                       'group absolute flex touch-none flex-col overflow-hidden rounded-[5px] px-2 py-1 text-left ring-1 ring-inset transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
                       isDragging || isResizing ? 'z-30 cursor-grabbing shadow-lg' : 'z-10 cursor-grab hover:z-20 hover:shadow-md',
-                      event.recurring && 'cursor-pointer',
-                      calendarChip[event.calendar],
+                      event.isDemo && 'cursor-pointer',
+                      chipClass[event.color],
                     )}
                     data-event-chip
                     key={event.id}
@@ -343,7 +348,7 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
                         {isResizing ? minutesToTime(resize!.endMin) : minutesToTime(startMin)}
                       </span>
                     ) : null}
-                    {!event.recurring ? (
+                    {!event.isDemo ? (
                       <span
                         className="absolute inset-x-0 bottom-0 z-10 flex h-2.5 cursor-ns-resize touch-none items-end justify-center pb-0.5 opacity-0 transition-opacity group-hover:opacity-100"
                         data-event-chip
@@ -389,6 +394,7 @@ export function CalendarBoard({ days, events, view }: { days: string[]; events: 
       {createDraft ? (
         <EventCreateDialog
           key={`${createDraft.day}-${createDraft.start}-${createDraft.duration}`}
+          calendars={calendars}
           day={createDraft.day}
           defaultDuration={createDraft.duration}
           defaultStart={createDraft.start}

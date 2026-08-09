@@ -2,9 +2,10 @@
 
 import * as Ariakit from '@ariakit/react'
 import { Plus } from 'lucide-react'
+import type { Calendar } from '../types/calendar'
 import { EventCreateDialog } from './event-create-dialog'
 
-export function NewEventButton({ day }: { day: string }) {
+export function NewEventButton({ calendars, day }: { calendars: Calendar[]; day: string }) {
   const store = Ariakit.useDialogStore()
 
   return (
@@ -16,7 +17,7 @@ export function NewEventButton({ day }: { day: string }) {
         <Plus className="size-4" />
         <span className="hidden sm:inline">New event</span>
       </Ariakit.DialogDisclosure>
-      <EventCreateDialog store={store} day={day} />
+      <EventCreateDialog calendars={calendars} day={day} store={store} />
     </>
   )
 }

@@ -8,12 +8,26 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
+  id           String          @id @default(cuid())
   name         String
-  handle       String        @unique
-  createdAt    DateTime      @default(now())
+  handle       String          @unique
+  createdAt    DateTime        @default(now())
   events       CalendarEvent[]
+  calendars    Calendar[]
   bookingPages BookingPage[]
+}
+
+model Calendar {
+  id        String          @id @default(cuid())
+  name      String
+  color     String
+  isDemo    Boolean         @default(false)
+  userId    String
+  createdAt DateTime        @default(now())
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events    CalendarEvent[]
+
+  @@index([userId])
 }
 
 model CalendarEvent {
@@ -22,15 +36,17 @@ model CalendarEvent {
   day        DateTime
   start      String
   duration   Int      @default(60)
-  calendar   String   @default("personal")
-  color      String   @default("blue")
   recurrence String?
+  demo       Boolean  @default(false)
+  calendarId String
   userId     String
   createdAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  calendar Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
 
   @@index([userId, day])
+  @@index([calendarId])
 }
 
 model BookingPage {

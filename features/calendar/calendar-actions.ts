@@ -2,6 +2,7 @@
 
 import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/db'
+import { isCalendarColor } from './calendar-colors'
 import { calendarCache } from './calendar-queries'
 import { getWeekDays, isDateKey } from './calendar-utils'
 
@@ -12,8 +13,7 @@ type MoveEventInput = {
 }
 
 type CreateEventInput = {
-  calendar: 'focus' | 'personal' | 'team'
-  color: 'amber' | 'blue' | 'rose' | 'violet'
+  calendarId: string
   day: string
   duration: number
   recurrence?: string | null
@@ -21,21 +21,38 @@ type CreateEventInput = {
   title: string
 }
 
-type UpdateEventInput = Pick<CreateEventInput, 'color' | 'duration' | 'start' | 'title'> & {
+type UpdateEventInput = {
+  duration: number
   eventId: string
+  start: string
+  title: string
 }
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 const RECURRENCE_VALUES = new Set(['weekday', ...WEEKDAY_NAMES])
 
-export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
-  if (!timePattern.test(start)) {
-    return { error: 'Choose a valid time.' }
-  }
+async function requireUserId() {
+  const user = await prisma.user.findUnique({ select: { id: true }, where: { handle: 'aurora' } })
+  return user?.id ?? null
+}
 
-  const event = await prisma.calendarEvent.findUnique({ where: { id: sourceId } })
+async function findEvent(id: string) {
+  return prisma.calendarEvent.findUnique({ where: { id } })
+}
+
+function invalidateWeek(day: Date | string) {
+  const key = typeof day === 'string' ? day : day.toISOString().slice(0, 10)
+  updateTag(calendarCache.tag)
+  updateTag(calendarCache.weekTag(getWeekDays(key)[0]))
+}
+
+export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
+  if (!timePattern.test(start)) return { error: 'Choose a valid time.' }
+
+  const event = await findEvent(sourceId)
   if (!event) return { error: 'This event no longer exists.' }
+  if (event.demo) return { error: 'Demo events can’t be moved.' }
 
   if (event.recurrence) {
     const data: { recurrence?: string; start: string } = { start }
@@ -43,8 +60,7 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
       data.recurrence = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()]
     }
     const updated = await prisma.calendarEvent.update({ data, where: { id: sourceId } })
-    updateTag(calendarCache.tag)
-    updateTag(calendarCache.weekTag(getWeekDays(event.day.toISOString().slice(0, 10))[0]))
+    invalidateWeek(event.day)
     return { data: updated }
   }
 
@@ -55,11 +71,8 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
     data: { day: new Date(`${day}T00:00:00.000Z`), start },
     where: { id: sourceId },
   })
-
-  updateTag(calendarCache.tag)
-  updateTag(calendarCache.weekTag(getWeekDays(previousDay.toISOString().slice(0, 10))[0]))
-  updateTag(calendarCache.weekTag(getWeekDays(day)[0]))
-
+  invalidateWeek(previousDay)
+  invalidateWeek(day)
   return { data: updated }
 }
 
@@ -70,29 +83,26 @@ export async function createEvent(input: CreateEventInput) {
     return { error: 'Choose a valid date and time.' }
   }
 
-  const user = await prisma.user.findUnique({
-    select: { id: true },
-    where: { handle: 'aurora' },
-  })
-  if (!user) return { error: 'Your local profile is unavailable. Run the database seed first.' }
+  const userId = await requireUserId()
+  if (!userId) return { error: 'Your local profile is unavailable. Run the database seed first.' }
+
+  const calendar = await prisma.calendar.findFirst({ where: { id: input.calendarId, userId } })
+  if (!calendar) return { error: 'Choose a calendar for this event.' }
 
   const recurrence = input.recurrence && RECURRENCE_VALUES.has(input.recurrence) ? input.recurrence : null
 
   const event = await prisma.calendarEvent.create({
     data: {
-      calendar: input.calendar,
-      color: input.color,
+      calendarId: input.calendarId,
       day: new Date(`${input.day}T00:00:00.000Z`),
       duration: input.duration,
       recurrence,
       start: input.start,
       title,
-      userId: user.id,
+      userId,
     },
   })
-
-  updateTag(calendarCache.tag)
-  updateTag(calendarCache.weekTag(getWeekDays(input.day)[0]))
+  invalidateWeek(input.day)
   return { data: event }
 }
 
@@ -102,44 +112,77 @@ export async function updateEvent(input: UpdateEventInput) {
     return { error: 'Add a title and a valid start time.' }
   }
 
-  const event = await prisma.calendarEvent.findUnique({ where: { id: input.eventId } })
+  const event = await findEvent(input.eventId)
   if (!event) return { error: 'This event no longer exists.' }
+  if (event.demo) return { error: 'Demo events can’t be edited.' }
 
   const updated = await prisma.calendarEvent.update({
-    data: {
-      color: input.color,
-      duration: input.duration,
-      start: input.start,
-      title,
-    },
+    data: { duration: input.duration, start: input.start, title },
     where: { id: input.eventId },
   })
-
-  updateTag(calendarCache.tag)
-  updateTag(calendarCache.weekTag(getWeekDays(event.day.toISOString().slice(0, 10))[0]))
+  invalidateWeek(event.day)
   return { data: updated }
 }
 
 export async function resizeEvent({ duration, sourceId }: { duration: number; sourceId: string }) {
   if (duration < 15 || duration > 24 * 60) return { error: 'Choose a valid duration.' }
 
-  const event = await prisma.calendarEvent.findUnique({ where: { id: sourceId } })
+  const event = await findEvent(sourceId)
   if (!event) return { error: 'This event no longer exists.' }
+  if (event.demo) return { error: 'Demo events can’t be resized.' }
 
   const updated = await prisma.calendarEvent.update({ data: { duration }, where: { id: sourceId } })
-  updateTag(calendarCache.tag)
-  updateTag(calendarCache.weekTag(getWeekDays(event.day.toISOString().slice(0, 10))[0]))
+  invalidateWeek(event.day)
   return { data: updated }
 }
 
 export async function deleteEvent(eventId: string) {
-  const event = await prisma.calendarEvent.findUnique({ where: { id: eventId } })
+  const event = await findEvent(eventId)
   if (!event) return { error: 'This event no longer exists.' }
+  if (event.demo) return { error: 'Demo events can’t be deleted.' }
 
   await prisma.calendarEvent.delete({ where: { id: eventId } })
-  updateTag(calendarCache.tag)
-  updateTag(calendarCache.weekTag(getWeekDays(event.day.toISOString().slice(0, 10))[0]))
+  invalidateWeek(event.day)
   return { data: { id: eventId } }
+}
+
+export async function createCalendar({ color, name }: { color: string; name: string }) {
+  const trimmed = name.trim()
+  if (!trimmed) return { error: 'Give the calendar a name.' }
+  if (!isCalendarColor(color)) return { error: 'Choose a color.' }
+
+  const userId = await requireUserId()
+  if (!userId) return { error: 'Your local profile is unavailable.' }
+
+  const calendar = await prisma.calendar.create({ data: { color, name: trimmed, userId } })
+  updateTag(calendarCache.calendarsTag)
+  return { data: calendar }
+}
+
+export async function updateCalendar({ color, id, name }: { color: string; id: string; name: string }) {
+  const trimmed = name.trim()
+  if (!trimmed) return { error: 'Give the calendar a name.' }
+  if (!isCalendarColor(color)) return { error: 'Choose a color.' }
+
+  const calendar = await prisma.calendar.findUnique({ where: { id } })
+  if (!calendar) return { error: 'This calendar no longer exists.' }
+  if (calendar.isDemo) return { error: 'Demo calendars can’t be changed.' }
+
+  const updated = await prisma.calendar.update({ data: { color, name: trimmed }, where: { id } })
+  updateTag(calendarCache.calendarsTag)
+  updateTag(calendarCache.tag)
+  return { data: updated }
+}
+
+export async function deleteCalendar(id: string) {
+  const calendar = await prisma.calendar.findUnique({ where: { id } })
+  if (!calendar) return { error: 'This calendar no longer exists.' }
+  if (calendar.isDemo) return { error: 'Demo calendars can’t be deleted.' }
+
+  await prisma.calendar.delete({ where: { id } })
+  updateTag(calendarCache.calendarsTag)
+  updateTag(calendarCache.tag)
+  return { data: { id } }
 }
 
 export async function bookSlot({

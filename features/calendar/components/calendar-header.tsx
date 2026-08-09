@@ -1,9 +1,11 @@
+import { getCalendars } from '../calendar-queries'
 import { CalendarControls } from './calendar-controls'
 import { NewEventButton } from './new-event-button'
 import type { CalendarView } from '../types/calendar'
 import { formatDayLong, formatMonth } from '../calendar-utils'
 
-export function CalendarHeader({ date, view }: { date: string; view: CalendarView }) {
+export async function CalendarHeader({ date, view }: { date: string; view: CalendarView }) {
+  const calendars = await getCalendars()
   return (
     <>
       <header className="flex min-h-18 items-center justify-between border-b border-divider px-4 sm:px-6 dark:border-divider-dark">
@@ -16,7 +18,7 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <NewEventButton day={date} />
+          <NewEventButton calendars={calendars} day={date} />
         </div>
       </header>
       <div className="border-b border-divider px-4 py-2 dark:border-divider-dark sm:hidden">

@@ -5,16 +5,10 @@ import { useActionState } from 'react'
 import { toast } from 'sonner'
 import { Dialog } from '@/components/ui/dialog'
 import { createEvent } from '../calendar-actions'
-import type { CalendarName, EventColor } from '../types/calendar'
+import type { Calendar } from '../types/calendar'
 import { formatDay } from '../calendar-utils'
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium'
-
-const calendarColor: Record<CalendarName, EventColor> = {
-  focus: 'violet',
-  personal: 'rose',
-  team: 'blue',
-}
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 const weekdayLabel = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'long' })
@@ -24,23 +18,23 @@ type State = { error?: string }
 export function EventCreateDialog({
   store,
   day,
+  calendars,
   defaultStart = '10:00',
   defaultDuration = 60,
 }: {
   store: Ariakit.DialogStore
   day: string
+  calendars: Calendar[]
   defaultStart?: string
   defaultDuration?: number
 }) {
   const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()]
 
   const [state, formAction, isPending] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
-    const calendar = String(formData.get('calendar')) as CalendarName
     const repeat = String(formData.get('repeat'))
     const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? weekday : null
     const result = await createEvent({
-      calendar,
-      color: calendarColor[calendar],
+      calendarId: String(formData.get('calendarId')),
       day,
       duration: Number(formData.get('duration')),
       recurrence,
@@ -79,10 +73,12 @@ export function EventCreateDialog({
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className={fieldLabel}>Calendar</span>
-            <select defaultValue="personal" name="calendar">
-              <option value="focus">Focus</option>
-              <option value="team">Team</option>
-              <option value="personal">Personal</option>
+            <select defaultValue={calendars[0]?.id} name="calendarId">
+              {calendars.map((calendar) => (
+                <option key={calendar.id} value={calendar.id}>
+                  {calendar.name}
+                </option>
+              ))}
             </select>
           </label>
           <label className="block">

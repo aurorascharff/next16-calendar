@@ -1,10 +1,11 @@
 import { CalendarDays, Link2, LogOut } from 'lucide-react'
 import Link from 'next/link'
-import { ViewTransition } from 'react'
+import { Suspense, ViewTransition } from 'react'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { GitHubIcon } from '@/components/ui/github-icon'
 import { NavLink } from '@/components/ui/nav-link'
-import { CalendarLegend } from '@/features/calendar/components/calendar-legend'
+import { getCalendars } from '@/features/calendar/calendar-queries'
+import { CalendarManager } from '@/features/calendar/components/calendar-manager'
 import { MiniMonth } from '@/features/calendar/components/mini-month'
 
 const REPO_URL = 'https://github.com/aurorascharff/next16-calendar'
@@ -42,8 +43,9 @@ export function CalendarNavigation() {
         </div>
 
         <div className="mt-6">
-          <p className="text-muted mb-2 px-3 text-xs font-semibold tracking-wide uppercase">Calendars</p>
-          <CalendarLegend />
+          <Suspense fallback={<CalendarsFallback />}>
+            <CalendarSection />
+          </Suspense>
         </div>
 
         <div className="mt-auto">
@@ -80,6 +82,17 @@ export function CalendarNavigation() {
         </div>
       </aside>
     </ViewTransition>
+  )
+}
+
+async function CalendarSection() {
+  const calendars = await getCalendars()
+  return <CalendarManager calendars={calendars} />
+}
+
+function CalendarsFallback() {
+  return (
+    <p className="text-muted mb-2 px-3 text-xs font-semibold tracking-wide uppercase">Calendars</p>
   )
 }
 

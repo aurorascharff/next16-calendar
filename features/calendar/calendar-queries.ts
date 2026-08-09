@@ -4,18 +4,20 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { delay } from '@/lib/utils'
-import type { CalendarEvent, CalendarName, CalendarWeek, EventColor } from './types/calendar'
+import type { Calendar, CalendarColor, CalendarEvent, CalendarWeek } from './types/calendar'
 import { dateKey, getWeekDays, isDateKey } from './calendar-utils'
 
 export const calendarCache = {
+  calendarsTag: 'calendars',
   tag: 'calendar-events',
   weekTag: (start: string) => `calendar-week:${start}`,
 }
 
 type StoredEvent = {
-  calendar: string
-  color: string
+  calendar: { color: string }
+  calendarId: string
   day: Date
+  demo: boolean
   duration: number
   id: string
   recurrence: string | null
@@ -31,6 +33,30 @@ async function getCurrentUserId() {
     where: { handle: 'aurora' },
   })
   return user?.id ?? null
+}
+
+export async function getCalendars(): Promise<Calendar[]> {
+  const userId = await getCurrentUserId()
+  if (!userId) return []
+  return getCalendarsForUser(userId)
+}
+
+async function getCalendarsForUser(userId: string): Promise<Calendar[]> {
+  'use cache'
+  cacheLife('hours')
+  cacheTag(calendarCache.calendarsTag)
+
+  const rows = await prisma.calendar.findMany({
+    orderBy: [{ isDemo: 'desc' }, { createdAt: 'asc' }],
+    where: { userId },
+  })
+
+  return rows.map((calendar) => ({
+    color: calendar.color as CalendarColor,
+    id: calendar.id,
+    isDemo: calendar.isDemo,
+    name: calendar.name,
+  }))
 }
 
 export async function getCalendarWeek(date: string): Promise<CalendarWeek> {
@@ -54,6 +80,7 @@ async function getCalendarWeekForUser(
 
   await delay(650)
   const rows = await prisma.calendarEvent.findMany({
+    include: { calendar: { select: { color: true } } },
     orderBy: [{ start: 'asc' }, { title: 'asc' }],
     where: { userId },
   })
@@ -97,11 +124,12 @@ function matchesRecurrence(recurrence: string, day: string) {
 
 function toCalendarEvent(event: StoredEvent, day: string): CalendarEvent {
   return {
-    calendar: event.calendar as CalendarName,
-    color: event.color as EventColor,
+    calendarId: event.calendarId,
+    color: event.calendar.color as CalendarColor,
     day,
     duration: event.duration,
     id: event.id,
+    isDemo: event.demo,
     recurrence: event.recurrence,
     sourceId: event.id,
     start: event.start,

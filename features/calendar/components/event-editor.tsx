@@ -6,14 +6,14 @@ import { useActionState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Dialog } from '@/components/ui/dialog'
 import { deleteEvent, updateEvent } from '../calendar-actions'
-import type { CalendarEvent, EventColor } from '../types/calendar'
+import type { CalendarEvent } from '../types/calendar'
 import { formatDay } from '../calendar-utils'
 
 type EventEditorProps = {
   event: CalendarEvent
   onClose: () => void
   onDeleted: (sourceId: string) => void
-  onUpdated: (event: Pick<CalendarEvent, 'color' | 'duration' | 'sourceId' | 'start' | 'title'>) => void
+  onUpdated: (event: Pick<CalendarEvent, 'duration' | 'sourceId' | 'start' | 'title'>) => void
 }
 
 type State = { error?: string }
@@ -30,9 +30,8 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
   })
 
   const [state, formAction, isSaving] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
-    if (event.recurring) return { error: 'This is a recurring demo event and can’t be edited.' }
+    if (event.isDemo) return { error: 'This is a demo event and can’t be edited.' }
     const input = {
-      color: String(formData.get('color')) as EventColor,
       duration: Number(formData.get('duration')),
       eventId: event.sourceId,
       start: String(formData.get('start')),
@@ -47,8 +46,8 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
   }, {})
 
   function remove() {
-    if (event.recurring) {
-      toast.error('Recurring demo events can’t be deleted.')
+    if (event.isDemo) {
+      toast.error('Demo events can’t be deleted.')
       return
     }
     startDelete(async () => {
@@ -67,24 +66,24 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
 
   return (
     <Dialog store={store} title="Edit event" description={`${formatDay(event.day)} · ${event.start}`} busy={busy}>
-      {event.recurring ? (
+      {event.isDemo ? (
         <p className="text-muted mt-3 rounded-md bg-card px-3 py-2 text-xs dark:bg-card-dark">
-          This is a recurring demo event — it can’t be edited or deleted.
+          This is a demo event — create your own to edit, move, resize, and delete freely.
         </p>
       ) : null}
       <form action={formAction} className="mt-4 space-y-4">
         <label className="block">
           <span className={fieldLabel}>Title</span>
-          <input autoFocus defaultValue={event.title} disabled={event.recurring} name="title" />
+          <input autoFocus defaultValue={event.title} disabled={event.isDemo} name="title" />
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className={fieldLabel}>Starts at</span>
-            <input defaultValue={event.start} disabled={event.recurring} name="start" type="time" />
+            <input defaultValue={event.start} disabled={event.isDemo} name="start" type="time" />
           </label>
           <label className="block">
             <span className={fieldLabel}>Duration</span>
-            <select defaultValue={String(event.duration)} disabled={event.recurring} name="duration">
+            <select defaultValue={String(event.duration)} disabled={event.isDemo} name="duration">
               <option value="30">30 minutes</option>
               <option value="45">45 minutes</option>
               <option value="60">1 hour</option>
@@ -93,15 +92,6 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
             </select>
           </label>
         </div>
-        <label className="block">
-          <span className={fieldLabel}>Color</span>
-          <select defaultValue={event.color} disabled={event.recurring} name="color">
-            <option value="blue">Blue</option>
-            <option value="violet">Violet</option>
-            <option value="amber">Amber</option>
-            <option value="rose">Rose</option>
-          </select>
-        </label>
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex items-center justify-between gap-3">
           <button
@@ -122,7 +112,7 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
             </Ariakit.DialogDismiss>
             <button
               className="rounded-md bg-accent px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
-              disabled={busy || event.recurring}
+              disabled={busy || event.isDemo}
               type="submit"
             >
               {isSaving ? 'Saving…' : 'Save changes'}
