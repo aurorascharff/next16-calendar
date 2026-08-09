@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { signIn } from '../user-actions';
 
 export function SignInForm() {
-  const [state, formAction, isPending] = useActionState(signIn, null);
+  const [state, formAction] = useActionState(signIn, null);
 
   return (
     <form action={formAction} className="mt-8 flex flex-col gap-3">
@@ -26,8 +26,8 @@ export function SignInForm() {
           {state.error}
         </p>
       ) : null}
-      <Button className="mt-1 w-full py-2.5" disabled={isPending} type="submit">
-        {isPending ? 'Signing in…' : 'Continue'}
+      <Button className="mt-1 w-full py-2.5" type="submit">
+        Continue
       </Button>
     </form>
   );

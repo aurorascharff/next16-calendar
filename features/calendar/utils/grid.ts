@@ -9,7 +9,7 @@ export const GRID_HEIGHT = HOURS.length * HOUR_HEIGHT;
 export const DEFAULT_SCROLL_HOUR = 7;
 export const DEFAULT_SCROLL_TOP = (DEFAULT_SCROLL_HOUR - START_HOUR) * HOUR_HEIGHT;
 export const SNAP_MINUTES = 15;
-export const DURATION_OPTIONS = [30, 45, 60, 90, 120];
+export const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120];
 
 export type Placement = { col: number; cols: number };
 

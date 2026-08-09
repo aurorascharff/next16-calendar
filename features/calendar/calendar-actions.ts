@@ -1,7 +1,8 @@
 'use server';
 
 import { updateTag } from 'next/cache';
-import { verifyAuth } from '@/features/user/user-queries';
+import { bookingCache } from '@/features/booking/booking-queries';
+import { getCurrentUser, verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { calendarCache } from './calendar-queries';
 import { getWeekDays, isDateKey } from './calendar-utils';
@@ -37,24 +38,37 @@ const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const RECURRENCE_VALUES = new Set(['weekday', ...WEEKDAY_NAMES]);
 
-async function requireUserId() {
-  return verifyAuth();
+async function requireUser() {
+  const user = await getCurrentUser();
+  if (user) return user;
+
+  await verifyAuth();
+  throw new Error('Authentication redirect failed.');
 }
 
 async function findEvent(id: string) {
   return prisma.calendarEvent.findUnique({ where: { id } });
 }
 
-function invalidateWeek(day: Date | string) {
+function invalidateWeek(day: Date | string, handle: string) {
   const key = typeof day === 'string' ? day : day.toISOString().slice(0, 10);
   updateTag(calendarCache.tag);
   updateTag(calendarCache.weekTag(getWeekDays(key)[0]));
+  updateTag(bookingCache.tag(handle));
+}
+
+function invalidateCalendars(handle: string) {
+  updateTag(calendarCache.calendarsTag);
+  updateTag(calendarCache.tag);
+  updateTag(bookingCache.tag(handle));
 }
 
 export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
+  const user = await requireUser();
   const event = await findEvent(sourceId);
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
+  if (event.userId !== user.id) return { error: 'This event is not available.' };
   if (!event.allDay && !timePattern.test(start)) return { error: 'Choose a valid time.' };
 
   const eventStart = event.allDay ? '00:00' : start;
@@ -65,7 +79,7 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
       data.recurrence = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
     }
     const updated = await prisma.calendarEvent.update({ data, where: { id: sourceId } });
-    invalidateWeek(event.day);
+    invalidateWeek(event.day, user.handle);
     return { data: updated };
   }
 
@@ -76,8 +90,8 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
     data: { day: new Date(`${day}T00:00:00.000Z`), start: eventStart },
     where: { id: sourceId },
   });
-  invalidateWeek(previousDay);
-  invalidateWeek(day);
+  invalidateWeek(previousDay, user.handle);
+  invalidateWeek(day, user.handle);
   return { data: updated };
 }
 
@@ -89,19 +103,18 @@ export async function createEvent(input: CreateEventInput) {
     return { error: 'Choose a valid date and time.' };
   }
 
-  const userId = await requireUserId();
-  if (!userId) return { error: 'Your local profile is unavailable. Run the database seed first.' };
+  const user = await requireUser();
 
   const calendar = input.calendarId
     ? await prisma.calendar.findUnique({ where: { id: input.calendarId } })
     : await prisma.calendar.findFirst({
         orderBy: { createdAt: 'asc' },
-        where: { isDemo: false, userId },
+        where: { isDemo: false, userId: user.id },
       });
 
   if (!calendar) return { error: 'Create a calendar before adding events.' };
   if (calendar.isDemo) return { error: 'Create your own calendar to make changes.' };
-  if (calendar.userId !== userId) return { error: 'Choose a calendar for this event.' };
+  if (calendar.userId !== user.id) return { error: 'Choose a calendar for this event.' };
 
   const recurrence = input.recurrence && RECURRENCE_VALUES.has(input.recurrence) ? input.recurrence : null;
   const description = input.description?.trim() || null;
@@ -116,10 +129,10 @@ export async function createEvent(input: CreateEventInput) {
       recurrence,
       start: allDay ? '00:00' : input.start,
       title,
-      userId,
+      userId: user.id,
     },
   });
-  invalidateWeek(input.day);
+  invalidateWeek(input.day, user.handle);
   return { data: event };
 }
 
@@ -130,9 +143,11 @@ export async function updateEvent(input: UpdateEventInput) {
     return { error: 'Add a title and a valid start time.' };
   }
 
+  const user = await requireUser();
   const event = await findEvent(input.eventId);
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
+  if (event.userId !== user.id) return { error: 'This event is not available.' };
 
   const updated = await prisma.calendarEvent.update({
     data: {
@@ -144,30 +159,34 @@ export async function updateEvent(input: UpdateEventInput) {
     },
     where: { id: input.eventId },
   });
-  invalidateWeek(event.day);
+  invalidateWeek(event.day, user.handle);
   return { data: updated };
 }
 
 export async function resizeEvent({ duration, sourceId }: { duration: number; sourceId: string }) {
   if (duration < 15 || duration > 24 * 60) return { error: 'Choose a valid duration.' };
 
+  const user = await requireUser();
   const event = await findEvent(sourceId);
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
+  if (event.userId !== user.id) return { error: 'This event is not available.' };
   if (event.allDay) return { error: 'All-day events do not resize.' };
 
   const updated = await prisma.calendarEvent.update({ data: { duration }, where: { id: sourceId } });
-  invalidateWeek(event.day);
+  invalidateWeek(event.day, user.handle);
   return { data: updated };
 }
 
 export async function deleteEvent(eventId: string) {
+  const user = await requireUser();
   const event = await findEvent(eventId);
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
+  if (event.userId !== user.id) return { error: 'This event is not available.' };
 
   await prisma.calendarEvent.delete({ where: { id: eventId } });
-  invalidateWeek(event.day);
+  invalidateWeek(event.day, user.handle);
   return { data: { id: eventId } };
 }
 
@@ -176,11 +195,10 @@ export async function createCalendar({ color, name }: { color: string; name: str
   if (!trimmed) return { error: 'Give the calendar a name.' };
   if (!isCalendarColor(color)) return { error: 'Choose a color.' };
 
-  const userId = await requireUserId();
-  if (!userId) return { error: 'Your local profile is unavailable.' };
+  const user = await requireUser();
 
-  const calendar = await prisma.calendar.create({ data: { color, name: trimmed, userId } });
-  updateTag(calendarCache.calendarsTag);
+  const calendar = await prisma.calendar.create({ data: { color, name: trimmed, userId: user.id } });
+  invalidateCalendars(user.handle);
   return { data: calendar };
 }
 
@@ -189,23 +207,25 @@ export async function updateCalendar({ color, id, name }: { color: string; id: s
   if (!trimmed) return { error: 'Give the calendar a name.' };
   if (!isCalendarColor(color)) return { error: 'Choose a color.' };
 
+  const user = await requireUser();
   const calendar = await prisma.calendar.findUnique({ where: { id } });
   if (!calendar) return { error: 'This calendar no longer exists.' };
   if (calendar.isDemo) return { error: 'Create your own calendar to make changes.' };
+  if (calendar.userId !== user.id) return { error: 'This calendar is not available.' };
 
   const updated = await prisma.calendar.update({ data: { color, name: trimmed }, where: { id } });
-  updateTag(calendarCache.calendarsTag);
-  updateTag(calendarCache.tag);
+  invalidateCalendars(user.handle);
   return { data: updated };
 }
 
 export async function deleteCalendar(id: string) {
+  const user = await requireUser();
   const calendar = await prisma.calendar.findUnique({ where: { id } });
   if (!calendar) return { error: 'This calendar no longer exists.' };
   if (calendar.isDemo) return { error: 'Create your own calendar to make changes.' };
+  if (calendar.userId !== user.id) return { error: 'This calendar is not available.' };
 
   await prisma.calendar.delete({ where: { id } });
-  updateTag(calendarCache.calendarsTag);
-  updateTag(calendarCache.tag);
+  invalidateCalendars(user.handle);
   return { data: { id } };
 }

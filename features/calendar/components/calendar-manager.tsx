@@ -6,6 +6,7 @@ import { useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
+import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { createCalendar, deleteCalendar, updateCalendar } from '../calendar-actions';
 import { CALENDAR_COLORS, dotClass } from '../utils/colors';
@@ -35,17 +36,16 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
     <>
       <div className="mb-2 flex items-center justify-between px-3">
         <p className="text-muted text-xs font-semibold tracking-wide uppercase">Calendars</p>
-        <button
-          aria-label="New calendar"
-          className="text-muted rounded p-0.5 transition-colors hover:text-black dark:hover:text-white"
+        <IconButton
+          label="New calendar"
           onClick={() => {
             setEditing('new');
             store.show();
           }}
-          type="button"
+          size="sm"
         >
           <Plus className="size-4" />
-        </button>
+        </IconButton>
       </div>
       <div className="space-y-0.5">
         {calendars.map(calendar => {
@@ -73,13 +73,15 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
                 </span>
               </button>
               <Ariakit.MenuProvider>
-                <Ariakit.MenuButton
-                  aria-label={`${calendar.name} options`}
-                  className="text-muted rounded p-1 opacity-0 transition group-hover:opacity-100 hover:text-black focus-visible:opacity-100 dark:hover:text-white"
+                <IconButton
+                  className="opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100"
                   disabled={isDeleting}
+                  label={`${calendar.name} options`}
+                  render={<Ariakit.MenuButton />}
+                  size="sm"
                 >
                   <MoreHorizontal className="size-4" />
-                </Ariakit.MenuButton>
+                </IconButton>
                 <Ariakit.Menu
                   gutter={4}
                   className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 min-w-36 rounded-md border p-1 shadow-lg outline-none"
@@ -176,15 +178,10 @@ function CalendarFormDialog({
         </div>
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex justify-end gap-2">
-          <Ariakit.DialogDismiss
-            className="text-muted rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black disabled:opacity-50 dark:hover:text-white"
-            disabled={isPending}
-          >
+          <Button render={<Ariakit.DialogDismiss disabled={isPending} />} variant="ghost">
             Cancel
-          </Ariakit.DialogDismiss>
-          <Button disabled={isPending} type="submit">
-            {isPending ? 'Saving…' : calendar ? 'Save' : 'Create'}
           </Button>
+          <Button type="submit">{calendar ? 'Save' : 'Create'}</Button>
         </div>
       </form>
     </Dialog>

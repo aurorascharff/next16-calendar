@@ -30,6 +30,7 @@ type OptimisticAction =
 export type SelectedEvent = { anchorRect?: DOMRect | null; event: CalendarEvent };
 export type CalendarBoardInteractions = {
   create: {
+    onPointerCancel: (event: React.PointerEvent<HTMLDivElement>) => void;
     onPointerDown: (day: string, event: React.PointerEvent<HTMLDivElement>) => void;
     onPointerMove: (day: string, event: React.PointerEvent<HTMLDivElement>) => void;
     onPointerUp: (day: string, event: React.PointerEvent<HTMLDivElement>) => void;
@@ -98,6 +99,7 @@ export function useCalendarBoard({
   } | null>(null);
   const resizeColTopRef = useRef(0);
   const dragMoveRef = useRef<{ day: string; id: string; startMin: number } | null>(null);
+  const createRef = useRef<{ aMin: number; day: string; pointerId: number } | null>(null);
   const suppressClickRef = useRef(false);
   const createStore = Ariakit.usePopoverStore({
     placement: 'top-start',
@@ -235,25 +237,29 @@ export function useCalendarBoard({
     const bounds = event.currentTarget.getBoundingClientRect();
     const minutes = snapMinutes(event.clientY, bounds.top);
     event.currentTarget.setPointerCapture(event.pointerId);
+    createRef.current = { aMin: minutes, day, pointerId: event.pointerId };
     setCreateSel({ aMin: minutes, bMin: minutes, day });
   }
 
   function handleCreateMove(day: string, event: React.PointerEvent<HTMLDivElement>) {
-    if (!createSel || createSel.day !== day) return;
+    const active = createRef.current;
+    if (!active || active.day !== day || active.pointerId !== event.pointerId) return;
     const bounds = event.currentTarget.getBoundingClientRect();
-    setCreateSel(current => (current ? { ...current, bMin: snapMinutes(event.clientY, bounds.top) } : current));
+    setCreateSel({ aMin: active.aMin, bMin: snapMinutes(event.clientY, bounds.top), day });
   }
 
   function handleCreateUp(day: string, event: React.PointerEvent<HTMLDivElement>) {
-    if (!createSel || createSel.day !== day) return;
+    const active = createRef.current;
+    if (!active || active.day !== day || active.pointerId !== event.pointerId) return;
+    createRef.current = null;
     try {
       event.currentTarget.releasePointerCapture(event.pointerId);
     } catch {}
     const bounds = event.currentTarget.getBoundingClientRect();
     const releasedMin = snapMinutes(event.clientY, bounds.top);
-    const lo = Math.min(createSel.aMin, releasedMin);
-    const hi = Math.max(createSel.aMin, releasedMin);
-    const duration = hi - lo >= SNAP_MINUTES ? nearestDuration(hi - lo) : 60;
+    const lo = Math.min(active.aMin, releasedMin);
+    const hi = Math.max(active.aMin, releasedMin);
+    const duration = hi - lo >= SNAP_MINUTES ? nearestDuration(hi - lo) : 15;
     const startMin = Math.min(lo, END_MINUTES - duration);
     setCreateSel({ aMin: startMin, bMin: startMin + duration, day });
     setCreateDraft({
@@ -263,6 +269,12 @@ export function useCalendarBoard({
       start: minutesToTime(startMin),
     });
     createStore.show();
+  }
+
+  function handleCreateCancel(event: React.PointerEvent<HTMLDivElement>) {
+    if (createRef.current?.pointerId !== event.pointerId) return;
+    createRef.current = null;
+    setCreateSel(null);
   }
 
   function handleAllDayCreate(day: string, event: React.MouseEvent<HTMLElement>) {
@@ -284,6 +296,7 @@ export function useCalendarBoard({
 
   const interactions: CalendarBoardInteractions = {
     create: {
+      onPointerCancel: handleCreateCancel,
       onPointerDown: handleCreateDown,
       onPointerMove: handleCreateMove,
       onPointerUp: handleCreateUp,

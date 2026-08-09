@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Suspense } from 'react';
 import { NavLink } from '@/components/ui/nav-link';
 import { useTodayKey } from '../hooks/use-now';
 import type { Route } from 'next';
@@ -43,7 +44,15 @@ function useCalendarHomeLink() {
   };
 }
 
-export function CalendarHomeLink({ href, ...props }: CalendarLinkProps) {
+export function CalendarHomeLink(props: CalendarLinkProps) {
+  return (
+    <Suspense fallback={<CalendarHomeLinkShell {...props} />}>
+      <CalendarHomeLinkInner {...props} />
+    </Suspense>
+  );
+}
+
+function CalendarHomeLinkInner({ href, ...props }: CalendarLinkProps) {
   const home = useCalendarHomeLink();
 
   return (
@@ -55,7 +64,19 @@ export function CalendarHomeLink({ href, ...props }: CalendarLinkProps) {
   );
 }
 
-export function CalendarHomeNavLink({ href, ...props }: CalendarNavLinkProps) {
+function CalendarHomeLinkShell({ href, ...props }: CalendarLinkProps) {
+  return <Link href={href ?? '/'} {...props} />;
+}
+
+export function CalendarHomeNavLink(props: CalendarNavLinkProps) {
+  return (
+    <Suspense fallback={<CalendarHomeNavLinkShell {...props} />}>
+      <CalendarHomeNavLinkInner {...props} />
+    </Suspense>
+  );
+}
+
+function CalendarHomeNavLinkInner({ href, ...props }: CalendarNavLinkProps) {
   const home = useCalendarHomeLink();
 
   return (
@@ -66,4 +87,8 @@ export function CalendarHomeNavLink({ href, ...props }: CalendarNavLinkProps) {
       {...props}
     />
   );
+}
+
+function CalendarHomeNavLinkShell({ href, ...props }: CalendarNavLinkProps) {
+  return <NavLink href={href ?? '/'} match="/calendar" {...props} />;
 }

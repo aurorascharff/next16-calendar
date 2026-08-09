@@ -3,7 +3,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { Suspense, useOptimistic, useState, useTransition } from 'react';
+import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { dateKey, getWeekDays } from '../calendar-utils';
 import { useTodayKey } from '../hooks/use-now';
@@ -30,6 +31,14 @@ function monthOf(dateKeyValue: string) {
 }
 
 export function MiniMonth() {
+  return (
+    <Suspense fallback={<div aria-hidden className="h-[232px]" />}>
+      <MiniMonthInner />
+    </Suspense>
+  );
+}
+
+function MiniMonthInner() {
   const pathname = usePathname();
   const selected = pathname.match(/\/calendar\/(\d{4}-\d{2}-\d{2})/)?.[1] ?? null;
   const today = useTodayKey();
@@ -49,7 +58,9 @@ function MiniMonthCalendar({
   selected: string | null;
   today: string | null;
 }) {
-  const weekDays = selected ? getWeekDays(selected) : null;
+  const [optimisticSelected, setOptimisticSelected] = useOptimistic(selected);
+  const [, startTransition] = useTransition();
+  const weekDays = optimisticSelected ? getWeekDays(optimisticSelected) : null;
   const weekSet = weekDays ? new Set(weekDays) : null;
   const firstKey = weekDays?.[0];
   const lastKey = weekDays?.[6];
@@ -71,22 +82,12 @@ function MiniMonthCalendar({
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-semibold">{monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}</span>
         <div className="flex items-center gap-0.5">
-          <button
-            aria-label="Previous month"
-            className="text-muted hover:bg-card dark:hover:bg-card-dark rounded p-1 hover:text-black dark:hover:text-white"
-            onClick={() => shiftMonth(-1)}
-            type="button"
-          >
+          <IconButton label="Previous month" onClick={() => shiftMonth(-1)} size="sm">
             <ChevronLeft className="size-4" />
-          </button>
-          <button
-            aria-label="Next month"
-            className="text-muted hover:bg-card dark:hover:bg-card-dark rounded p-1 hover:text-black dark:hover:text-white"
-            onClick={() => shiftMonth(1)}
-            type="button"
-          >
+          </IconButton>
+          <IconButton label="Next month" onClick={() => shiftMonth(1)} size="sm">
             <ChevronRight className="size-4" />
-          </button>
+          </IconButton>
         </div>
       </div>
       <div className="text-muted mb-1 grid grid-cols-7 text-center text-[10px] font-medium">
@@ -104,19 +105,23 @@ function MiniMonthCalendar({
             <Link
               className={cn(
                 'relative grid h-7 w-full place-items-center text-xs tabular-nums',
-                inWeek && 'bg-card dark:bg-card-dark',
+                inWeek && 'bg-divider/70 dark:bg-divider-dark/80',
                 inWeek && key === firstKey && 'rounded-l-md',
                 inWeek && key === lastKey && 'rounded-r-md',
               )}
               href={`/calendar/${key}` as Route}
               key={key}
+              onNavigate={() => {
+                if (key === optimisticSelected) return;
+                startTransition(() => setOptimisticSelected(key));
+              }}
               prefetch={inWeek ? true : undefined}
             >
               <span
                 className={cn(
                   'grid size-7 place-items-center rounded-md',
                   isToday && 'bg-accent font-semibold text-white',
-                  !isToday && !inWeek && 'hover:bg-card dark:hover:bg-card-dark',
+                  !isToday && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
                   !isToday && isOutside && 'text-muted/40',
                 )}
               >

@@ -1,16 +1,20 @@
 'use client';
 
 import * as Ariakit from '@ariakit/react';
-import { Trash2, X } from 'lucide-react';
+import { AlignLeft, CalendarDays, Pencil, Repeat2, Trash2, X } from 'lucide-react';
 import { useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
+import { cn } from '@/lib/utils';
 import { deleteEvent, updateEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
-import type { CalendarEvent } from '../types/calendar';
+import { dotClass } from '../utils/colors';
+import type { Calendar, CalendarEvent } from '../types/calendar';
 
 type EventEditorProps = {
   anchorRect?: DOMRect | null;
+  calendar?: Calendar;
   event: CalendarEvent;
   onClose: () => void;
   onDeleted: (sourceId: string) => void;
@@ -33,8 +37,16 @@ const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 const disabledTimeBlock =
   'opacity-55 [&_input]:bg-card [&_input]:text-muted [&_select]:bg-card [&_select]:text-muted dark:[&_input]:bg-card-dark dark:[&_select]:bg-card-dark';
 
-export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }: EventEditorProps) {
+function durationLabel(minutes: number) {
+  if (minutes < 60) return `${minutes} minutes`;
+  if (minutes === 60) return '1 hour';
+  if (minutes % 60 === 0) return `${minutes / 60} hours`;
+  return `${Math.floor(minutes / 60)} hr ${minutes % 60} min`;
+}
+
+export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, onUpdated }: EventEditorProps) {
   const [isDeleting, startDelete] = useTransition();
+  const [mode, setMode] = useState<'details' | 'edit'>('details');
   const store = Ariakit.usePopoverStore({
     defaultOpen: true,
     placement: 'top-start',
@@ -104,96 +116,140 @@ export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }
       unmountOnHide
       fixed
       fitViewport
+      portal
       getAnchorRect={anchorRect ? () => anchorRect : undefined}
       gutter={10}
       hideOnEscape={!busy}
       hideOnInteractOutside={!busy}
-      className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 w-[min(24rem,calc(100vw-2rem))] rounded-lg border p-4 shadow-2xl outline-none"
+      wrapperProps={{
+        className:
+          'event-editor-wrapper max-sm:!inset-0 max-sm:!h-dvh max-sm:!w-screen max-sm:!max-h-none max-sm:!max-w-none',
+      }}
+      backdrop={<div className="fixed inset-0 z-40 bg-black/40 sm:hidden" />}
+      className={cn(
+        'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 flex w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border shadow-2xl outline-none',
+        'max-sm:!inset-0 max-sm:!h-dvh max-sm:!max-h-dvh max-sm:!w-full max-sm:!max-w-none max-sm:!translate-x-0 max-sm:!translate-y-0 max-sm:rounded-none max-sm:border-0',
+      )}
       style={{ viewTransitionName: 'dialog' }}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="border-divider dark:border-divider-dark flex items-start justify-between gap-4 border-b px-4 py-4 sm:border-b-0 sm:pb-2">
         <div className="min-w-0">
-          <Ariakit.PopoverHeading className="text-base font-semibold tracking-tight">Edit event</Ariakit.PopoverHeading>
+          <Ariakit.PopoverHeading className="truncate text-base font-semibold tracking-tight">
+            {mode === 'details' ? event.title : 'Edit event'}
+          </Ariakit.PopoverHeading>
           <Ariakit.PopoverDescription className="text-muted mt-0.5 text-sm">
             {formatDay(event.day)}
             {event.allDay ? ' · All day' : ` · ${event.start}`}
           </Ariakit.PopoverDescription>
         </div>
-        <Ariakit.PopoverDismiss
-          aria-label="Close"
-          className="text-muted hover:bg-card focus-visible:ring-accent dark:hover:bg-card-dark -mr-1 rounded-md p-1 transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none dark:hover:text-white"
-          disabled={busy}
-        >
+        <IconButton className="-mr-1" label="Close" render={<Ariakit.PopoverDismiss disabled={busy} />} size="sm">
           <X className="size-4" />
-        </Ariakit.PopoverDismiss>
+        </IconButton>
       </div>
-      <form action={formAction} className="mt-4 space-y-4" key={state.key ?? event.id}>
-        <label className="block">
-          <span className={fieldLabel}>Title</span>
-          <input autoFocus defaultValue={values.title} name="title" />
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            checked={allDay}
-            className="size-4 w-auto"
-            name="allDay"
-            onChange={inputEvent => setAllDay(inputEvent.target.checked)}
-            type="checkbox"
-          />
-          All day
-        </label>
-        <div aria-disabled={allDay} className={`grid grid-cols-2 gap-3 ${allDay ? disabledTimeBlock : ''}`}>
-          <label className="block">
-            <span className={fieldLabel}>Starts at</span>
-            <input defaultValue={values.start} disabled={allDay} name={allDay ? undefined : 'start'} type="time" />
-            {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
-          </label>
-          <label className="block">
-            <span className={fieldLabel}>Duration</span>
-            <select defaultValue={values.duration} disabled={allDay} name={allDay ? undefined : 'duration'}>
-              <option value="30">30 minutes</option>
-              <option value="45">45 minutes</option>
-              <option value="60">1 hour</option>
-              <option value="90">90 minutes</option>
-              <option value="120">2 hours</option>
-            </select>
-            {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
-          </label>
-        </div>
-        {allDay ? <p className="text-muted -mt-2 text-xs">This event will fill the all-day row.</p> : null}
-        <label className="block">
-          <span className={fieldLabel}>Description</span>
-          <textarea
-            defaultValue={values.description}
-            name="description"
-            placeholder="Add notes, links, or context"
-            rows={3}
-          />
-        </label>
-        {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
-        <div className="mt-6 flex items-center justify-between gap-3">
-          <button
-            className="text-danger hover:bg-danger/10 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-colors disabled:opacity-60"
-            disabled={busy}
-            onClick={remove}
-            type="button"
-          >
-            <Trash2 className="size-4" />
-            Delete
-          </button>
-          <div className="flex gap-2">
-            <Ariakit.PopoverDismiss
-              className="text-muted focus-visible:ring-accent rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:hover:text-white"
+
+      {mode === 'details' ? (
+        <>
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3 sm:flex-none">
+            <div className="grid grid-cols-[1rem_minmax(0,1fr)] gap-x-3 gap-y-4 text-sm">
+              <CalendarDays className="text-muted mt-0.5 size-4" />
+              <div>
+                <p>{formatDay(event.day)}</p>
+                <p className="text-muted mt-0.5">
+                  {event.allDay ? 'All day' : `${event.start} · ${durationLabel(event.duration)}`}
+                </p>
+              </div>
+              <span className={cn('mt-1 size-2.5 rounded-full', dotClass[event.color])} />
+              <p>{calendar?.name ?? 'Calendar'}</p>
+              {event.recurring ? (
+                <>
+                  <Repeat2 className="text-muted mt-0.5 size-4" />
+                  <p>{event.recurrence ? `Repeats ${event.recurrence.toLowerCase()}` : 'Repeating event'}</p>
+                </>
+              ) : null}
+              <AlignLeft className="text-muted mt-0.5 size-4" />
+              <p className={cn('whitespace-pre-wrap', !event.description && 'text-muted')}>
+                {event.description || 'No description'}
+              </p>
+            </div>
+          </div>
+          <div className="border-divider dark:border-divider-dark mt-auto flex items-center justify-between gap-3 border-t p-4">
+            <Button
+              className="text-danger hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger"
               disabled={busy}
+              onClick={remove}
+              variant="ghost"
             >
-              Cancel
-            </Ariakit.PopoverDismiss>
-            <Button disabled={busy} type="submit">
-              {isSaving ? 'Saving…' : 'Save changes'}
+              <Trash2 className="size-4" />
+              Delete
+            </Button>
+            <Button onClick={() => setMode('edit')}>
+              <Pencil className="size-4" />
+              Edit event
             </Button>
           </div>
-        </div>
-      </form>
+        </>
+      ) : (
+        <form
+          action={formAction}
+          className="flex min-h-0 flex-1 flex-col overflow-hidden sm:flex-none"
+          key={state.key ?? event.id}
+        >
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3 sm:flex-none sm:overflow-visible">
+            <label className="block">
+              <span className={fieldLabel}>Title</span>
+              <input autoFocus defaultValue={values.title} name="title" />
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                checked={allDay}
+                className="size-4 w-auto"
+                name="allDay"
+                onChange={inputEvent => setAllDay(inputEvent.target.checked)}
+                type="checkbox"
+              />
+              All day
+            </label>
+            <div aria-disabled={allDay} className={`grid grid-cols-2 gap-3 ${allDay ? disabledTimeBlock : ''}`}>
+              <label className="block">
+                <span className={fieldLabel}>Starts at</span>
+                <input defaultValue={values.start} disabled={allDay} name={allDay ? undefined : 'start'} type="time" />
+                {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
+              </label>
+              <label className="block">
+                <span className={fieldLabel}>Duration</span>
+                <select defaultValue={values.duration} disabled={allDay} name={allDay ? undefined : 'duration'}>
+                  <option value="15">15 minutes</option>
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">90 minutes</option>
+                  <option value="120">2 hours</option>
+                </select>
+                {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
+              </label>
+            </div>
+            {allDay ? <p className="text-muted -mt-2 text-xs">This event will fill the all-day row.</p> : null}
+            <label className="block">
+              <span className={fieldLabel}>Description</span>
+              <textarea
+                defaultValue={values.description}
+                name="description"
+                placeholder="Add notes, links, or context"
+                rows={3}
+              />
+            </label>
+            {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
+          </div>
+          <div className="border-divider dark:border-divider-dark mt-auto flex justify-end gap-2 border-t p-4">
+            <Button disabled={busy} onClick={() => setMode('details')} variant="ghost">
+              Cancel
+            </Button>
+            <Button disabled={busy} type="submit">
+              Save changes
+            </Button>
+          </div>
+        </form>
+      )}
     </Ariakit.Popover>
   );
 }

@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { useActionState, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
 import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
 import { CalendarPicker } from './calendar-picker';
@@ -113,13 +114,9 @@ export function EventCreateDialog({
             {formatDay(day)}
           </Ariakit.PopoverDescription>
         </div>
-        <Ariakit.PopoverDismiss
-          aria-label="Close"
-          className="text-muted hover:bg-card focus-visible:ring-accent dark:hover:bg-card-dark -mr-1 inline-grid size-8 place-items-center rounded-md transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none dark:hover:text-white"
-          disabled={isPending}
-        >
+        <IconButton className="-mr-1" label="Close" render={<Ariakit.PopoverDismiss disabled={isPending} />}>
           <X className="size-4" />
-        </Ariakit.PopoverDismiss>
+        </IconButton>
       </div>
       <form action={formAction} className="mt-4 space-y-4" key={state.key ?? 'new-event'}>
         <label className="block">
@@ -148,6 +145,7 @@ export function EventCreateDialog({
           <label className="block">
             <span className={fieldLabel}>Duration</span>
             <select defaultValue={values.duration} disabled={allDay} name={allDay ? undefined : 'duration'}>
+              <option value="15">15 minutes</option>
               <option value="30">30 minutes</option>
               <option value="45">45 minutes</option>
               <option value="60">1 hour</option>
@@ -189,15 +187,10 @@ export function EventCreateDialog({
         </div>
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex justify-end gap-2">
-          <Ariakit.PopoverDismiss
-            className="text-muted focus-visible:ring-accent rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50 dark:hover:text-white"
-            disabled={isPending}
-          >
+          <Button render={<Ariakit.PopoverDismiss disabled={isPending} />} variant="ghost">
             Cancel
-          </Ariakit.PopoverDismiss>
-          <Button disabled={isPending} type="submit">
-            {isPending ? 'Saving…' : 'Create event'}
           </Button>
+          <Button type="submit">Create event</Button>
         </div>
       </form>
     </Ariakit.Popover>

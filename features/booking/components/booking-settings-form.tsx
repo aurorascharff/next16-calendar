@@ -27,7 +27,7 @@ type State = { error?: string; key?: number; values?: FormValues };
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 
 export function BookingSettingsForm({ settings }: { settings: Settings }) {
-  const [state, formAction, isPending] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
+  const [state, formAction] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
     const values = {
       active: formData.get('active') === 'on',
       duration: String(formData.get('duration')),
@@ -99,9 +99,7 @@ export function BookingSettingsForm({ settings }: { settings: Settings }) {
       </div>
       {state.error ? <p className="text-danger mt-4 text-sm">{state.error}</p> : null}
       <div className="mt-5 flex justify-end">
-        <Button disabled={isPending} type="submit">
-          {isPending ? 'Saving…' : 'Save settings'}
-        </Button>
+        <Button type="submit">Save settings</Button>
       </div>
     </form>
   );

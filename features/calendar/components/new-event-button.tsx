@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { Plus } from 'lucide-react';
-import { buttonClasses } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { EventCreateDialog } from './event-create-dialog';
 
 export function NewEventButton({ day }: { day: string }) {
@@ -10,10 +10,10 @@ export function NewEventButton({ day }: { day: string }) {
 
   return (
     <>
-      <Ariakit.PopoverDisclosure className={buttonClasses()} store={store}>
+      <Button render={<Ariakit.PopoverDisclosure store={store} />}>
         <Plus className="size-4" />
         <span className="hidden sm:inline">New event</span>
-      </Ariakit.PopoverDisclosure>
+      </Button>
       <EventCreateDialog day={day} store={store} />
     </>
   );

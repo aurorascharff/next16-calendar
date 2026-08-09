@@ -11,7 +11,7 @@ export const viewport: Viewport = { viewportFit: 'cover' };
 
 export const metadata: Metadata = {
   description: 'A calendar workspace built with Next.js 16 Cache Components and View Transitions.',
-  title: { default: 'Pace', template: '%s · Pace' },
+  title: { default: 'Dayline', template: '%s · Dayline' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

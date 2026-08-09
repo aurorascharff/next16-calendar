@@ -11,7 +11,7 @@ export default function WorkspaceNotFound() {
         <h1 className="text-xl font-semibold tracking-tight">That page isn&apos;t on the calendar.</h1>
         <p className="text-muted text-sm leading-6">Pick a date or return to your calendar workspace.</p>
         <Link className="mt-1" href="/">
-          <Button>Back to Pace</Button>
+          <Button>Back to Dayline</Button>
         </Link>
       </div>
     </main>

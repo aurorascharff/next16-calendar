@@ -14,7 +14,7 @@ export async function BookingProfile({ date, handle }: { date?: string; handle: 
           href="/"
         >
           <ChevronLeft className="size-4" />
-          Pace
+          Dayline
         </Link>
         <div className="flex items-start gap-4">
           <div className="bg-primary/15 text-primary grid size-11 place-items-center rounded-full">
@@ -38,7 +38,7 @@ export async function BookingProfile({ date, handle }: { date?: string; handle: 
               slots={availability.slots}
             />
           ) : (
-            <p className="text-muted border-divider dark:border-divider-dark rounded-md border border-dashed px-4 py-8 text-center text-sm">
+            <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
               This booking link is not accepting meetings yet.
             </p>
           )}

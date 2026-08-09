@@ -103,11 +103,17 @@ export async function getMyBookingProfile(handle: string) {
   const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
   if (!bookingPage) return null;
 
+  const calendar = await prisma.calendar.findFirst({
+    select: { id: true },
+    where: { isDemo: false, userId: bookingPage.userId },
+  });
+
   return {
     active: bookingPage.active,
     duration: bookingPage.duration,
     endTime: bookingPage.endTime,
     handle: bookingPage.handle,
+    hasCalendar: Boolean(calendar),
     startTime: bookingPage.startTime,
     title: bookingPage.title,
   };

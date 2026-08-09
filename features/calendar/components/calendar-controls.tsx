@@ -2,15 +2,14 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { shiftDay, shiftWeek } from '../calendar-utils';
 import { useTodayKey } from '../hooks/use-now';
 import { DatePicker } from './date-picker';
 import type { CalendarView } from '../types/calendar';
 import type { Route } from 'next';
-
-const iconButton =
-  'flex size-8 items-center justify-center rounded-md text-muted hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white';
 
 function calendarHref(date: string, view: CalendarView) {
   return `/calendar/${date}${view === 'day' ? '?view=day' : ''}` as Route;
@@ -26,42 +25,44 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
   const previous = view === 'day' ? shiftDay(date, -1) : shiftWeek(date, -1);
   const next = view === 'day' ? shiftDay(date, 1) : shiftWeek(date, 1);
 
-  const todayButton =
-    'text-muted inline-flex h-8 items-center rounded-md px-3 text-sm font-medium hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white';
-
   return (
     <div className="flex items-center gap-1">
       {today ? (
-        <Link
-          className={todayButton}
-          href={calendarHref(today, view)}
-          prefetch
-          transitionTypes={todayTransitionTypes(date, today)}
+        <Button
+          className="h-8 px-3"
+          render={
+            <Link
+              href={calendarHref(today, view)}
+              prefetch
+              transitionTypes={todayTransitionTypes(date, today)}
+            />
+          }
+          variant="ghost"
         >
           Today
-        </Link>
+        </Button>
       ) : (
-        <span className={cn(todayButton, 'opacity-50')}>Today</span>
+        <Button className="h-8 px-3" disabled variant="ghost">
+          Today
+        </Button>
       )}
       <div className="flex items-center">
-        <Link
-          aria-label={view === 'day' ? 'Previous day' : 'Previous week'}
-          className={iconButton}
-          href={calendarHref(previous, view)}
-          prefetch
-          transitionTypes={['nav-back']}
+        <IconButton
+          label={view === 'day' ? 'Previous day' : 'Previous week'}
+          render={
+            <Link href={calendarHref(previous, view)} prefetch transitionTypes={['nav-back']} />
+          }
         >
           <ChevronLeft className="size-4.5" />
-        </Link>
-        <Link
-          aria-label={view === 'day' ? 'Next day' : 'Next week'}
-          className={iconButton}
-          href={calendarHref(next, view)}
-          prefetch
-          transitionTypes={['nav-forward']}
+        </IconButton>
+        <IconButton
+          label={view === 'day' ? 'Next day' : 'Next week'}
+          render={
+            <Link href={calendarHref(next, view)} prefetch transitionTypes={['nav-forward']} />
+          }
         >
           <ChevronRight className="size-4.5" />
-        </Link>
+        </IconButton>
       </div>
       <DatePicker date={date} />
     </div>
@@ -69,7 +70,7 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
 }
 
 export function ViewToggle({ date, view }: { date: string; view: CalendarView }) {
-  const item = 'inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium transition-colors';
+  const item = 'inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-sm font-medium transition-colors';
   const active = 'bg-card dark:bg-card-dark text-black dark:text-white';
   const inactive = 'text-muted hover:text-black dark:hover:text-white';
 

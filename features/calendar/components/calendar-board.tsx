@@ -73,11 +73,11 @@ export function CalendarBoard({
           todayKey={todayKey}
         />
       </div>
-      <div className="grid pt-3" ref={gridRef} style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
+      <div className="grid" ref={gridRef} style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
         <div className="border-divider dark:border-divider-dark border-r">
           {HOURS.map(hour => (
             <div className="relative h-[72px] pr-3 text-right" key={hour}>
-              <span className="text-muted absolute -top-2 right-3 text-xs tabular-nums">
+              <span className="text-muted absolute top-1.5 right-3 text-xs tabular-nums">
                 {String(hour).padStart(2, '0')}:00
               </span>
             </div>
@@ -102,6 +102,7 @@ export function CalendarBoard({
       {selectedEvent ? (
         <EventEditor
           anchorRect={selectedEvent.anchorRect}
+          calendar={calendars.find(calendar => calendar.id === selectedEvent.event.calendarId)}
           event={selectedEvent.event}
           key={selectedEvent.event.id}
           onClose={() => setSelectedEvent(null)}
@@ -156,11 +157,11 @@ export function CalendarBoardSkeleton({ days = 7 }: { days?: number }) {
           ))}
         </div>
       </div>
-      <div className="grid pt-3" style={{ gridTemplateColumns: gridTemplate, minWidth }}>
+      <div className="grid" style={{ gridTemplateColumns: gridTemplate, minWidth }}>
         <div className="border-divider dark:border-divider-dark border-r">
           {HOURS.map(hour => (
             <div className="relative h-[72px] pr-3 text-right" key={hour}>
-              <span className="text-muted absolute -top-2 right-3 text-xs tabular-nums">
+              <span className="text-muted absolute top-1.5 right-3 text-xs tabular-nums">
                 {String(hour).padStart(2, '0')}:00
               </span>
             </div>

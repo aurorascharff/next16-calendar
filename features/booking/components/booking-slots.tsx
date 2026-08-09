@@ -1,12 +1,12 @@
 'use client';
 
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import { useActionState, useState } from 'react';
+import { ChevronLeft, ChevronRight, LoaderCircle } from 'lucide-react';
+import Link, { useLinkStatus } from 'next/link';
+import { useActionState, useOptimistic, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { buttonClasses } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
+import { IconButton } from '@/components/ui/icon-button';
 import { RouteTransition } from '@/components/ui/route-transition';
-import { Spinner } from '@/components/ui/spinner';
 import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
 import { cn } from '@/lib/utils';
 import { bookSlotAction, type BookSlotState } from '../booking-actions';
@@ -14,6 +14,13 @@ import type { BookingSlot } from '../booking-queries';
 import type { Route } from 'next';
 
 const dayHref = (handle: string, day: string) => `/book/${handle}?date=${day}` as Route;
+
+function DayNavigationIcon({ direction }: { direction: 'next' | 'previous' }) {
+  const { pending } = useLinkStatus();
+
+  if (pending) return <LoaderCircle className="size-4.5 animate-spin" />;
+  return direction === 'previous' ? <ChevronLeft className="size-4.5" /> : <ChevronRight className="size-4.5" />;
+}
 
 export function BookingSlots({
   calendarName,
@@ -28,7 +35,7 @@ export function BookingSlots({
   handle: string;
   slots: BookingSlot[];
 }) {
-  const [, formAction, isPending] = useActionState(async (previousState: BookSlotState, formData: FormData) => {
+  const [, formAction] = useActionState(async (previousState: BookSlotState, formData: FormData) => {
     const nextState = await bookSlotAction(previousState, formData);
 
     if (nextState?.error) toast.error(nextState.error);
@@ -38,37 +45,49 @@ export function BookingSlots({
   }, null);
   const [guestName, setGuestName] = useState('');
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [displayDay, setDisplayDay] = useOptimistic(day);
+  const [, startTransition] = useTransition();
+  const previousDay = shiftDay(day, -1);
+  const nextDay = shiftDay(day, 1);
 
   const visibleSlots = slots.filter(slot => slot.reason !== 'calendar');
   const selected = selectedSlot ? visibleSlots.find(slot => slot.time === selectedSlot) : null;
   const selectedAvailable = selected && !selected.taken ? selected : null;
 
-  const navButton =
-    'text-muted flex size-8 items-center justify-center rounded-md hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white';
   const allTaken = visibleSlots.length === 0 || visibleSlots.every(slot => slot.taken);
 
   return (
     <div className="min-h-0 w-full sm:min-w-[32rem]">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <Link
-          aria-label="Previous day"
-          className={navButton}
-          href={dayHref(handle, shiftDay(day, -1))}
-          prefetch
-          transitionTypes={['nav-back']}
+        <IconButton
+          label="Previous day"
+          render={
+            <Link
+              href={dayHref(handle, previousDay)}
+              onNavigate={() => startTransition(() => setDisplayDay(previousDay))}
+              prefetch
+              transitionTypes={['nav-back']}
+            />
+          }
         >
-          <ChevronLeft className="size-4.5" />
-        </Link>
-        <span className="text-sm font-semibold tabular-nums">{formatDayLong(day)}</span>
-        <Link
-          aria-label="Next day"
-          className={navButton}
-          href={dayHref(handle, shiftDay(day, 1))}
-          prefetch
-          transitionTypes={['nav-forward']}
+          <DayNavigationIcon direction="previous" />
+        </IconButton>
+        <span aria-live="polite" className="text-sm font-semibold tabular-nums">
+          {formatDayLong(displayDay)}
+        </span>
+        <IconButton
+          label="Next day"
+          render={
+            <Link
+              href={dayHref(handle, nextDay)}
+              onNavigate={() => startTransition(() => setDisplayDay(nextDay))}
+              prefetch
+              transitionTypes={['nav-forward']}
+            />
+          }
         >
-          <ChevronRight className="size-4.5" />
-        </Link>
+          <DayNavigationIcon direction="next" />
+        </IconButton>
       </div>
       <form action={formAction} className="flex min-h-0 flex-col">
         <input name="day" type="hidden" value={day} />
@@ -87,9 +106,9 @@ export function BookingSlots({
         </label>
         <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
         <RouteTransition slideKey={day}>
-          <div className="min-h-0 [scrollbar-gutter:stable] overflow-y-auto pr-1 sm:max-h-80">
+          <div className="min-h-0 [scrollbar-gutter:stable] overflow-y-auto pr-1 sm:h-80">
             {allTaken ? (
-              <p className="text-muted border-divider dark:border-divider-dark rounded-md border border-dashed py-8 text-center text-sm">
+              <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm sm:h-full sm:min-h-0">
                 No open {duration}-minute slots on this day. Try another date.
               </p>
             ) : (
@@ -110,7 +129,7 @@ export function BookingSlots({
                       className={cn(
                         'rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100',
                         selectedSlot === slot.time
-                          ? 'border-accent bg-accent/10 text-accent shadow-accent'
+                          ? 'border-accent bg-accent/10 text-accent ring-accent/40 ring-1 ring-inset'
                           : 'border-divider text-muted hover:border-accent hover:bg-accent/10 hover:text-accent dark:border-divider-dark',
                       )}
                       key={slot.time}
@@ -132,10 +151,9 @@ export function BookingSlots({
               {selectedAvailable ? `${duration} minutes on ${calendarName}` : `${duration}-minute meeting`}
             </p>
           </div>
-          <button aria-busy={isPending} className={buttonClasses({ className: 'h-10 shrink-0 px-4' })} type="submit">
-            {isPending ? <Spinner className="size-4" /> : <Check className="size-4" />}
-            {isPending ? 'Booking' : 'Book'}
-          </button>
+          <Button className="h-10 shrink-0 px-4" type="submit">
+            Book
+          </Button>
         </div>
       </form>
     </div>

@@ -28,7 +28,7 @@ export function CalendarDayHeaderRow({
           <div
             className={cn(
               'border-divider dark:border-divider-dark flex items-center gap-1.5 border-r px-3 py-1.5 text-left',
-              isToday && 'bg-accent/[0.035]',
+              isToday && 'bg-card dark:bg-card-dark',
             )}
             key={day}
           >
@@ -82,13 +82,13 @@ export function CalendarAllDayRow({
           <div
             className={cn(
               'border-divider dark:border-divider-dark min-h-9 border-r p-1',
-              isToday && 'bg-accent/[0.035]',
+              isToday && 'bg-card dark:bg-card-dark',
             )}
             key={day}
           >
             <button
               aria-label={`Add all-day event on ${formatDay(day)}`}
-              className="focus-visible:ring-accent group hover:bg-accent/[0.06] focus-visible:bg-accent/[0.06] flex min-h-7 w-full flex-col gap-1 rounded-md text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-accent group hover:bg-card focus-visible:bg-card dark:hover:bg-card-dark dark:focus-visible:bg-card-dark flex min-h-7 w-full flex-col gap-1 rounded-md text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               onClick={event => onCreateAllDay(day, event)}
               type="button"
             >

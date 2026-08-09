@@ -4,8 +4,10 @@ import * as Ariakit from '@ariakit/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { dateKey } from '../calendar-utils';
+import { useTodayKey } from '../hooks/use-now';
 import type { Route } from 'next';
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -56,7 +58,7 @@ export function DatePicker({ date }: { date: string }) {
 function DatePickerCalendar({ date, onPick }: { date: string; onPick: () => void }) {
   const selected = fromKey(date);
   const [view, setView] = useState(() => ({ month: selected.getUTCMonth(), year: selected.getUTCFullYear() }));
-  const todayKey = dateKey(new Date());
+  const todayKey = useTodayKey();
   const days = monthGrid(view.year, view.month);
 
   function shiftMonth(delta: number) {
@@ -69,23 +71,13 @@ function DatePickerCalendar({ date, onPick }: { date: string; onPick: () => void
   return (
     <>
       <div className="mb-2 flex items-center justify-between">
-        <button
-          aria-label="Previous month"
-          className="text-muted hover:bg-card dark:hover:bg-card-dark rounded p-1 transition-colors hover:text-black dark:hover:text-white"
-          onClick={() => shiftMonth(-1)}
-          type="button"
-        >
+        <IconButton label="Previous month" onClick={() => shiftMonth(-1)} size="sm">
           <ChevronLeft className="size-4" />
-        </button>
+        </IconButton>
         <span className="text-sm font-semibold">{monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}</span>
-        <button
-          aria-label="Next month"
-          className="text-muted hover:bg-card dark:hover:bg-card-dark rounded p-1 transition-colors hover:text-black dark:hover:text-white"
-          onClick={() => shiftMonth(1)}
-          type="button"
-        >
+        <IconButton label="Next month" onClick={() => shiftMonth(1)} size="sm">
           <ChevronRight className="size-4" />
-        </button>
+        </IconButton>
       </div>
       <div className="text-muted mb-1 grid grid-cols-7 text-center text-[11px] font-medium">
         {WEEKDAY_LABELS.map((label, index) => (

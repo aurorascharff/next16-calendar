@@ -1,6 +1,6 @@
 'use client';
 
-import { type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { cloneElement, type ButtonHTMLAttributes, type ReactElement, type ReactNode } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
@@ -12,22 +12,23 @@ type Props = {
   children: ReactNode;
   variant?: Variant;
   size?: Size;
+  render?: ReactElement<{ className?: string; children?: ReactNode }>;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-md font-semibold whitespace-nowrap transition-[background-color,box-shadow,transform,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100';
+  'inline-flex items-center justify-center gap-2 rounded-md font-semibold whitespace-nowrap transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100';
 
 const sizes: Record<Size, string> = {
-  default: 'px-3.5 py-2 text-sm',
+  default: 'px-4 py-2 text-sm',
   icon: 'size-9',
   sm: 'px-3 py-1.5 text-xs',
 };
 
 const variants: Record<Variant, string> = {
   ghost: 'text-muted hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white',
-  primary: 'bg-accent text-white hover:bg-accent-hover',
+  primary: 'bg-accent text-white inset-ring-1 inset-ring-white/15 hover:bg-accent-hover',
   secondary:
-    'border border-divider bg-white text-black hover:bg-card dark:border-divider-dark dark:bg-transparent dark:text-white dark:hover:bg-card-dark',
+    'border border-divider bg-white text-black hover:border-gray/40 hover:bg-card dark:border-divider-dark dark:bg-transparent dark:text-white dark:hover:border-gray/30 dark:hover:bg-card-dark',
 };
 
 export function buttonClasses({
@@ -47,6 +48,7 @@ export function Button({
   variant = 'primary',
   size = 'default',
   className,
+  render,
   type = 'button',
   disabled,
   ...props
@@ -54,16 +56,22 @@ export function Button({
   const { pending } = useFormStatus();
   const isSubmit = type === 'submit';
   const isDisabled = disabled || (isSubmit && pending);
-
-  return (
-    <button
-      type={type}
-      disabled={isDisabled}
-      className={buttonClasses({ className, size, variant })}
-      {...props}
-    >
+  const classes = buttonClasses({ className, size, variant });
+  const content = (
+    <>
       {isSubmit && pending && <Spinner />}
       {children}
+    </>
+  );
+
+  if (render) {
+    const renderClassName = render.props?.className;
+    return cloneElement(render, { className: cn(classes, renderClassName), ...props }, content);
+  }
+
+  return (
+    <button className={classes} disabled={isDisabled} type={type} {...props}>
+      {content}
     </button>
   );
 }

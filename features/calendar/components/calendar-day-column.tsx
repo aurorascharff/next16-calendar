@@ -29,8 +29,12 @@ export function DayColumn({
 
   return (
     <div
-      className={cn('border-divider dark:border-divider-dark relative border-r', isToday && 'bg-accent/[0.035]')}
+      className={cn(
+        'border-divider dark:border-divider-dark relative border-r',
+        isToday && 'bg-card/40 dark:bg-card-dark/40',
+      )}
       data-day-column
+      onPointerCancel={interaction.create.onPointerCancel}
       onPointerDown={event => interaction.create.onPointerDown(day, event)}
       onPointerMove={event => interaction.create.onPointerMove(day, event)}
       onPointerUp={event => interaction.create.onPointerUp(day, event)}

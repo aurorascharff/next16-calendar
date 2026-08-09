@@ -4,7 +4,7 @@ const nav = { 'nav-back': 'nav-back', 'nav-forward': 'nav-forward', default: 'no
 
 export function RouteTransition({ children, slideKey }: { children: React.ReactNode; slideKey: string }) {
   return (
-    <ViewTransition default="none" enter={nav} exit={nav} key={slideKey}>
+    <ViewTransition default="none" enter={nav} exit={nav} key={slideKey} update={nav}>
       {children}
     </ViewTransition>
   );

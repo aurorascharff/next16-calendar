@@ -10,7 +10,7 @@ export default function NotFound() {
         <p className="text-muted text-sm">404</p>
         <h1 className="text-xl font-semibold tracking-tight">That page isn&apos;t on the calendar.</h1>
         <Link href="/" className="mt-1">
-          <Button>Back to Pace</Button>
+          <Button>Back to Dayline</Button>
         </Link>
       </div>
     </main>

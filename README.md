@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/logo.svg" alt="Pace" width="72" height="72" />
+<img src="public/logo.svg" alt="Dayline" width="72" height="72" />
 
-# Pace
+# Dayline
 
 A [Next.js 16.3](https://nextjs.org/blog/next-16-3) calendar workspace demonstrating [Instant Navigations](https://nextjs.org/docs/app/guides/instant-navigation).
 
@@ -21,7 +21,7 @@ A [Next.js 16.3](https://nextjs.org/blog/next-16-3) calendar workspace demonstra
 
 ## Getting started
 
-Pace runs on SQLite locally with zero setup:
+Dayline runs on SQLite locally with zero setup:
 
 ```bash
 pnpm install

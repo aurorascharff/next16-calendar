@@ -4,7 +4,7 @@ import { Check, Copy, ExternalLink, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { buttonClasses } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import type { Route } from 'next';
 
 export function BookingLink({ handle }: { handle: string }) {
@@ -27,19 +27,18 @@ export function BookingLink({ handle }: { handle: string }) {
           <span className="min-w-0 flex-1 truncate font-mono text-sm text-black dark:text-white">{path}</span>
         </div>
         <div className="flex gap-2">
-          <button className={buttonClasses({ className: 'flex-1 sm:flex-none' })} onClick={copy} type="button">
+          <Button className="flex-1 sm:flex-none" onClick={copy}>
             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
             {copied ? 'Copied' : 'Copy link'}
-          </button>
-          <Link
-            className={buttonClasses({ className: 'flex-1 sm:flex-none', variant: 'secondary' })}
-            href={path as Route}
-            rel="noopener noreferrer"
-            target="_blank"
+          </Button>
+          <Button
+            className="flex-1 sm:flex-none"
+            render={<Link href={path as Route} rel="noopener noreferrer" target="_blank" />}
+            variant="secondary"
           >
             <ExternalLink className="size-4" />
             Preview
-          </Link>
+          </Button>
         </div>
       </div>
     </div>

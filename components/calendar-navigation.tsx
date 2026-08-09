@@ -1,8 +1,9 @@
-import { CalendarDays, Link2, LogOut } from 'lucide-react';
+import { CalendarDays, Link2, LogOut, Sunrise } from 'lucide-react';
 import { Suspense, ViewTransition } from 'react';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Crossfade } from '@/components/ui/crossfade';
 import { GitHubIcon } from '@/components/ui/github-icon';
+import { IconButton } from '@/components/ui/icon-button';
 import { NavLink } from '@/components/ui/nav-link';
 import { getCalendars } from '@/features/calendar/calendar-queries';
 import { CalendarHomeLink, CalendarHomeNavLink } from '@/features/calendar/components/calendar-home-link';
@@ -21,12 +22,13 @@ export function CalendarNavigation() {
     <ViewTransition name="sidebar" default="none">
       <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-64 shrink-0 flex-col border-r p-3 md:flex">
         <CalendarHomeLink className="mb-6 flex items-center gap-2.5 px-2">
-          <span className="bg-accent grid size-8 place-items-center rounded-md text-white">
-            <CalendarDays className="size-4.5" strokeWidth={2.25} />
+          <span className="bg-accent relative grid size-8 place-items-center overflow-hidden rounded-md text-white">
+            <Sunrise className="size-4.5" strokeWidth={2.25} />
+            <span className="bg-dayline absolute inset-x-0 bottom-0 h-0.5" />
           </span>
           <span>
-            <span className="block font-semibold tracking-tight">Pace</span>
-            <span className="text-muted block text-xs">Calendar workspace</span>
+            <span className="block font-semibold tracking-tight">Dayline</span>
+            <span className="text-muted block text-xs">Shape your day</span>
           </span>
         </CalendarHomeLink>
 
@@ -54,15 +56,9 @@ export function CalendarNavigation() {
         <div className="mt-auto">
           <div className="mb-3 flex items-center justify-between px-1">
             <ThemeToggle />
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="View source on GitHub"
-              className="text-muted rounded-md p-1.5 hover:text-black dark:hover:text-white"
-            >
+            <IconButton external href={REPO_URL} label="View source on GitHub" size="sm">
               <GitHubIcon className="size-4" />
-            </a>
+            </IconButton>
           </div>
           <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t">
             <Suspense fallback={<div className="h-[60px]" />}>
@@ -88,13 +84,9 @@ async function UserFooter() {
         <p className="text-muted truncate text-xs">@{user.handle}</p>
       </div>
       <form action={signOut}>
-        <button
-          aria-label="Log out"
-          className="text-muted hover:bg-card dark:hover:bg-card-dark rounded-md p-1.5 hover:text-black dark:hover:text-white"
-          type="submit"
-        >
+        <IconButton label="Log out" size="sm" type="submit">
           <LogOut className="size-4" />
-        </button>
+        </IconButton>
       </form>
     </div>
   );
