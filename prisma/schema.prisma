@@ -22,9 +22,9 @@ model Calendar {
   name      String
   color     String
   isDemo    Boolean         @default(false)
-  userId    String
+  userId    String?
   createdAt DateTime        @default(now())
-  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
   events    CalendarEvent[]
 
   @@index([userId])
@@ -40,10 +40,10 @@ model CalendarEvent {
   recurrence String?
   demo       Boolean  @default(false)
   calendarId String
-  userId     String
+  userId     String?
   createdAt  DateTime @default(now())
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   calendar Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
 
   @@index([userId, day])

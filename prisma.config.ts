@@ -1,7 +1,7 @@
-import { config } from 'dotenv'
-import { defineConfig } from 'prisma/config'
+import { config } from 'dotenv';
+import { defineConfig } from 'prisma/config';
 
-config({ path: '.env.local' })
+config({ path: '.env.local' });
 
 export default defineConfig({
   datasource: {
@@ -12,4 +12,4 @@ export default defineConfig({
     seed: 'tsx prisma/seed.ts',
   },
   schema: 'prisma/schema.prisma',
-})
+});

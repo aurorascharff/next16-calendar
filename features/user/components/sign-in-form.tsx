@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { useActionState } from 'react'
-import { Spinner } from '@/components/ui/spinner'
-import { signIn } from '../user-actions'
+import { useActionState } from 'react';
+import { Spinner } from '@/components/ui/spinner';
+import { signIn } from '../user-actions';
 
 export function SignInForm() {
-  const [state, formAction, isPending] = useActionState(signIn, null)
+  const [state, formAction, isPending] = useActionState(signIn, null);
 
   return (
     <form action={formAction} className="mt-8 flex flex-col gap-3">
@@ -27,7 +27,7 @@ export function SignInForm() {
         </p>
       ) : null}
       <button
-        className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+        className="bg-accent hover:bg-accent-hover mt-1 inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-50"
         disabled={isPending}
         type="submit"
       >
@@ -35,5 +35,5 @@ export function SignInForm() {
         {isPending ? 'Signing in…' : 'Continue'}
       </button>
     </form>
-  )
+  );
 }

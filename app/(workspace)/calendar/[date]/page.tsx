@@ -1,16 +1,16 @@
-import { Suspense, ViewTransition } from 'react'
-import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header'
-import { CalendarWeek, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week'
-import type { CalendarView } from '@/features/calendar/types/calendar'
+import { Suspense, ViewTransition } from 'react';
+import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header';
+import { CalendarWeek, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week';
+import type { CalendarView } from '@/features/calendar/types/calendar';
 
 const weekTransition = {
   'calendar-back': 'week-back',
   'calendar-forward': 'week-forward',
   default: 'none',
-}
+};
 
 function toView(view: string | string[] | undefined): CalendarView {
-  return view === 'day' ? 'day' : 'week'
+  return view === 'day' ? 'day' : 'week';
 }
 
 export default function CalendarPage({ params, searchParams }: PageProps<'/calendar/[date]'>) {
@@ -25,5 +25,5 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
         </Suspense>
       </ViewTransition>
     </main>
-  )
+  );
 }

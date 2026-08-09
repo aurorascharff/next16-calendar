@@ -31,6 +31,8 @@ type OptimisticAction =
   | { duration: number; sourceId: string; type: 'resize' }
   | { event: Pick<CalendarEvent, 'allDay' | 'duration' | 'sourceId' | 'start' | 'title'>; type: 'update' };
 
+type SelectedEvent = { anchorRect?: DOMRect | null; event: CalendarEvent };
+
 export function CalendarBoard({
   calendars,
   days,
@@ -54,11 +56,17 @@ export function CalendarBoard({
     return current.map(event => (event.id === next.id ? { ...event, day: next.day, start: next.start } : event));
   });
   const [isPending, startTransition] = useTransition();
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
   const [dragMove, setDragMove] = useState<{ day: string; id: string; startMin: number } | null>(null);
   const [resize, setResize] = useState<{ endMin: number; sourceId: string; startMin: number } | null>(null);
   const [createSel, setCreateSel] = useState<{ aMin: number; bMin: number; day: string } | null>(null);
-  const [createDraft, setCreateDraft] = useState<{ allDay?: boolean; day: string; duration: number; start: string } | null>(null);
+  const [createDraft, setCreateDraft] = useState<{
+    allDay?: boolean;
+    anchorRect?: DOMRect | null;
+    day: string;
+    duration: number;
+    start: string;
+  } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const moveRef = useRef<{
     duration: number;
@@ -162,6 +170,11 @@ export function CalendarBoard({
     });
   }
 
+  function handleMoveCancel() {
+    moveRef.current = null;
+    setDragMove(null);
+  }
+
   function handleResizeDown(event: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) {
     pointerEvent.stopPropagation();
     pointerEvent.preventDefault();
@@ -216,13 +229,24 @@ export function CalendarBoard({
     const hi = Math.max(createSel.aMin, createSel.bMin);
     const duration = hi - lo >= SNAP_MINUTES ? nearestDuration(hi - lo) : 60;
     setCreateSel({ aMin: lo, bMin: lo + duration, day });
-    setCreateDraft({ day, duration, start: minutesToTime(Math.min(lo, END_MINUTES - 60)) });
+    setCreateDraft({
+      anchorRect: new DOMRect(event.clientX, event.clientY, 0, 0),
+      day,
+      duration,
+      start: minutesToTime(Math.min(lo, END_MINUTES - 60)),
+    });
     createStore.show();
   }
 
-  function handleAllDayCreate(day: string) {
+  function handleAllDayCreate(day: string, event: React.MouseEvent<HTMLElement>) {
     setCreateSel(null);
-    setCreateDraft({ allDay: true, day, duration: 24 * 60, start: '00:00' });
+    setCreateDraft({
+      allDay: true,
+      anchorRect: event.currentTarget.getBoundingClientRect(),
+      day,
+      duration: 24 * 60,
+      start: '00:00',
+    });
     createStore.show();
   }
 
@@ -233,68 +257,24 @@ export function CalendarBoard({
           <div className="bg-accent h-full w-1/3" style={{ animation: 'loading-slide 0.9s ease-in-out infinite' }} />
         </div>
       ) : null}
-      <div
-        className="border-divider bg-surface/90 dark:border-divider-dark dark:bg-surface-dark/90 sticky top-0 z-20 grid border-b backdrop-blur"
-        style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}
-      >
-        <div />
-        {days.map(day => {
-          const [weekday, dayNumber] = formatDay(day).split(' ');
-          const isToday = day === todayKey;
-          return (
-            <div className="flex items-center gap-1.5 px-3 py-1.5" key={day}>
-              <p className={cn('text-[11px] font-medium uppercase', isToday ? 'text-accent' : 'text-muted')}>{weekday}</p>
-              <p
-                className={cn(
-                  'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums',
-                  isToday && 'bg-accent text-white',
-                )}
-              >
-                {dayNumber}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-      <div
-        className="border-divider dark:border-divider-dark grid border-b bg-surface/70 dark:bg-surface-dark/70"
-        style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}
-      >
-        <div className="border-divider dark:border-divider-dark flex items-center justify-end border-r px-3 py-2 text-xs font-medium text-muted">
-          All day
-        </div>
-        {days.map(day => {
-          const dayEvents = allDayEvents.filter(event => effectiveDay(event) === day);
-          return (
-            <div className="min-h-12 border-r border-divider p-1.5 dark:border-divider-dark" key={day}>
-              <button
-                aria-label={`Add all-day event on ${formatDay(day)}`}
-                className="flex min-h-8 w-full flex-col gap-1 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                onClick={() => handleAllDayCreate(day)}
-                type="button"
-              >
-                {dayEvents.length ? (
-                  dayEvents.map(event => (
-                    <span
-                      className="cal-chip flex min-w-0 items-center gap-1 rounded-[5px] px-2 py-1 text-xs font-semibold ring-1 ring-inset"
-                      key={event.id}
-                      onClick={click => {
-                        click.stopPropagation();
-                        setSelectedEvent(event);
-                      }}
-                      style={chipStyle(event.color)}
-                    >
-                      <span className="truncate">{event.title}</span>
-                    </span>
-                  ))
-                ) : (
-                  <span className="sr-only">Create all-day event</span>
-                )}
-              </button>
-            </div>
-          );
-        })}
-      </div>
+      <CalendarDayHeaderRow
+        days={days}
+        gridMinWidth={gridMinWidth}
+        gridTemplate={gridTemplate}
+        onCreateAllDay={handleAllDayCreate}
+        todayKey={todayKey}
+      />
+      {allDayEvents.length > 0 ? (
+        <CalendarAllDayRow
+          days={days}
+          events={allDayEvents}
+          getEffectiveDay={effectiveDay}
+          gridMinWidth={gridMinWidth}
+          gridTemplate={gridTemplate}
+          onCreateAllDay={handleAllDayCreate}
+          onSelectEvent={setSelectedEvent}
+        />
+      ) : null}
       <div className="grid pt-3" ref={gridRef} style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}>
         <div className="border-divider dark:border-divider-dark border-r">
           {HOURS.map(hour => (
@@ -319,10 +299,11 @@ export function CalendarBoard({
               onCreateDown={handleCreateDown}
               onCreateMove={handleCreateMove}
               onCreateUp={handleCreateUp}
-              onEventSelect={event => {
+              onEventSelect={(event, anchorRect) => {
                 if (suppressClickRef.current) return;
-                setSelectedEvent(event);
+                setSelectedEvent({ anchorRect, event });
               }}
+              onMoveCancel={handleMoveCancel}
               onMoveDown={handleMoveDown}
               onMoveMove={handleMoveMove}
               onMoveUp={handleMoveUp}
@@ -340,7 +321,8 @@ export function CalendarBoard({
       </div>
       {selectedEvent ? (
         <EventEditor
-          event={selectedEvent}
+          anchorRect={selectedEvent.anchorRect}
+          event={selectedEvent.event}
           onClose={() => setSelectedEvent(null)}
           onDeleted={sourceId => setOptimisticEvents({ sourceId, type: 'delete' })}
           onUpdated={event => setOptimisticEvents({ event, type: 'update' })}
@@ -349,6 +331,7 @@ export function CalendarBoard({
       {createDraft ? (
         <EventCreateDialog
           calendars={calendars}
+          anchorRect={createDraft.anchorRect}
           day={createDraft.day}
           defaultAllDay={createDraft.allDay}
           defaultCalendarId={defaultCalendar?.id}
@@ -358,6 +341,114 @@ export function CalendarBoard({
           store={createStore}
         />
       ) : null}
+    </div>
+  );
+}
+
+function CalendarDayHeaderRow({
+  days,
+  gridMinWidth,
+  gridTemplate,
+  onCreateAllDay,
+  todayKey,
+}: {
+  days: string[];
+  gridMinWidth?: number;
+  gridTemplate: string;
+  onCreateAllDay: (day: string, event: React.MouseEvent<HTMLElement>) => void;
+  todayKey: string | null;
+}) {
+  return (
+    <div
+      className="border-divider bg-surface/90 dark:border-divider-dark dark:bg-surface-dark/90 sticky top-0 z-20 grid border-b backdrop-blur"
+      style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}
+    >
+      <div />
+      {days.map(day => {
+        const [weekday, dayNumber] = formatDay(day).split(' ');
+        const isToday = day === todayKey;
+        return (
+          <button
+            aria-label={`Add all-day event on ${formatDay(day)}`}
+            className="focus-visible:ring-accent flex items-center gap-1.5 px-3 py-1.5 text-left focus-visible:ring-2 focus-visible:outline-none"
+            key={day}
+            onClick={event => onCreateAllDay(day, event)}
+            type="button"
+          >
+            <span className={cn('text-[11px] font-medium uppercase', isToday ? 'text-accent' : 'text-muted')}>
+              {weekday}
+            </span>
+            <span
+              className={cn(
+                'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums',
+                isToday && 'bg-accent text-white',
+              )}
+            >
+              {dayNumber}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function CalendarAllDayRow({
+  days,
+  events,
+  getEffectiveDay,
+  gridMinWidth,
+  gridTemplate,
+  onCreateAllDay,
+  onSelectEvent,
+}: {
+  days: string[];
+  events: CalendarEvent[];
+  getEffectiveDay: (event: CalendarEvent) => string;
+  gridMinWidth?: number;
+  gridTemplate: string;
+  onCreateAllDay: (day: string, event: React.MouseEvent<HTMLElement>) => void;
+  onSelectEvent: (event: SelectedEvent) => void;
+}) {
+  return (
+    <div
+      className="border-divider dark:border-divider-dark bg-surface/70 dark:bg-surface-dark/70 grid border-b"
+      style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}
+    >
+      <div className="border-divider dark:border-divider-dark text-muted flex items-center justify-end border-r px-3 py-2 text-xs font-medium">
+        All day
+      </div>
+      {days.map(day => {
+        const dayEvents = events.filter(event => getEffectiveDay(event) === day);
+        return (
+          <div className="border-divider dark:border-divider-dark min-h-12 border-r p-1.5" key={day}>
+            <button
+              aria-label={`Add all-day event on ${formatDay(day)}`}
+              className="focus-visible:ring-accent flex min-h-8 w-full flex-col gap-1 rounded-md text-left focus-visible:ring-2 focus-visible:outline-none"
+              onClick={event => onCreateAllDay(day, event)}
+              type="button"
+            >
+              {dayEvents.length ? (
+                dayEvents.map(event => (
+                  <span
+                    className="cal-chip flex min-w-0 items-center gap-1 rounded-[5px] px-2 py-1 text-xs font-semibold ring-1 ring-inset"
+                    key={event.id}
+                    onClick={click => {
+                      click.stopPropagation();
+                      onSelectEvent({ anchorRect: click.currentTarget.getBoundingClientRect(), event });
+                    }}
+                    style={chipStyle(event.color)}
+                  >
+                    <span className="truncate">{event.title}</span>
+                  </span>
+                ))
+              ) : (
+                <span className="sr-only">Create all-day event</span>
+              )}
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

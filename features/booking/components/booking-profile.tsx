@@ -1,15 +1,15 @@
-import { CalendarCheck } from 'lucide-react'
-import { getBookingAvailability } from '../booking-queries'
-import { BookingSlots } from './booking-slots'
+import { CalendarCheck } from 'lucide-react';
+import { getBookingAvailability } from '../booking-queries';
+import { BookingSlots } from './booking-slots';
 
 export async function BookingProfile({ date, handle }: { date?: string; handle: string }) {
-  const availability = await getBookingAvailability(handle, date)
+  const availability = await getBookingAvailability(handle, date);
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-surface px-4 py-8 dark:bg-surface-dark">
-      <section className="w-full max-w-xl rounded-lg border border-divider bg-card/40 p-5 sm:p-8 dark:border-divider-dark dark:bg-card-dark/30">
+    <main className="bg-surface dark:bg-surface-dark grid min-h-dvh place-items-center px-4 py-8">
+      <section className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 w-full max-w-xl rounded-lg border p-5 sm:p-8">
         <div className="flex items-start gap-4">
-          <div className="grid size-11 place-items-center rounded-full bg-primary/15 text-primary">
+          <div className="bg-primary/15 text-primary grid size-11 place-items-center rounded-full">
             <CalendarCheck className="size-5" />
           </div>
           <div>
@@ -20,7 +20,7 @@ export async function BookingProfile({ date, handle }: { date?: string; handle: 
             </p>
           </div>
         </div>
-        <div className="border-divider mt-8 border-t pt-6 dark:border-divider-dark">
+        <div className="border-divider dark:border-divider-dark mt-8 border-t pt-6">
           <BookingSlots
             day={availability.day}
             duration={availability.duration}
@@ -30,13 +30,13 @@ export async function BookingProfile({ date, handle }: { date?: string; handle: 
         </div>
       </section>
     </main>
-  )
+  );
 }
 
 export function BookingProfileSkeleton() {
   return (
-    <main className="grid min-h-dvh place-items-center bg-surface px-4 py-8 dark:bg-surface-dark">
-      <div className="h-[38rem] w-full max-w-xl animate-pulse rounded-lg border border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30" />
+    <main className="bg-surface dark:bg-surface-dark grid min-h-dvh place-items-center px-4 py-8">
+      <div className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 h-[38rem] w-full max-w-xl animate-pulse rounded-lg border" />
     </main>
-  )
+  );
 }

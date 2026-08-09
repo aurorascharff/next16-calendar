@@ -1,12 +1,17 @@
-import { CalendarDays } from 'lucide-react'
-import { SignInForm } from '@/features/user/components/sign-in-form'
+import { CalendarDays } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { SignInForm } from '@/features/user/components/sign-in-form';
+import { getCurrentUser } from '@/features/user/user-queries';
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const user = await getCurrentUser();
+  if (user) redirect('/');
+
   return (
-    <main className="grid min-h-dvh place-items-center bg-surface px-6 dark:bg-surface-dark">
+    <main className="bg-surface dark:bg-surface-dark grid min-h-dvh place-items-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex items-center justify-center gap-2 text-2xl font-bold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-md bg-accent text-white">
+          <span className="bg-accent grid size-8 place-items-center rounded-md text-white">
             <CalendarDays className="size-5" strokeWidth={2.25} />
           </span>
           <span>Cadence</span>
@@ -14,5 +19,5 @@ export default function LoginPage() {
         <SignInForm />
       </div>
     </main>
-  )
+  );
 }

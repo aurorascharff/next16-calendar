@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useTheme } from 'next-themes'
-import { Toaster as Sonner } from 'sonner'
-import { ViewTransition } from 'react'
+import { useTheme } from 'next-themes';
+import { ViewTransition } from 'react';
+import { Toaster as Sonner } from 'sonner';
 
 export function Toaster() {
-  const { resolvedTheme } = useTheme()
+  const { resolvedTheme } = useTheme();
   return (
     <ViewTransition name="toaster" default="none">
       <Sonner position="bottom-right" theme={resolvedTheme === 'light' ? 'light' : 'dark'} />
     </ViewTransition>
-  )
+  );
 }

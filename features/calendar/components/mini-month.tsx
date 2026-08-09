@@ -3,9 +3,10 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { dateKey, getWeekDays } from '../calendar-utils';
+import { useTodayKey } from '../hooks/use-now';
 import type { Route } from 'next';
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -31,29 +32,29 @@ function monthOf(dateKeyValue: string) {
 export function MiniMonth() {
   const pathname = usePathname();
   const selected = pathname.match(/\/calendar\/(\d{4}-\d{2}-\d{2})/)?.[1] ?? null;
+  const today = useTodayKey();
+  const initialKey = selected ?? today;
+
+  if (!initialKey) return <div aria-hidden className="h-[232px]" />;
+
+  return <MiniMonthCalendar initialKey={initialKey} key={initialKey} selected={selected} today={today} />;
+}
+
+function MiniMonthCalendar({
+  initialKey,
+  selected,
+  today,
+}: {
+  initialKey: string;
+  selected: string | null;
+  today: string | null;
+}) {
   const weekDays = selected ? getWeekDays(selected) : null;
   const weekSet = weekDays ? new Set(weekDays) : null;
   const firstKey = weekDays?.[0];
   const lastKey = weekDays?.[6];
-  const [today, setToday] = useState<string | null>(null);
-  const [monthView, setMonthView] = useState<{ month: number; year: number } | null>(() =>
-    selected ? monthOf(selected) : null,
-  );
-
-  useEffect(() => {
-    setToday(dateKey(new Date()));
-  }, []);
-
-  useEffect(() => {
-    if (selected) setMonthView(monthOf(selected));
-  }, [selected]);
-
-  useEffect(() => {
-    setMonthView(current => current ?? monthOf(dateKey(new Date())));
-  }, []);
-
-  const view = monthView ?? (selected ? monthOf(selected) : null);
-  if (!view) return <div aria-hidden className="h-[232px]" />;
+  const [monthView, setMonthView] = useState(() => monthOf(initialKey));
+  const view = monthView;
 
   function shiftMonth(delta: number) {
     setMonthView(current => {

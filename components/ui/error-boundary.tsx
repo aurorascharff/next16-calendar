@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { TriangleAlert } from 'lucide-react'
-import { catchError, type ErrorInfo } from 'next/error'
-import { Button } from '@/components/ui/button'
+import { TriangleAlert } from 'lucide-react';
+import { catchError, type ErrorInfo } from 'next/error';
+import { Button } from '@/components/ui/button';
 
 function ErrorFallback(props: { title?: string; compact?: boolean }, { retry }: ErrorInfo) {
   if (props.compact) {
@@ -14,7 +14,7 @@ function ErrorFallback(props: { title?: string; compact?: boolean }, { retry }: 
           Try again
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -25,7 +25,7 @@ function ErrorFallback(props: { title?: string; compact?: boolean }, { retry }: 
         Try again
       </Button>
     </div>
-  )
+  );
 }
 
-export default catchError(ErrorFallback)
+export default catchError(ErrorFallback);

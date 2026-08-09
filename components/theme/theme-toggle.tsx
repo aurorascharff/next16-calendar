@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import { Monitor, Moon, Sun } from 'lucide-react'
-import { useTheme } from 'next-themes'
-import { useSyncExternalStore } from 'react'
-import { cn } from '@/lib/utils'
+import { Monitor, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useSyncExternalStore } from 'react';
+import { cn } from '@/lib/utils';
 
-const subscribe = () => () => {}
+const subscribe = () => () => {};
 function useIsMounted() {
   return useSyncExternalStore(
     subscribe,
     () => true,
     () => false,
-  )
+  );
 }
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-  const mounted = useIsMounted()
-  const active = mounted ? theme : undefined
+  const { theme, setTheme } = useTheme();
+  const mounted = useIsMounted();
+  const active = mounted ? theme : undefined;
 
   return (
     <div
@@ -34,7 +34,7 @@ export function ThemeToggle() {
         <Monitor className="size-4" />
       </ToggleButton>
     </div>
-  )
+  );
 }
 
 function ToggleButton({
@@ -43,10 +43,10 @@ function ToggleButton({
   onClick,
   children,
 }: {
-  active: boolean
-  label: string
-  onClick: () => void
-  children: React.ReactNode
+  active: boolean;
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
 }) {
   return (
     <button
@@ -57,11 +57,11 @@ function ToggleButton({
       className={cn(
         'rounded-full p-1.5 transition-colors',
         active
-          ? 'bg-card text-black dark:bg-card-dark dark:text-white'
+          ? 'bg-card dark:bg-card-dark text-black dark:text-white'
           : 'text-muted hover:text-black dark:hover:text-white',
       )}
     >
       {children}
     </button>
-  )
+  );
 }

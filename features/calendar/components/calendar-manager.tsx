@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
-import * as Ariakit from '@ariakit/react'
-import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useActionState, useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { Dialog } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
-import { createCalendar, deleteCalendar, updateCalendar } from '../calendar-actions'
-import { CALENDAR_COLORS, dotClass } from '../utils/colors'
-import type { Calendar, CalendarColor } from '../types/calendar'
-import { useCalendarVisibility } from './calendar-visibility'
+import * as Ariakit from '@ariakit/react';
+import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useActionState, useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { Dialog } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { createCalendar, deleteCalendar, updateCalendar } from '../calendar-actions';
+import { CALENDAR_COLORS, dotClass } from '../utils/colors';
+import { useCalendarVisibility } from './calendar-visibility';
+import type { Calendar, CalendarColor } from '../types/calendar';
 
 export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
-  const { hidden, toggle } = useCalendarVisibility()
-  const [editing, setEditing] = useState<Calendar | 'new' | null>(null)
-  const [isDeleting, startDelete] = useTransition()
-  const demoColors = new Set(calendars.filter((calendar) => calendar.isDemo).map((calendar) => calendar.color))
+  const { hidden, toggle } = useCalendarVisibility();
+  const [editing, setEditing] = useState<Calendar | 'new' | null>(null);
+  const [isDeleting, startDelete] = useTransition();
+  const demoColors = new Set(calendars.filter(calendar => calendar.isDemo).map(calendar => calendar.color));
   const store = Ariakit.useDialogStore({
     setOpen(open) {
-      if (!open) setEditing(null)
+      if (!open) setEditing(null);
     },
-  })
+  });
 
   function remove(calendar: Calendar) {
     startDelete(async () => {
-      const result = await deleteCalendar(calendar.id)
-      if (result.error) toast.error(result.error)
-      else toast.success('Calendar deleted.')
-    })
+      const result = await deleteCalendar(calendar.id);
+      if (result.error) toast.error(result.error);
+      else toast.success('Calendar deleted.');
+    });
   }
 
   return (
@@ -38,8 +38,8 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
           aria-label="New calendar"
           className="text-muted rounded p-0.5 transition-colors hover:text-black dark:hover:text-white"
           onClick={() => {
-            setEditing('new')
-            store.show()
+            setEditing('new');
+            store.show();
           }}
           type="button"
         >
@@ -47,11 +47,11 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
         </button>
       </div>
       <div className="space-y-0.5">
-        {calendars.map((calendar) => {
-          const isHidden = hidden.has(calendar.id)
+        {calendars.map(calendar => {
+          const isHidden = hidden.has(calendar.id);
           return (
             <div
-              className="group flex items-center gap-2 rounded-md pr-1 pl-3 transition-colors hover:bg-card dark:hover:bg-card-dark"
+              className="group hover:bg-card dark:hover:bg-card-dark flex items-center gap-2 rounded-md pr-1 pl-3 transition-colors"
               key={calendar.id}
             >
               <button
@@ -60,56 +60,64 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
                 onClick={() => toggle(calendar.id)}
                 type="button"
               >
-                <span className={cn('size-2.5 shrink-0 rounded-full transition-opacity', dotClass[calendar.color], isHidden && 'opacity-25')} />
-                <span className={cn('text-muted truncate', isHidden && 'line-through opacity-60')}>{calendar.name}</span>
+                <span
+                  className={cn(
+                    'size-2.5 shrink-0 rounded-full transition-opacity',
+                    dotClass[calendar.color],
+                    isHidden && 'opacity-25',
+                  )}
+                />
+                <span className={cn('text-muted truncate', isHidden && 'line-through opacity-60')}>
+                  {calendar.name}
+                </span>
               </button>
-              {calendar.isDemo ? null : (
-                <Ariakit.MenuProvider>
-                  <Ariakit.MenuButton
-                    aria-label={`${calendar.name} options`}
-                    className="text-muted rounded p-1 opacity-0 transition hover:text-black focus-visible:opacity-100 group-hover:opacity-100 dark:hover:text-white"
-                    disabled={isDeleting}
+              <Ariakit.MenuProvider>
+                <Ariakit.MenuButton
+                  aria-label={`${calendar.name} options`}
+                  className="text-muted rounded p-1 opacity-0 transition group-hover:opacity-100 hover:text-black focus-visible:opacity-100 dark:hover:text-white"
+                  disabled={isDeleting}
+                >
+                  <MoreHorizontal className="size-4" />
+                </Ariakit.MenuButton>
+                <Ariakit.Menu
+                  gutter={4}
+                  className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 min-w-36 rounded-md border p-1 shadow-lg outline-none"
+                >
+                  <Ariakit.MenuItem
+                    className="hover:bg-card dark:hover:bg-card-dark flex items-center gap-2 rounded px-2 py-1.5 text-sm"
+                    onClick={() => {
+                      setEditing(calendar);
+                      store.show();
+                    }}
                   >
-                    <MoreHorizontal className="size-4" />
-                  </Ariakit.MenuButton>
-                  <Ariakit.Menu
-                    gutter={4}
-                    className="border-divider z-50 min-w-36 rounded-md border bg-surface p-1 shadow-lg outline-none dark:border-divider-dark dark:bg-surface-dark"
+                    <Pencil className="size-3.5" />
+                    Edit
+                  </Ariakit.MenuItem>
+                  <Ariakit.MenuItem
+                    className="text-danger hover:bg-danger/10 flex items-center gap-2 rounded px-2 py-1.5 text-sm"
+                    onClick={() => remove(calendar)}
                   >
-                    <Ariakit.MenuItem
-                      className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-card dark:hover:bg-card-dark"
-                      onClick={() => {
-                        setEditing(calendar)
-                        store.show()
-                      }}
-                    >
-                      <Pencil className="size-3.5" />
-                      Edit
-                    </Ariakit.MenuItem>
-                    <Ariakit.MenuItem
-                      className="text-danger flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-danger/10"
-                      onClick={() => remove(calendar)}
-                    >
-                      <Trash2 className="size-3.5" />
-                      Delete
-                    </Ariakit.MenuItem>
-                  </Ariakit.Menu>
-                </Ariakit.MenuProvider>
-              )}
+                    <Trash2 className="size-3.5" />
+                    Delete
+                  </Ariakit.MenuItem>
+                </Ariakit.Menu>
+              </Ariakit.MenuProvider>
             </div>
-          )
+          );
         })}
       </div>
       {editing ? (
         <CalendarFormDialog
           calendar={editing === 'new' ? null : editing}
-          colors={CALENDAR_COLORS.filter((color) => !demoColors.has(color) || (editing !== 'new' && color === editing.color))}
+          colors={CALENDAR_COLORS.filter(
+            color => !demoColors.has(color) || (editing !== 'new' && color === editing.color),
+          )}
           key={editing === 'new' ? 'new' : editing.id}
           store={store}
         />
       ) : null}
     </>
-  )
+  );
 }
 
 function CalendarFormDialog({
@@ -117,34 +125,39 @@ function CalendarFormDialog({
   colors,
   store,
 }: {
-  calendar: Calendar | null
-  colors: CalendarColor[]
-  store: Ariakit.DialogStore
+  calendar: Calendar | null;
+  colors: CalendarColor[];
+  store: Ariakit.DialogStore;
 }) {
-  const [color, setColor] = useState<CalendarColor>(calendar?.color ?? colors[0] ?? 'indigo')
+  const [color, setColor] = useState<CalendarColor>(calendar?.color ?? colors[0] ?? 'indigo');
 
-  const [state, formAction, isPending] = useActionState(async (_prev: { error?: string }, formData: FormData) => {
-    const name = String(formData.get('name'))
-    const result = calendar
-      ? await updateCalendar({ color, id: calendar.id, name })
-      : await createCalendar({ color, name })
-    if (result.error) return { error: result.error }
-    store.hide()
-    toast.success(calendar ? 'Calendar updated.' : 'Calendar created.')
-    return {}
-  }, {})
+  const [state, formAction, isPending] = useActionState(
+    async (_prev: { error?: string; key?: number; values?: { name: string } }, formData: FormData) => {
+      const name = String(formData.get('name'));
+      const result = calendar
+        ? await updateCalendar({ color, id: calendar.id, name })
+        : await createCalendar({ color, name });
+      if (result.error) return { error: result.error, key: Date.now(), values: { name } };
+      store.hide();
+      toast.success(calendar ? 'Calendar updated.' : 'Calendar created.');
+      return {};
+    },
+    {},
+  );
+
+  const name = state.values?.name ?? calendar?.name ?? '';
 
   return (
     <Dialog busy={isPending} store={store} title={calendar ? 'Edit calendar' : 'New calendar'}>
-      <form action={formAction} className="mt-4 space-y-4">
+      <form action={formAction} className="mt-4 space-y-4" key={state.key ?? calendar?.id ?? 'new-calendar'}>
         <label className="block">
           <span className="text-muted mb-1.5 block text-xs font-medium">Name</span>
-          <input autoFocus defaultValue={calendar?.name ?? ''} name="name" placeholder="e.g. Side project" />
+          <input autoFocus defaultValue={name} name="name" placeholder="e.g. Side project" />
         </label>
         <div>
           <span className="text-muted mb-1.5 block text-xs font-medium">Color</span>
           <div className="flex gap-2">
-            {colors.map((option) => (
+            {colors.map(option => (
               <button
                 aria-label={option}
                 aria-pressed={color === option}
@@ -169,7 +182,7 @@ function CalendarFormDialog({
             Cancel
           </Ariakit.DialogDismiss>
           <button
-            className="rounded-md bg-accent px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
+            className="bg-accent hover:bg-accent-hover rounded-md px-3.5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-60"
             disabled={isPending}
             type="submit"
           >
@@ -178,5 +191,5 @@ function CalendarFormDialog({
         </div>
       </form>
     </Dialog>
-  )
+  );
 }

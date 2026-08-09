@@ -1,12 +1,9 @@
-import { timeToMinutes } from "../calendar-utils";
-import { CalendarEvent } from "../types/calendar";
+import { timeToMinutes } from '../calendar-utils';
+import type { CalendarEvent } from '../types/calendar';
 
 export const HOUR_HEIGHT = 72;
 export const START_HOUR = 8;
-export const HOURS = Array.from(
-  { length: 11 },
-  (_, index) => START_HOUR + index,
-);
+export const HOURS = Array.from({ length: 11 }, (_, index) => START_HOUR + index);
 export const END_MINUTES = (START_HOUR + HOURS.length) * 60;
 export const GRID_HEIGHT = HOURS.length * HOUR_HEIGHT;
 export const SNAP_MINUTES = 15;
@@ -16,7 +13,7 @@ export type Placement = { col: number; cols: number };
 
 export function packDay(events: CalendarEvent[]): Map<string, Placement> {
   const items = events
-    .map((event) => ({
+    .map(event => ({
       end: timeToMinutes(event.start) + event.duration,
       event,
       start: timeToMinutes(event.start),
@@ -29,7 +26,7 @@ export function packDay(events: CalendarEvent[]): Map<string, Placement> {
   function flush() {
     const columnEnds: number[] = [];
     for (const item of cluster) {
-      let col = columnEnds.findIndex((end) => end <= item.start);
+      let col = columnEnds.findIndex(end => end <= item.start);
       if (col === -1) {
         col = columnEnds.length;
         columnEnds.push(item.end);
@@ -66,7 +63,7 @@ export function snapMinutes(clientY: number, boundsTop: number) {
 }
 
 export function minutesToTime(minutes: number) {
-  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 }
 
 export function nearestDuration(minutes: number) {

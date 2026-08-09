@@ -37,7 +37,7 @@
 
 @layer base {
   body {
-    @apply selection:bg-accent selection:text-white bg-surface font-sans text-black antialiased dark:bg-surface-dark dark:text-white;
+    @apply selection:bg-accent bg-surface dark:bg-surface-dark font-sans text-black antialiased selection:text-white dark:text-white;
   }
 
   h1 {
@@ -73,8 +73,6 @@
   }
 }
 
-/* Calendar event chip: light/dark variants derived from one base hue. Light is
-   a soft tint with deep colored text; dark is a deep fill with light text. */
 .cal-chip {
   background-color: var(--cal-lb);
   color: var(--cal-lt);
@@ -86,7 +84,6 @@
   --tw-ring-color: rgb(255 255 255 / 0.08);
 }
 
-/* Skeleton shimmer */
 .skeleton-animation {
   background: rgba(150, 150, 150, 0.15);
   background: linear-gradient(
@@ -112,7 +109,6 @@
   }
 }
 
-/* Live "now" indicator pulse */
 @keyframes now-pulse {
   0%,
   100% {
@@ -123,7 +119,6 @@
   }
 }
 
-/* Indeterminate top loading bar */
 @keyframes loading-slide {
   0% {
     transform: translateX(-100%);
@@ -133,7 +128,6 @@
   }
 }
 
-/* View transitions -------------------------------------------------------- */
 :root {
   --duration-exit: 130ms;
   --duration-enter: 190ms;
@@ -151,7 +145,6 @@
   }
 }
 
-/* Directional week slide, keyed off navigation direction. */
 @keyframes slide-in-right {
   from {
     transform: translateX(22px);
@@ -206,7 +199,6 @@
     var(--duration-move) ease-out both slide-in-left;
 }
 
-/* Neutral crossfade for non-directional jumps (Today, the date picker). */
 ::view-transition-old(.week-fade) {
   animation: var(--duration-exit) ease-in both fade reverse;
 }

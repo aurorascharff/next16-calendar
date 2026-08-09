@@ -10,7 +10,7 @@ Prefer minimal, stable props: IDs, slugs, handles, parsed filters, or records th
 
 ```tsx
 // features/notifications/components/notifications-badge.tsx
-import { getUnreadNotificationCount } from "@/features/notifications/notifications-queries";
+import { getUnreadNotificationCount } from '@/features/notifications/notifications-queries';
 
 export async function NotificationsBadge() {
   const count = await getUnreadNotificationCount();
@@ -49,7 +49,7 @@ export async function Feed({ userId }: { userId: string }) {
   const posts = await getFeed(userId);
   return (
     <ul>
-      {posts.map((p) => (
+      {posts.map(p => (
         <Post key={p.id} post={p} />
       ))}
     </ul>
@@ -129,10 +129,7 @@ If the component needs interactive pieces, keep the server component as the pare
 
 ```tsx
 async function PostDetail({ id }: { id: string }) {
-  const [post, userState] = await Promise.all([
-    getPost(id),
-    getPostUserState(id),
-  ]);
+  const [post, userState] = await Promise.all([getPost(id), getPostUserState(id)]);
   return (
     <article>
       <PostBody body={post.body} />
@@ -166,7 +163,7 @@ Prefer passing plain values (strings, IDs, resolved data) to a server child. A s
 // Right — parent fetches the list, passes each item
 async function Feed({ userId }: { userId: string }) {
   const posts = await getFeed(userId);
-  return posts.map((post) => <Post key={post.id} post={post} />);
+  return posts.map(post => <Post key={post.id} post={post} />);
 }
 
 async function Post({ post }: { post: Post }) {
@@ -194,8 +191,8 @@ When a client component needs server data but should manage its own loading (a s
 ```
 
 ```tsx
-"use client";
-import { use } from "react";
+'use client';
+import { use } from 'react';
 
 export function TagPicker({ itemsPromise }: { itemsPromise: Promise<Tag[]> }) {
   const items = use(itemsPromise);

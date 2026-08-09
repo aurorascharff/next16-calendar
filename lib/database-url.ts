@@ -5,9 +5,9 @@
 // passing the URL to any client/adapter/CLI codepath. An explicit
 // `sslmode=disable` is left as-is for a local/CI Postgres without TLS.
 export function normalizeDatabaseUrl(url: string): string {
-  const parsed = new URL(url)
+  const parsed = new URL(url);
   if (parsed.searchParams.get('sslmode') !== 'disable') {
-    parsed.searchParams.set('sslmode', 'verify-full')
+    parsed.searchParams.set('sslmode', 'verify-full');
   }
-  return parsed.toString()
+  return parsed.toString();
 }

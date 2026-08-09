@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
-import type { Route } from 'next'
-import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
-import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils'
-import { bookSlot } from '../booking-actions'
-import type { BookingSlot } from '../booking-queries'
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
+import { cn } from '@/lib/utils';
+import { bookSlot } from '../booking-actions';
+import type { BookingSlot } from '../booking-queries';
+import type { Route } from 'next';
 
-const dayHref = (handle: string, day: string) => `/book/${handle}?date=${day}` as Route
+const dayHref = (handle: string, day: string) => `/book/${handle}?date=${day}` as Route;
 
 export function BookingSlots({
   day,
@@ -19,29 +19,30 @@ export function BookingSlots({
   handle,
   slots,
 }: {
-  day: string
-  duration: number
-  handle: string
-  slots: BookingSlot[]
+  day: string;
+  duration: number;
+  handle: string;
+  slots: BookingSlot[];
 }) {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [guestName, setGuestName] = useState('')
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [guestName, setGuestName] = useState('');
 
   function selectSlot(slot: string) {
     startTransition(async () => {
-      const result = await bookSlot({ day, guestName, handle, slot })
+      const result = await bookSlot({ day, guestName, handle, slot });
       if (result.error) {
-        toast.error(result.error)
-        return
+        toast.error(result.error);
+        return;
       }
-      toast.success(`Booked ${slot}. A confirmation is on its way.`)
-      router.refresh()
-    })
+      toast.success(`Booked ${slot}. A confirmation is on its way.`);
+      router.refresh();
+    });
   }
 
-  const navButton = 'text-muted flex size-8 items-center justify-center rounded-md hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white'
-  const allTaken = slots.every((slot) => slot.taken)
+  const navButton =
+    'text-muted flex size-8 items-center justify-center rounded-md hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white';
+  const allTaken = slots.every(slot => slot.taken);
 
   return (
     <div>
@@ -56,22 +57,22 @@ export function BookingSlots({
       </div>
       <label className="mb-4 block">
         <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-        <input onChange={(event) => setGuestName(event.target.value)} placeholder="Name" value={guestName} />
+        <input onChange={event => setGuestName(event.target.value)} placeholder="Name" value={guestName} />
       </label>
       <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
       {allTaken ? (
-        <p className="text-muted rounded-md border border-dashed border-divider py-8 text-center text-sm dark:border-divider-dark">
+        <p className="text-muted border-divider dark:border-divider-dark rounded-md border border-dashed py-8 text-center text-sm">
           No open {duration}-minute slots on this day. Try another date.
         </p>
       ) : (
         <div className="grid gap-2 sm:grid-cols-2">
-          {slots.map((slot) => (
+          {slots.map(slot => (
             <button
               className={cn(
                 'rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums transition-colors',
                 slot.taken
-                  ? 'border-divider text-muted/50 line-through dark:border-divider-dark'
-                  : 'border-divider text-muted hover:border-accent hover:bg-accent/10 hover:text-accent disabled:opacity-60 dark:border-divider-dark',
+                  ? 'border-divider text-muted/50 dark:border-divider-dark line-through'
+                  : 'border-divider text-muted hover:border-accent hover:bg-accent/10 hover:text-accent dark:border-divider-dark disabled:opacity-60',
               )}
               disabled={slot.taken || isPending}
               key={slot.time}
@@ -85,5 +86,5 @@ export function BookingSlots({
         </div>
       )}
     </div>
-  )
+  );
 }

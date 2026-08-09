@@ -1,11 +1,11 @@
-import { CalendarClock } from 'lucide-react'
+import { CalendarClock } from 'lucide-react';
 
 type Props = {
-  title: string
-  body?: string
-  icon?: React.ReactNode
-  children?: React.ReactNode
-}
+  title: string;
+  body?: string;
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
+};
 
 export function EmptyState({ title, body, icon, children }: Props) {
   return (
@@ -17,5 +17,5 @@ export function EmptyState({ title, body, icon, children }: Props) {
       {body ? <p className="text-muted max-w-xs text-sm leading-6">{body}</p> : null}
       {children}
     </div>
-  )
+  );
 }

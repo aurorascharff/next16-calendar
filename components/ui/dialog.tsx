@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import * as Ariakit from '@ariakit/react'
-import { X } from 'lucide-react'
+import * as Ariakit from '@ariakit/react';
+import { X } from 'lucide-react';
 
 type Props = {
-  store: Ariakit.DialogStore
-  title: string
-  description?: string
-  children: React.ReactNode
-  busy?: boolean
-}
+  store: Ariakit.DialogStore;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  busy?: boolean;
+};
 
 export function Dialog({ store, title, description, children, busy = false }: Props) {
   return (
@@ -24,7 +24,7 @@ export function Dialog({ store, title, description, children, busy = false }: Pr
           style={{ viewTransitionName: 'dialog-backdrop' }}
         />
       }
-      className="border-divider dark:border-divider-dark fixed bottom-0 left-1/2 z-50 flex w-full max-w-md -translate-x-1/2 flex-col rounded-t-2xl border bg-surface p-5 shadow-2xl outline-none sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:rounded-2xl dark:bg-surface-dark"
+      className="border-divider dark:border-divider-dark bg-surface dark:bg-surface-dark fixed bottom-0 left-1/2 z-50 flex w-full max-w-md -translate-x-1/2 flex-col rounded-t-2xl border p-5 shadow-2xl outline-none sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:rounded-2xl"
       style={{ viewTransitionName: 'dialog' }}
     >
       <div className="flex items-start justify-between gap-4">
@@ -36,7 +36,7 @@ export function Dialog({ store, title, description, children, busy = false }: Pr
         </div>
         <Ariakit.DialogDismiss
           aria-label="Close"
-          className="text-muted -mr-1 rounded-md p-1 transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
+          className="text-muted hover:bg-card dark:hover:bg-card-dark -mr-1 rounded-md p-1 transition-colors hover:text-black dark:hover:text-white"
           disabled={busy}
         >
           <X className="size-4" />
@@ -44,5 +44,5 @@ export function Dialog({ store, title, description, children, busy = false }: Pr
       </div>
       {children}
     </Ariakit.Dialog>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import type { NextConfig } from 'next'
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -9,6 +9,6 @@ const nextConfig: NextConfig = {
     inlineCss: true,
     useOffline: true,
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

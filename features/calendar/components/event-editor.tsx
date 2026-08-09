@@ -1,65 +1,85 @@
-'use client'
+'use client';
 
-import * as Ariakit from '@ariakit/react'
-import { Trash2, X } from 'lucide-react'
-import { useActionState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { deleteEvent, updateEvent } from '../calendar-actions'
-import type { CalendarEvent } from '../types/calendar'
-import { formatDay } from '../calendar-utils'
+import * as Ariakit from '@ariakit/react';
+import { Trash2, X } from 'lucide-react';
+import { useActionState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { deleteEvent, updateEvent } from '../calendar-actions';
+import { formatDay } from '../calendar-utils';
+import type { CalendarEvent } from '../types/calendar';
 
 type EventEditorProps = {
-  event: CalendarEvent
-  onClose: () => void
-  onDeleted: (sourceId: string) => void
-  onUpdated: (event: Pick<CalendarEvent, 'allDay' | 'duration' | 'sourceId' | 'start' | 'title'>) => void
-}
+  anchorRect?: DOMRect | null;
+  event: CalendarEvent;
+  onClose: () => void;
+  onDeleted: (sourceId: string) => void;
+  onUpdated: (event: Pick<CalendarEvent, 'allDay' | 'duration' | 'sourceId' | 'start' | 'title'>) => void;
+};
 
-type State = { error?: string }
+type FormValues = {
+  allDay: boolean;
+  duration: string;
+  start: string;
+  title: string;
+};
 
-const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium'
+type State = { error?: string; key?: number; values?: FormValues };
 
-export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEditorProps) {
-  const [isDeleting, startDelete] = useTransition()
+const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
+
+export function EventEditor({ anchorRect, event, onClose, onDeleted, onUpdated }: EventEditorProps) {
+  const [isDeleting, startDelete] = useTransition();
   const store = Ariakit.usePopoverStore({
     defaultOpen: true,
     placement: 'bottom-start',
     setOpen(open) {
-      if (!open) onClose()
+      if (!open) onClose();
     },
-  })
+  });
 
   const [state, formAction, isSaving] = useActionState(async (_prev: State, formData: FormData): Promise<State> => {
-    const allDay = formData.get('allDay') === 'on'
-    const input = {
+    const allDay = formData.get('allDay') === 'on';
+    const values = {
       allDay,
-      duration: Number(formData.get('duration')),
-      eventId: event.sourceId,
+      duration: String(formData.get('duration')),
       start: String(formData.get('start')),
       title: String(formData.get('title')),
-    }
-    const result = await updateEvent(input)
-    if (result.error) return { error: result.error }
-    onUpdated({ allDay, duration: input.duration, sourceId: event.sourceId, start: input.start, title: input.title })
-    store.hide()
-    toast.success('Event updated.')
-    return {}
-  }, {})
+    };
+    const input = {
+      allDay,
+      duration: Number(values.duration),
+      eventId: event.sourceId,
+      start: values.start,
+      title: values.title,
+    };
+    const result = await updateEvent(input);
+    if (result.error) return { error: result.error, key: Date.now(), values };
+    onUpdated({ allDay, duration: input.duration, sourceId: event.sourceId, start: input.start, title: input.title });
+    store.hide();
+    toast.success('Event updated.');
+    return {};
+  }, {});
 
   function remove() {
     startDelete(async () => {
-      const result = await deleteEvent(event.sourceId)
+      const result = await deleteEvent(event.sourceId);
       if (result.error) {
-        toast.error(result.error)
-        return
+        toast.error(result.error);
+        return;
       }
-      onDeleted(event.sourceId)
-      store.hide()
-      toast.success('Event removed.')
-    })
+      onDeleted(event.sourceId);
+      store.hide();
+      toast.success('Event removed.');
+    });
   }
 
-  const busy = isSaving || isDeleting
+  const busy = isSaving || isDeleting;
+  const values = state.values ?? {
+    allDay: event.allDay,
+    duration: String(event.duration),
+    start: event.start,
+    title: event.title,
+  };
 
   return (
     <Ariakit.Popover
@@ -67,10 +87,11 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
       unmountOnHide
       fixed
       fitViewport
+      getAnchorRect={anchorRect ? () => anchorRect : undefined}
       gutter={10}
       hideOnEscape={!busy}
       hideOnInteractOutside={!busy}
-      className="border-divider z-50 w-[min(24rem,calc(100vw-2rem))] rounded-lg border bg-surface p-4 shadow-2xl outline-none dark:border-divider-dark dark:bg-surface-dark"
+      className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 w-[min(24rem,calc(100vw-2rem))] rounded-lg border p-4 shadow-2xl outline-none"
       style={{ viewTransitionName: 'dialog' }}
     >
       <div className="flex items-start justify-between gap-4">
@@ -83,29 +104,29 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
         </div>
         <Ariakit.PopoverDismiss
           aria-label="Close"
-          className="text-muted -mr-1 rounded-md p-1 transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
+          className="text-muted hover:bg-card dark:hover:bg-card-dark -mr-1 rounded-md p-1 transition-colors hover:text-black dark:hover:text-white"
           disabled={busy}
         >
           <X className="size-4" />
         </Ariakit.PopoverDismiss>
       </div>
-      <form action={formAction} className="mt-4 space-y-4">
+      <form action={formAction} className="mt-4 space-y-4" key={state.key ?? event.id}>
         <label className="block">
           <span className={fieldLabel}>Title</span>
-          <input autoFocus defaultValue={event.title} name="title" />
+          <input autoFocus defaultValue={values.title} name="title" />
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input className="size-4 w-auto" defaultChecked={event.allDay} name="allDay" type="checkbox" />
+          <input className="size-4 w-auto" defaultChecked={values.allDay} name="allDay" type="checkbox" />
           All day
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className={fieldLabel}>Starts at</span>
-            <input defaultValue={event.start} name="start" type="time" />
+            <input defaultValue={values.start} name="start" type="time" />
           </label>
           <label className="block">
             <span className={fieldLabel}>Duration</span>
-            <select defaultValue={String(event.duration)} name="duration">
+            <select defaultValue={values.duration} name="duration">
               <option value="30">30 minutes</option>
               <option value="45">45 minutes</option>
               <option value="60">1 hour</option>
@@ -117,7 +138,7 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
         {state.error ? <p className="text-danger text-sm">{state.error}</p> : null}
         <div className="mt-6 flex items-center justify-between gap-3">
           <button
-            className="text-danger inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-danger/10 disabled:opacity-60"
+            className="text-danger hover:bg-danger/10 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium transition-colors disabled:opacity-60"
             disabled={busy}
             onClick={remove}
             type="button"
@@ -133,7 +154,7 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
               Cancel
             </Ariakit.PopoverDismiss>
             <button
-              className="rounded-md bg-accent px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
+              className="bg-accent hover:bg-accent-hover rounded-md px-3.5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-60"
               disabled={busy}
               type="submit"
             >
@@ -143,5 +164,5 @@ export function EventEditor({ event, onClose, onDeleted, onUpdated }: EventEdito
         </div>
       </form>
     </Ariakit.Popover>
-  )
+  );
 }

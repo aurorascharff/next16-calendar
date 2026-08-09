@@ -1,31 +1,28 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Suspense } from 'react'
-import type { Route } from 'next'
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Suspense } from 'react';
+import type { Route } from 'next';
 
-type RenderProps = { isActive: boolean }
-type Renderable<T> = T | ((props: RenderProps) => T)
+type RenderProps = { isActive: boolean };
+type Renderable<T> = T | ((props: RenderProps) => T);
 
-type Props<T extends string = string> = Omit<
-  React.ComponentProps<typeof Link>,
-  'href' | 'className' | 'children'
-> & {
-  href: Route<T> | URL
-  match?: string
-  exact?: boolean
-  className?: Renderable<string | undefined>
-  children?: Renderable<React.ReactNode>
-}
+type Props<T extends string = string> = Omit<React.ComponentProps<typeof Link>, 'href' | 'className' | 'children'> & {
+  href: Route<T> | URL;
+  match?: string;
+  exact?: boolean;
+  className?: Renderable<string | undefined>;
+  children?: Renderable<React.ReactNode>;
+};
 
 function resolve<T>(value: Renderable<T> | undefined, props: RenderProps): T | undefined {
-  return typeof value === 'function' ? (value as (p: RenderProps) => T)(props) : value
+  return typeof value === 'function' ? (value as (p: RenderProps) => T)(props) : value;
 }
 
 function checkActive(pathname: string, target: string, exact?: boolean): boolean {
-  if (exact || target === '/') return pathname === target
-  return pathname === target || pathname.startsWith(`${target}/`)
+  if (exact || target === '/') return pathname === target;
+  return pathname === target || pathname.startsWith(`${target}/`);
 }
 
 export function NavLink<T extends string>(props: Props<T>) {
@@ -33,14 +30,14 @@ export function NavLink<T extends string>(props: Props<T>) {
     <Suspense fallback={<NavLinkShell {...props} isActive={false} />}>
       <NavLinkInner {...props} />
     </Suspense>
-  )
+  );
 }
 
 function NavLinkInner<T extends string>(props: Props<T>) {
-  const pathname = usePathname()
-  const target = (props.match ?? props.href.toString()).split('?')[0].split('#')[0]
-  const isActive = checkActive(pathname, target, props.exact)
-  return <NavLinkShell {...props} isActive={isActive} />
+  const pathname = usePathname();
+  const target = (props.match ?? props.href.toString()).split('?')[0].split('#')[0];
+  const isActive = checkActive(pathname, target, props.exact);
+  return <NavLinkShell {...props} isActive={isActive} />;
 }
 
 function NavLinkShell<T extends string>({
@@ -62,5 +59,5 @@ function NavLinkShell<T extends string>({
     >
       {resolve(children, { isActive })}
     </Link>
-  )
+  );
 }

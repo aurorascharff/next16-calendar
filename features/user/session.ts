@@ -1,1 +1,1 @@
-export const SESSION_COOKIE = 'cadence-user'
+export const SESSION_COOKIE = 'cadence-user';
