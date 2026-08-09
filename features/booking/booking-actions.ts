@@ -36,9 +36,11 @@ export async function bookSlotAction(_state: BookSlotState, formData: FormData):
   const handle = String(formData.get('handle') ?? '');
   const result = await bookSlot({
     day,
+    guestEmail: String(formData.get('guestEmail') ?? ''),
     guestName: String(formData.get('guestName') ?? ''),
     handle,
     slot: String(formData.get('slot') ?? ''),
+    title: String(formData.get('title') ?? ''),
   });
 
   if ('error' in result) return { error: result.error };
@@ -48,20 +50,28 @@ export async function bookSlotAction(_state: BookSlotState, formData: FormData):
 
 export async function bookSlot({
   day,
+  guestEmail,
   guestName,
   handle,
   slot,
+  title,
 }: {
   day: string;
+  guestEmail: string;
   guestName: string;
   handle: string;
   slot: string;
+  title: string;
 }) {
   if (!isDateKey(day) || !timePattern.test(slot)) {
     return { error: 'Choose a valid booking time.' };
   }
   const name = guestName.trim();
   if (!name) return { error: 'Enter your name to book this time.' };
+  const email = guestEmail.trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(email)) return { error: 'Enter a valid email address.' };
+  const meetingTitle = title.trim();
+  if (!meetingTitle) return { error: 'Enter a meeting title.' };
 
   const bookingPage = await prisma.bookingPage.findUnique({
     include: { user: { select: { name: true } } },
@@ -107,19 +117,21 @@ export async function bookSlot({
       await tx.booking.create({
         data: {
           bookingPageId: bookingPage.id,
+          guestEmail: email,
           guestName: name,
           startsAt,
+          title: meetingTitle,
         },
       });
 
       await tx.calendarEvent.create({
         data: {
           calendarId: calendar.id,
-          description: `${bookingPage.user.name} and ${name}`,
+          description: `${bookingPage.user.name} and ${name} (${email})`,
           day: new Date(`${day}T00:00:00.000Z`),
           duration: bookingPage.duration,
           start: slot,
-          title: bookingPage.title,
+          title: meetingTitle,
           userId: bookingPage.userId,
         },
       });

@@ -38,7 +38,7 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
         type="button"
       >
         <span className="min-w-0 flex-1 truncate">{event.title}</span>
-        {event.recurring ? <Repeat className="size-2.5 shrink-0 opacity-50" /> : null}
+        {event.recurring ? <Repeat className="hidden size-2.5 shrink-0 opacity-50 sm:block" /> : null}
       </button>
     );
   }
@@ -55,9 +55,9 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
       type="button"
     >
       <span className="size-1.5 shrink-0 rounded-full" style={colorStyle(event.color)} />
-      <span className="text-muted shrink-0 tabular-nums">{event.start}</span>
+      <span className="text-muted hidden shrink-0 tabular-nums sm:inline">{event.start}</span>
       <span className="min-w-0 flex-1 truncate font-medium">{event.title}</span>
-      {event.recurring ? <Repeat className="text-muted size-2.5 shrink-0" /> : null}
+      {event.recurring ? <Repeat className="text-muted hidden size-2.5 shrink-0 sm:block" /> : null}
     </button>
   );
 }
@@ -143,7 +143,7 @@ export function CalendarMonthBoard({
                   {Number(day.slice(-2))}
                 </span>
                 <IconButton
-                  className="sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  className="hidden sm:inline-flex sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                   label={`Add event on ${day}`}
                   onClick={event => openCreate(day, event.currentTarget)}
                   size="sm"

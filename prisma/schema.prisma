@@ -73,6 +73,8 @@ model BookingPage {
 model Booking {
   id            String   @id @default(cuid())
   guestName     String
+  guestEmail    String   @default("")
+  title         String   @default("")
   startsAt      DateTime
   bookingPageId String
   createdAt     DateTime @default(now())

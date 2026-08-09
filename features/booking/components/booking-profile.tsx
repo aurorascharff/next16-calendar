@@ -25,6 +25,7 @@ export async function BookingProfile({ booked, date, handle }: { booked?: string
             key={availability.day}
             booked={booked}
             slots={availability.slots}
+            title={availability.title}
           />
         ) : (
           <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">

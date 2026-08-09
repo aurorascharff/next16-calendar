@@ -142,7 +142,9 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
       >
         {mode === 'details' ? (
           <>
-            <EventPopoverHeader busy={busy} event={event}>
+            <EventPopoverHeader busy={busy} event={event} />
+            <EventDetails calendar={calendar} event={event} />
+            <div className="border-divider dark:border-divider-dark flex justify-end gap-1 border-t px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] max-sm:[&_button]:size-11 max-sm:[&_svg]:size-5">
               <IconButton disabled={busy} label="Edit event" onClick={() => setMode('edit')} size="sm">
                 <Pencil className="size-4" />
               </IconButton>
@@ -155,8 +157,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
               >
                 <Trash2 className="size-4" />
               </IconButton>
-            </EventPopoverHeader>
-            <EventDetails calendar={calendar} event={event} />
+            </div>
           </>
         ) : (
           <>
@@ -191,7 +192,15 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
   );
 }
 
-function EventPopoverHeader({ busy, children, event }: { busy: boolean; children: ReactNode; event: CalendarEvent }) {
+function EventPopoverHeader({
+  busy,
+  children,
+  event,
+}: {
+  busy: boolean;
+  children?: ReactNode;
+  event: CalendarEvent;
+}) {
   return (
     <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-3 border-b px-4 py-3 max-sm:[&_button]:size-10 max-sm:[&_svg]:size-5">
       <div className="min-w-0">
@@ -215,7 +224,7 @@ function EventPopoverHeader({ busy, children, event }: { busy: boolean; children
 
 function EventDetails({ calendar, event }: { calendar?: Calendar; event: CalendarEvent }) {
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-6 sm:flex-none">
+    <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:flex-none">
       <div className="grid grid-cols-[1rem_minmax(0,1fr)] gap-x-3 gap-y-3 text-sm">
         <CalendarDays className="text-muted mt-0.5 size-4" />
         <div>

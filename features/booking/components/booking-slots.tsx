@@ -31,12 +31,14 @@ export function BookingSlots({
   duration,
   handle,
   slots,
+  title,
 }: {
   booked?: string;
   day: string;
   duration: number;
   handle: string;
   slots: BookingSlot[];
+  title: string;
 }) {
   const [, formAction] = useActionState(async (previousState: BookSlotState, formData: FormData) => {
     const nextState = await bookSlotAction(previousState, formData);
@@ -121,10 +123,20 @@ export function BookingSlots({
             <input name="day" type="hidden" value={day} />
             <input name="handle" type="hidden" value={handle} />
             <input name="slot" type="hidden" value={selectedAvailable?.time ?? ''} />
-            <label className="mb-3 block sm:mb-4">
-              <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-              <input autoComplete="name" name="guestName" placeholder="Name" required />
-            </label>
+            <div className="mb-3 grid gap-3 sm:mb-4 sm:grid-cols-2">
+              <label className="block min-w-0">
+                <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
+                <input autoComplete="name" name="guestName" placeholder="Name" required />
+              </label>
+              <label className="block min-w-0">
+                <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
+                <input autoComplete="email" name="guestEmail" placeholder="you@example.com" required type="email" />
+              </label>
+              <label className="block min-w-0 sm:col-span-2">
+                <span className="text-muted mb-1.5 block text-xs font-medium">Meeting title</span>
+                <input defaultValue={title} name="title" required />
+              </label>
+            </div>
             <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
             <DirectionalSlide key={day} name="booking-slots">
               <div className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain py-1 pr-1">

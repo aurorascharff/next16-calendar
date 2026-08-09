@@ -1,7 +1,6 @@
 import { Suspense, ViewTransition } from 'react';
 import {
   CalendarSidebarBrand,
-  MobileWorkspaceNavigation,
   WorkspaceNavigationLinks,
 } from '@/components/calendar-navigation';
 import { Crossfade } from '@/components/ui/crossfade';
@@ -15,7 +14,7 @@ import type { ReactNode } from 'react';
 export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   return (
     <CalendarVisibilityProvider>
-      <div className="bg-surface dark:bg-surface-dark flex min-h-svh pb-[calc(4rem+env(safe-area-inset-bottom))] md:h-dvh md:min-h-0 md:pb-0">
+      <div className="bg-surface dark:bg-surface-dark flex min-h-svh md:h-dvh md:min-h-0">
         <ViewTransition name="sidebar" default="none">
           <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-64 shrink-0 flex-col border-r p-3 md:flex">
             <CalendarSidebarBrand />
@@ -54,7 +53,6 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
           </aside>
         </ViewTransition>
         {children}
-        <MobileWorkspaceNavigation />
       </div>
     </CalendarVisibilityProvider>
   );

@@ -1,5 +1,4 @@
 import { CalendarDays, Link2 } from 'lucide-react';
-import { ViewTransition } from 'react';
 import { FlowMark } from '@/components/ui/flow-mark';
 import { GitHubIcon } from '@/components/ui/github-icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -39,28 +38,5 @@ export function WorkspaceNavigationLinks() {
         Booking link
       </NavLink>
     </nav>
-  );
-}
-
-const mobileTab =
-  'flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted not-aria-[current=page]:hover:text-accent aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
-
-export function MobileWorkspaceNavigation() {
-  return (
-    <ViewTransition name="mobile-nav" default="none">
-      <nav
-        aria-label="Primary"
-        className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark after:bg-surface dark:after:bg-surface-dark fixed inset-x-0 bottom-0 z-30 flex border-t pb-[env(safe-area-inset-bottom)] after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-dvh md:hidden"
-      >
-        <CalendarHomeNavLink className={mobileTab}>
-          <CalendarDays className="size-5" />
-          Calendar
-        </CalendarHomeNavLink>
-        <NavLink href="/booking" className={mobileTab}>
-          <Link2 className="size-5" />
-          Booking
-        </NavLink>
-      </nav>
-    </ViewTransition>
   );
 }

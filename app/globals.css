@@ -62,6 +62,13 @@
     cursor: not-allowed;
   }
 
+  input[type='time'] {
+    display: block;
+    inline-size: 100%;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
   select {
     -webkit-appearance: none;
     appearance: none;
@@ -277,7 +284,6 @@ main:has([data-calendar-pending]) .calendar-pending-spinner {
 }
 
 ::view-transition-group(sidebar),
-::view-transition-group(mobile-nav),
 ::view-transition-group(demo-toolbar),
 ::view-transition-group(theme-toggle),
 ::view-transition-group(toaster),
@@ -293,8 +299,6 @@ main:has([data-calendar-pending]) .calendar-pending-spinner {
 
 ::view-transition-old(sidebar),
 ::view-transition-new(sidebar),
-::view-transition-old(mobile-nav),
-::view-transition-new(mobile-nav),
 ::view-transition-old(demo-toolbar),
 ::view-transition-new(demo-toolbar),
 ::view-transition-old(theme-toggle),
