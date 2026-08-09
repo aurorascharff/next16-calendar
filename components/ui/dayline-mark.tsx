@@ -1,6 +1,5 @@
+import { useId, type SVGProps } from 'react';
 import { cn } from '@/lib/utils';
-import { useId } from 'react';
-import type { SVGProps } from 'react';
 
 type Props = SVGProps<SVGSVGElement> & {
   animated?: boolean;
