@@ -38,7 +38,7 @@ export function CalendarAllDayRow({
         return (
           <div
             className={cn(
-              'border-divider dark:border-divider-dark flex min-w-0 items-center gap-1 border-r p-1',
+              'border-divider dark:border-divider-dark flex min-w-0 items-center gap-1 border-r p-1 group-open:pb-0.5',
               day === todayKey && 'bg-card dark:bg-card-dark',
             )}
             key={day}
@@ -51,7 +51,7 @@ export function CalendarAllDayRow({
             {hiddenEventCount > 0 ? (
               <span
                 aria-label={`${hiddenEventCount} more all-day events on ${formatDay(day)}`}
-                className="bg-card text-muted dark:bg-card-dark group-open:hidden h-6 shrink-0 rounded-[5px] px-2 text-[11px] leading-6 font-semibold ring-1 ring-divider dark:ring-divider-dark"
+                className="bg-card text-muted dark:bg-card-dark ring-divider dark:ring-divider-dark h-6 shrink-0 rounded-[5px] px-2 text-[11px] leading-6 font-semibold ring-1 group-open:hidden"
               >
                 +{hiddenEventCount}
               </span>
@@ -63,7 +63,9 @@ export function CalendarAllDayRow({
   );
 
   if (!canExpand) {
-    return <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark border-b">{preview}</div>;
+    return (
+      <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark border-b">{preview}</div>
+    );
   }
 
   return (

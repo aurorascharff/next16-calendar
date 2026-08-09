@@ -45,7 +45,7 @@ export function CalendarDayHeaderRow({
               </span>
               <button
                 aria-label={`Add all-day event on ${formatDay(day)}`}
-                className="text-muted hover:text-black focus-visible:ring-accent dark:hover:text-white ml-auto grid size-8 place-items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="text-muted focus-visible:ring-accent ml-auto grid size-8 place-items-center rounded-full transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none dark:hover:text-white"
                 onClick={event => onCreateAllDay(day, event)}
                 type="button"
               >

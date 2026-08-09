@@ -8,6 +8,11 @@ import {
   BookingSettingsCard,
   BookingSettingsSkeleton,
 } from '@/features/booking/components/booking-overview';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Booking link',
+};
 
 export default function BookingPage() {
   return (

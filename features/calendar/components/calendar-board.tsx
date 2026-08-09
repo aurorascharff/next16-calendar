@@ -1,6 +1,5 @@
 'use client';
 
-import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { formatDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
@@ -66,13 +65,9 @@ export function CalendarBoard({
   return (
     <div className="relative select-none">
       {isPending ? (
-        <div
-          aria-label="Saving calendar changes"
-          className="border-divider bg-surface/90 text-accent shadow-soft dark:border-divider-dark dark:bg-surface-dark/90 pointer-events-none absolute top-3 right-4 z-40 grid size-8 place-items-center rounded-full border"
-          role="status"
-        >
-          <Spinner className="size-4" />
-        </div>
+        <span className="sr-only" data-calendar-pending role="status">
+          Saving calendar changes
+        </span>
       ) : null}
       <div className="sticky top-0 z-30" style={{ minWidth: gridMinWidth }}>
         <CalendarDayHeaderRow
@@ -186,10 +181,7 @@ export function CalendarBoardSkeleton({ days, fallbackCount = 7 }: { days?: stri
           {dayKeys.map((day, index) => {
             const [weekday, dayNumber] = day ? formatDay(day).split(' ') : ['', ''];
             return (
-              <div
-                className="border-divider dark:border-divider-dark border-r px-3 py-1.5"
-                key={index}
-              >
+              <div className="border-divider dark:border-divider-dark border-r px-3 py-1.5" key={index}>
                 {day ? (
                   <div className="flex min-w-0 items-center gap-1.5">
                     <span className="text-muted text-[11px] font-medium uppercase">{weekday}</span>

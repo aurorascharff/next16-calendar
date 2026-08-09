@@ -3,6 +3,11 @@ import { Suspense } from 'react';
 import { DaylineMark } from '@/components/ui/dayline-mark';
 import { SignInForm } from '@/features/user/components/sign-in-form';
 import { getCurrentUser } from '@/features/user/user-queries';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Sign in',
+};
 
 export default function LoginPage() {
   return (

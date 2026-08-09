@@ -16,12 +16,7 @@ export async function CalendarWeek({ date, view }: { date: string; view: Calenda
   const days = view === 'day' ? [date] : week.days;
 
   return (
-    <ViewTransition
-      default="none"
-      key={`${view}:${days.join(',')}`}
-      name="calendar-board"
-      share={boardSlide}
-    >
+    <ViewTransition default="none" key={`${view}:${days.join(',')}`} name="calendar-board" share={boardSlide}>
       <CalendarBoard calendars={calendars} days={days} events={week.events} view={view} />
     </ViewTransition>
   );

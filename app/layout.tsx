@@ -12,8 +12,24 @@ import './globals.css';
 
 export const viewport: Viewport = { viewportFit: 'cover' };
 
+const description =
+  'A Next.js 16.3 calendar demonstrating Instant Navigations with Cache Components and View Transitions.';
+
 export const metadata: Metadata = {
-  description: 'A calendar workspace built with Next.js 16 Cache Components and View Transitions.',
+  applicationName: 'Dayline',
+  description,
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL ??
+      (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : 'http://localhost:3000'),
+  ),
+  openGraph: {
+    description,
+    siteName: 'Dayline',
+    title: 'Dayline',
+    type: 'website',
+  },
   title: { default: 'Dayline', template: '%s · Dayline' },
 };
 

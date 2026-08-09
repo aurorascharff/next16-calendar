@@ -1,4 +1,5 @@
 import { DaylineMark } from '@/components/ui/dayline-mark';
+import { Spinner } from '@/components/ui/spinner';
 import { formatDayLong, formatMonth } from '../calendar-utils';
 import { CalendarControls, ViewToggle } from './calendar-controls';
 import { NewEventButton } from './new-event-button';
@@ -20,7 +21,8 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
             <ViewToggle date={date} view={view} />
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-3">
+          <Spinner className="calendar-pending-spinner text-muted size-4" />
           <NewEventButton day={date} />
         </div>
       </header>

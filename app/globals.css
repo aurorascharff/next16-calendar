@@ -105,6 +105,19 @@
   --tw-ring-color: currentColor;
 }
 
+.calendar-pending-spinner {
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 150ms ease,
+    visibility 150ms;
+}
+
+main:has([data-calendar-pending]) .calendar-pending-spinner {
+  visibility: visible;
+  opacity: 1;
+}
+
 .skeleton-animation {
   --skeleton-base: rgb(0 0 0 / 0.055);
   --skeleton-shine: rgb(0 0 0 / 0.1);

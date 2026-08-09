@@ -31,6 +31,17 @@ export const bookingCache = {
   tag: (handle: string) => `booking:${handle}`,
 };
 
+export async function getPublicBookingMetadata(handle: string) {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(bookingCache.tag(handle));
+
+  return prisma.bookingPage.findFirst({
+    select: { active: true, duration: true, title: true },
+    where: { active: true, handle },
+  });
+}
+
 export async function getBookingAvailability(handle: string, date: string) {
   'use cache';
   cacheLife({ stale: 30 });

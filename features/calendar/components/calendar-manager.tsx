@@ -173,7 +173,16 @@ function CalendarFormDialog({
       <form action={formAction} className="mt-4 space-y-4" key={state.key ?? calendar?.id ?? 'new-calendar'}>
         <label className="block">
           <span className="text-muted mb-1.5 block text-xs font-medium">Name</span>
-          <input autoFocus defaultValue={name} name="name" placeholder="e.g. Side project" />
+          <input
+            autoFocus
+            defaultValue={name}
+            name="name"
+            onInput={event => event.currentTarget.setCustomValidity('')}
+            onInvalid={event => event.currentTarget.setCustomValidity('Give the calendar a name.')}
+            pattern=".*\S.*"
+            placeholder="e.g. Side project"
+            required
+          />
         </label>
         <div>
           <span className="text-muted mb-1.5 block text-xs font-medium">Color</span>

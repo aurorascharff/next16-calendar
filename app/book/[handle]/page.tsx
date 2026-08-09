@@ -2,7 +2,22 @@ import { CalendarCheck, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
+import { getPublicBookingMetadata } from '@/features/booking/booking-queries';
 import { BookingProfile, BookingProfileSkeleton } from '@/features/booking/components/booking-profile';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({ params }: PageProps<'/book/[handle]'>): Promise<Metadata> {
+  const { handle } = await params;
+  const booking = await getPublicBookingMetadata(handle);
+  if (!booking) return { title: 'Booking' };
+
+  const description = `Book a ${booking.duration}-minute time on Dayline.`;
+  return {
+    description,
+    openGraph: { description, siteName: 'Dayline', title: booking.title, type: 'website' },
+    title: booking.title,
+  };
+}
 
 export default function BookingPage({ params, searchParams }: PageProps<'/book/[handle]'>) {
   return (
