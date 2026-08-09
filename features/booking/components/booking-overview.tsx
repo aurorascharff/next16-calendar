@@ -1,19 +1,19 @@
 import { Link2 } from 'lucide-react';
 import { type ReactNode } from 'react';
 import { NewCalendarButton } from '@/features/calendar/components/calendar-manager';
-import { getMyBookingSettings, getMyBookingSummary } from '../booking-queries';
+import { getMyBookingOverview } from '../booking-queries';
 import { BookingLink } from './booking-link';
 import { BookingSettingsForm } from './booking-settings-form';
 
 export async function BookingLinkDetails() {
-  const profile = await getMyBookingSummary();
+  const { profile } = await getMyBookingOverview();
 
   return <BookingLinkDetailsContent profile={profile} />;
 }
 
 export function BookingLinkCard({ children }: { children: ReactNode }) {
   return (
-    <div className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 min-h-64 rounded-lg border p-6">
+    <div className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 min-h-[17.5rem] rounded-lg border p-6 sm:min-h-64">
       <div className="bg-accent/15 text-accent mb-4 grid size-10 place-items-center rounded-lg">
         <Link2 className="size-5" />
       </div>
@@ -30,7 +30,11 @@ export function BookingSettingsCard({ children }: { children: ReactNode }) {
   );
 }
 
-function BookingLinkDetailsContent({ profile }: { profile: Awaited<ReturnType<typeof getMyBookingSummary>> }) {
+function BookingLinkDetailsContent({
+  profile,
+}: {
+  profile: Awaited<ReturnType<typeof getMyBookingOverview>>['profile'];
+}) {
   const acceptingMeetings = Boolean(profile?.active && profile.hasCalendar);
 
   return (
@@ -68,7 +72,7 @@ function BookingLinkDetailsContent({ profile }: { profile: Awaited<ReturnType<ty
 }
 
 export async function BookingSettings() {
-  const settings = await getMyBookingSettings();
+  const { settings } = await getMyBookingOverview();
 
   return <BookingSettingsForm settings={settings} />;
 }

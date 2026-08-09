@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { calendarCache } from '@/features/calendar/calendar-queries';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { verifyAuth } from '@/features/user/user-queries';
@@ -188,12 +189,11 @@ async function getMyBookingSettingsForUser(userId: string, handle: string) {
   };
 }
 
-export async function getMyBookingSummary() {
+export const getMyBookingOverview = cache(async function getMyBookingOverview() {
   const user = await verifyAuth();
-  return getMyBookingProfile(user.handle);
-}
-
-export async function getMyBookingSettings() {
-  const user = await verifyAuth();
-  return getMyBookingSettingsForUser(user.id, user.handle);
-}
+  const [profile, settings] = await Promise.all([
+    getMyBookingProfile(user.handle),
+    getMyBookingSettingsForUser(user.id, user.handle),
+  ]);
+  return { profile, settings };
+});

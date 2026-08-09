@@ -203,6 +203,7 @@ export function EventEditor({ anchorRect, calendar, event, onClose, onDeleted, o
         <form
           action={formAction}
           className="flex min-h-0 flex-1 flex-col overflow-hidden sm:flex-none"
+          data-calendar-editing
           key={state.key ?? event.id}
         >
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-2 sm:flex-none sm:overflow-visible">

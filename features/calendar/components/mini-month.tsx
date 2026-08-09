@@ -1,14 +1,14 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useOptimistic, useState, useTransition } from 'react';
+import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { dateKey, getWeekDays } from '../calendar-utils';
+import { calendarHref, dateKey, getWeekDays } from '../calendar-utils';
 import { useTodayKey } from '../hooks/use-now';
-import type { Route } from 'next';
+import type { CalendarView } from '../types/calendar';
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const monthLabel = new Intl.DateTimeFormat('en-GB', { month: 'long', timeZone: 'UTC', year: 'numeric' });
@@ -32,34 +32,36 @@ function monthOf(dateKeyValue: string) {
 
 export function MiniMonth() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const selected = pathname.match(/\/calendar\/(\d{4}-\d{2}-\d{2})/)?.[1] ?? null;
+  const calendarView: CalendarView = searchParams.get('view') === 'month' ? 'month' : 'week';
   const today = useTodayKey();
   const initialKey = selected ?? today;
 
   if (!initialKey) return <MiniMonthSkeleton />;
 
-  return <MiniMonthCalendar initialKey={initialKey} key={initialKey} selected={selected} today={today} />;
+  return (
+    <MiniMonthCalendar
+      calendarView={calendarView}
+      initialKey={initialKey}
+      key={initialKey}
+      selected={selected}
+      today={today}
+    />
+  );
 }
 
 export function MiniMonthSkeleton() {
   return (
     <div aria-hidden className="h-[232px]">
-      <div className="mb-2 flex h-7 items-center justify-between">
-        <span className="bg-divider/60 dark:bg-divider-dark h-3 w-24 rounded-full" />
-        <span className="flex gap-0.5">
-          <span className="bg-divider/50 dark:bg-divider-dark size-7 rounded-md" />
-          <span className="bg-divider/50 dark:bg-divider-dark size-7 rounded-md" />
-        </span>
+      <div className="mb-2 flex h-7 items-center">
+        <span className="bg-divider/55 dark:bg-divider-dark/70 h-3 w-20 rounded-full" />
       </div>
-      <div className="text-muted mb-1 grid grid-cols-7 text-center text-[10px] font-medium">
-        {WEEKDAY_LABELS.map((label, index) => (
-          <span key={index}>{label}</span>
-        ))}
-      </div>
+      <div className="mb-1 h-3" />
       <div className="grid grid-cols-7 gap-y-0.5">
         {Array.from({ length: 42 }, (_, index) => (
           <span className="grid h-7 place-items-center" key={index}>
-            <span className="bg-divider/50 dark:bg-divider-dark size-2 rounded-full" />
+            <span className="bg-divider/45 dark:bg-divider-dark/65 size-2 rounded-full" />
           </span>
         ))}
       </div>
@@ -68,10 +70,12 @@ export function MiniMonthSkeleton() {
 }
 
 function MiniMonthCalendar({
+  calendarView,
   initialKey,
   selected,
   today,
 }: {
+  calendarView: CalendarView;
   initialKey: string;
   selected: string | null;
   today: string | null;
@@ -87,8 +91,7 @@ function MiniMonthCalendar({
 
   function shiftMonth(delta: number) {
     setMonthView(current => {
-      const base = current ?? view!;
-      const next = new Date(Date.UTC(base.year, base.month + delta, 1));
+      const next = new Date(Date.UTC(current.year, current.month + delta, 1));
       return { month: next.getUTCMonth(), year: next.getUTCFullYear() };
     });
   }
@@ -117,35 +120,36 @@ function MiniMonthCalendar({
         {days.map(day => {
           const key = dateKey(day);
           const isToday = key === today;
-          const inWeek = weekSet?.has(key);
+          const inWeek = calendarView === 'week' && weekSet?.has(key);
+          const isSelected = calendarView === 'month' && key === optimisticSelected;
           const isOutside = day.getUTCMonth() !== view.month;
           return (
-            <Link
+            <HoverPrefetchLink
               className={cn(
                 'relative grid h-7 w-full place-items-center text-xs tabular-nums',
                 inWeek && 'bg-divider/70 dark:bg-divider-dark/80',
                 inWeek && key === firstKey && 'rounded-l-md',
                 inWeek && key === lastKey && 'rounded-r-md',
               )}
-              href={`/calendar/${key}` as Route}
+              href={calendarHref(key, calendarView)}
               key={key}
               onNavigate={() => {
                 if (key === optimisticSelected) return;
                 startTransition(() => setOptimisticSelected(key));
               }}
-              prefetch={inWeek ? true : undefined}
             >
               <span
                 className={cn(
                   'grid size-7 place-items-center rounded-md',
                   isToday && 'bg-accent font-semibold text-white',
-                  !isToday && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
+                  !isToday && isSelected && 'ring-accent text-accent ring-1 ring-inset',
+                  !isToday && !isSelected && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
                   !isToday && isOutside && 'text-muted/40',
                 )}
               >
                 {day.getUTCDate()}
               </span>
-            </Link>
+            </HoverPrefetchLink>
           );
         })}
       </div>

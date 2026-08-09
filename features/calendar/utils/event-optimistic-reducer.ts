@@ -1,5 +1,26 @@
 import type { CalendarEvent } from '../types/calendar';
 
+const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+function matchesRecurrence(recurrence: string | null | undefined, day: string) {
+  if (!recurrence) return false;
+  const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
+  return recurrence === 'weekday' ? weekday >= 1 && weekday <= 5 : recurrence === WEEKDAY_NAMES[weekday];
+}
+
+export function expandOptimisticEvent(event: CalendarEvent, days: string[]) {
+  if (!event.recurrence) return [event];
+
+  return days
+    .filter(day => matchesRecurrence(event.recurrence, day))
+    .map(day => ({
+      ...event,
+      day,
+      id: `${event.sourceId}:${day}`,
+      recurring: true,
+    }));
+}
+
 export type EventAction =
   | { event: CalendarEvent; type: 'create' }
   | { day: string; id: string; start: string; type: 'move' }

@@ -1,46 +1,31 @@
-import { type ReactNode, ViewTransition } from 'react';
+import { type ReactNode } from 'react';
+import { DirectionalSlide } from '@/components/ui/directional-slide';
 import { getCalendars, getCalendarWeek } from '../calendar-queries';
 import { getWeekDays } from '../calendar-utils';
 import { CalendarBoard, CalendarBoardSkeleton } from './calendar-board';
 import { CalendarScrollSection } from './calendar-scroll-section';
-import type { CalendarView } from '../types/calendar';
 
-const boardSlide = {
-  'nav-back': 'nav-back',
-  'nav-forward': 'nav-forward',
-  default: 'none',
-};
-
-export async function CalendarWeek({ date, view }: { date: string; view: CalendarView }) {
+export async function CalendarWeek({ date }: { date: string }) {
   const [week, calendars] = await Promise.all([getCalendarWeek(date), getCalendars()]);
-  const days = view === 'day' ? [date] : week.days;
 
   return (
-    <ViewTransition default="none" key={`${view}:${days.join(',')}`} name="calendar-board" share={boardSlide}>
-      <CalendarBoard calendars={calendars} days={days} events={week.events} view={view} />
-    </ViewTransition>
+    <DirectionalSlide key={`week:${week.days.join(',')}`} name="calendar-board">
+      <CalendarBoard calendars={calendars} days={week.days} events={week.events} />
+    </DirectionalSlide>
   );
 }
 
-export function CalendarWeekSkeleton({ date, view = 'week' }: { date?: string; view?: CalendarView }) {
-  const days = date ? (view === 'day' ? [date] : getWeekDays(date)) : undefined;
+export function CalendarWeekSkeleton({ date }: { date?: string }) {
+  const days = date ? getWeekDays(date) : undefined;
 
-  return <CalendarBoardSkeleton days={days} fallbackCount={view === 'day' ? 1 : 7} />;
+  return <CalendarBoardSkeleton days={days} />;
 }
 
-export function CalendarWeekScroll({
-  children,
-  date,
-  view,
-}: {
-  children: ReactNode;
-  date?: string;
-  view: CalendarView;
-}) {
-  const days = date ? (view === 'day' ? [date] : getWeekDays(date)) : undefined;
+export function CalendarWeekScroll({ children, date }: { children: ReactNode; date?: string }) {
+  const days = date ? getWeekDays(date) : undefined;
 
   return (
-    <CalendarScrollSection scrollKey={days ? `${view}:${days.join(',')}` : `loading:${view}`}>
+    <CalendarScrollSection scrollKey={days ? `week:${days.join(',')}` : 'loading:week'}>
       {children}
     </CalendarScrollSection>
   );

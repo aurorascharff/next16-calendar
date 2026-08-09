@@ -2,24 +2,21 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { useOptimistic, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useOptimistic, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { shiftDay, shiftWeek } from '../calendar-utils';
+import { calendarHref, shiftMonth, shiftWeek } from '../calendar-utils';
 import { useTodayKey } from '../hooks/use-now';
 import { DatePicker } from './date-picker';
 import type { CalendarView } from '../types/calendar';
-import type { Route } from 'next';
-
-function calendarHref(date: string, view: CalendarView) {
-  return `/calendar/${date}${view === 'day' ? '?view=day' : ''}` as Route;
-}
 
 export function CalendarControls({ date, view }: { date: string; view: CalendarView }) {
   const today = useTodayKey();
-  const previous = view === 'day' ? shiftDay(date, -1) : shiftWeek(date, -1);
-  const next = view === 'day' ? shiftDay(date, 1) : shiftWeek(date, 1);
+  const previous = view === 'month' ? shiftMonth(date, -1) : shiftWeek(date, -1);
+  const next = view === 'month' ? shiftMonth(date, 1) : shiftWeek(date, 1);
+  const period = view === 'month' ? 'month' : 'week';
 
   return (
     <div className="flex items-center gap-1">
@@ -34,21 +31,63 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
       )}
       <div className="flex items-center">
         <IconButton
-          label={view === 'day' ? 'Previous day' : 'Previous week'}
+          label={`Previous ${period}`}
           render={<Link href={calendarHref(previous, view)} prefetch transitionTypes={['nav-back']} />}
         >
           <ChevronLeft className="size-4.5" />
         </IconButton>
         <IconButton
-          label={view === 'day' ? 'Next day' : 'Next week'}
+          label={`Next ${period}`}
           render={<Link href={calendarHref(next, view)} prefetch transitionTypes={['nav-forward']} />}
         >
           <ChevronRight className="size-4.5" />
         </IconButton>
       </div>
-      <DatePicker date={date} />
+      <DatePicker date={date} view={view} />
     </div>
   );
+}
+
+export function CalendarViewShortcuts({ date, view }: { date: string; view: CalendarView }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (
+        event.defaultPrevented ||
+        event.repeat ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.isComposing
+      ) {
+        return;
+      }
+      const target = event.target;
+      if (
+        document.querySelector('[data-calendar-editing]') ||
+        (target instanceof HTMLElement &&
+          (target.isContentEditable ||
+            target.closest(
+              'input, textarea, select, [contenteditable="true"], [role="dialog"], [role="menu"], [role="listbox"]',
+            )))
+      ) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+      const nextView = key === 'w' ? 'week' : key === 'm' ? 'month' : null;
+      if (!nextView || nextView === view) return;
+
+      event.preventDefault();
+      router.push(calendarHref(date, nextView));
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [date, router, view]);
+
+  return null;
 }
 
 export function ViewToggle({ date, view }: { date: string; view: CalendarView }) {
@@ -66,6 +105,7 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
   return (
     <div className="border-divider dark:border-divider-dark flex items-center rounded-md border p-0.5">
       <Link
+        aria-keyshortcuts="W"
         aria-current={optimisticView === 'week' ? 'page' : undefined}
         className={cn(item, optimisticView === 'week' ? active : inactive)}
         href={calendarHref(date, 'week')}
@@ -75,13 +115,14 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
         Week
       </Link>
       <Link
-        aria-current={optimisticView === 'day' ? 'page' : undefined}
-        className={cn(item, optimisticView === 'day' ? active : inactive)}
-        href={calendarHref(date, 'day')}
-        onNavigate={() => markView('day')}
+        aria-keyshortcuts="M"
+        aria-current={optimisticView === 'month' ? 'page' : undefined}
+        className={cn(item, optimisticView === 'month' ? active : inactive)}
+        href={calendarHref(date, 'month')}
+        onNavigate={() => markView('month')}
         prefetch
       >
-        Day
+        Month
       </Link>
     </div>
   );

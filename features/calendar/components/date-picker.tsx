@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { dateKey } from '../calendar-utils';
+import { calendarHref, dateKey } from '../calendar-utils';
 import { useTodayKey } from '../hooks/use-now';
-import type { Route } from 'next';
+import type { CalendarView } from '../types/calendar';
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
@@ -36,7 +36,7 @@ function monthGrid(year: number, month: number) {
   });
 }
 
-export function DatePicker({ date }: { date: string }) {
+export function DatePicker({ date, view }: { date: string; view: CalendarView }) {
   const selected = fromKey(date);
   const store = Ariakit.usePopoverStore();
 
@@ -49,20 +49,31 @@ export function DatePicker({ date }: { date: string }) {
         gutter={8}
         className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark z-50 w-64 rounded-xl border p-3 shadow-xl outline-none"
       >
-        <DatePickerCalendar date={date} onPick={() => store.hide()} />
+        <DatePickerCalendar date={date} onPick={() => store.hide()} view={view} />
       </Ariakit.Popover>
     </Ariakit.PopoverProvider>
   );
 }
 
-function DatePickerCalendar({ date, onPick }: { date: string; onPick: () => void }) {
+function DatePickerCalendar({
+  date,
+  onPick,
+  view: calendarView,
+}: {
+  date: string;
+  onPick: () => void;
+  view: CalendarView;
+}) {
   const selected = fromKey(date);
-  const [view, setView] = useState(() => ({ month: selected.getUTCMonth(), year: selected.getUTCFullYear() }));
+  const [visibleMonth, setVisibleMonth] = useState(() => ({
+    month: selected.getUTCMonth(),
+    year: selected.getUTCFullYear(),
+  }));
   const todayKey = useTodayKey();
-  const days = monthGrid(view.year, view.month);
+  const days = monthGrid(visibleMonth.year, visibleMonth.month);
 
   function shiftMonth(delta: number) {
-    setView(current => {
+    setVisibleMonth(current => {
       const next = new Date(Date.UTC(current.year, current.month + delta, 1));
       return { month: next.getUTCMonth(), year: next.getUTCFullYear() };
     });
@@ -74,7 +85,9 @@ function DatePickerCalendar({ date, onPick }: { date: string; onPick: () => void
         <IconButton label="Previous month" onClick={() => shiftMonth(-1)} size="sm">
           <ChevronLeft className="size-4" />
         </IconButton>
-        <span className="text-sm font-semibold">{monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}</span>
+        <span className="text-sm font-semibold">
+          {monthLabel.format(new Date(Date.UTC(visibleMonth.year, visibleMonth.month, 1)))}
+        </span>
         <IconButton label="Next month" onClick={() => shiftMonth(1)} size="sm">
           <ChevronRight className="size-4" />
         </IconButton>
@@ -89,7 +102,7 @@ function DatePickerCalendar({ date, onPick }: { date: string; onPick: () => void
           const key = dateKey(day);
           const isSelected = key === date;
           const isToday = key === todayKey;
-          const isOutside = day.getUTCMonth() !== view.month;
+          const isOutside = day.getUTCMonth() !== visibleMonth.month;
           return (
             <Link
               className={cn(
@@ -98,7 +111,7 @@ function DatePickerCalendar({ date, onPick }: { date: string; onPick: () => void
                 !isSelected && isToday && 'text-accent font-semibold',
                 !isSelected && isOutside && 'text-muted/50',
               )}
-              href={`/calendar/${key}` as Route}
+              href={calendarHref(key, calendarView)}
               key={key}
               onNavigate={onPick}
               prefetch={false}

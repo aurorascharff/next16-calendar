@@ -3,44 +3,23 @@
 import { cn } from '@/lib/utils';
 import { formatDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
+import { expandOptimisticEvent } from '../utils/event-optimistic-reducer';
 import { GRID_HEIGHT, HOURS } from '../utils/grid';
 import { CalendarAllDayRow } from './calendar-all-day-row';
 import { CalendarDayHeaderRow } from './calendar-board-rows';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventEditor } from './event-editor';
-import type { Calendar, CalendarEvent, CalendarView } from '../types/calendar';
-
-const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-function matchesRecurrence(recurrence: string | null | undefined, day: string) {
-  if (!recurrence) return false;
-  const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
-  return recurrence === 'weekday' ? weekday >= 1 && weekday <= 5 : recurrence === WEEKDAY_NAMES[weekday];
-}
-
-function optimisticCreatedEvents(event: CalendarEvent, days: string[]) {
-  if (!event.recurrence) return [event];
-
-  return days
-    .filter(day => matchesRecurrence(event.recurrence, day))
-    .map(day => ({
-      ...event,
-      day,
-      id: `${event.sourceId}:${day}`,
-      recurring: true,
-    }));
-}
+import type { Calendar, CalendarEvent } from '../types/calendar';
 
 export function CalendarBoard({
   calendars,
   days,
   events,
-  view,
 }: {
   calendars: Calendar[];
   days: string[];
   events: CalendarEvent[];
-  view: CalendarView;
 }) {
   const {
     allDayEvents,
@@ -60,7 +39,7 @@ export function CalendarBoard({
     setSelectedEvent,
     todayKey,
     visibleEvents,
-  } = useCalendarBoard({ calendars, days, events, view });
+  } = useCalendarBoard({ calendars, days, events });
 
   return (
     <div className="relative select-none">
@@ -154,7 +133,7 @@ export function CalendarBoard({
           defaultStart={createDraft.start}
           key={`${createDraft.day}-${createDraft.start}-${createDraft.duration}-${createDraft.allDay}`}
           onCreated={event => {
-            for (const createdEvent of optimisticCreatedEvents(event, days)) {
+            for (const createdEvent of expandOptimisticEvent(event, days)) {
               addOptimisticEvent({ event: createdEvent, type: 'create' });
             }
           }}

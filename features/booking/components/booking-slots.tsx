@@ -2,11 +2,12 @@
 
 import { ChevronLeft, ChevronRight, LoaderCircle } from 'lucide-react';
 import Link, { useLinkStatus } from 'next/link';
-import { useActionState, useOptimistic, useState, useTransition, ViewTransition } from 'react';
+import { useActionState, useOptimistic, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { DirectionalSlide } from '@/components/ui/directional-slide';
 import { IconButton } from '@/components/ui/icon-button';
-import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
+import { formatDayLong } from '@/features/calendar/calendar-utils';
 import { cn } from '@/lib/utils';
 import { bookSlotAction, type BookSlotState } from '../booking-actions';
 import type { BookingSlot } from '../booking-queries';
@@ -14,8 +15,6 @@ import type { Route } from 'next';
 
 const dayHref = (handle: string, day: string) => `/book/${handle}?date=${day}` as Route;
 type SelectedSlot = { day: string; time: string };
-
-const daySlide = { 'nav-back': 'nav-back', 'nav-forward': 'nav-forward', default: 'none' };
 
 function DayNavigationIcon({ direction }: { direction: 'next' | 'previous' }) {
   const { pending } = useLinkStatus();
@@ -119,7 +118,7 @@ export function BookingSlots({
             <input autoComplete="name" name="guestName" placeholder="Name" required />
           </label>
           <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
-          <ViewTransition default="none" key={day} name="booking-slots" share={daySlide}>
+          <DirectionalSlide key={day} name="booking-slots">
             <div className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain py-1 pr-1">
               {allTaken ? (
                 <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm sm:h-full sm:min-h-0">
@@ -157,7 +156,7 @@ export function BookingSlots({
                 </div>
               )}
             </div>
-          </ViewTransition>
+          </DirectionalSlide>
           <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 mt-4 flex min-h-16 items-center justify-between gap-3 rounded-lg border p-3">
             <div className="min-w-0">
               <p className="text-sm font-semibold tabular-nums">{selectedAvailable?.time ?? 'Choose a time'}</p>

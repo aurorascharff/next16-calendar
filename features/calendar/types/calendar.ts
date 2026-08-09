@@ -1,4 +1,4 @@
-export type CalendarView = 'day' | 'week';
+export type CalendarView = 'month' | 'week';
 export type CalendarColor =
   | 'rose'
   | 'orange'
@@ -38,7 +38,7 @@ export type CalendarEvent = {
   title: string;
 };
 
-export type CalendarWeek = {
+export type CalendarRange = {
   days: string[];
   events: CalendarEvent[];
   start: string;

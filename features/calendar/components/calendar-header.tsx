@@ -1,20 +1,19 @@
 import { DaylineMark } from '@/components/ui/dayline-mark';
 import { Spinner } from '@/components/ui/spinner';
-import { formatDayLong, formatMonth } from '../calendar-utils';
-import { CalendarControls, ViewToggle } from './calendar-controls';
+import { formatMonth } from '../calendar-utils';
+import { CalendarControls, CalendarViewShortcuts, ViewToggle } from './calendar-controls';
 import { NewEventButton } from './new-event-button';
 import type { CalendarView } from '../types/calendar';
 
 export function CalendarHeader({ date, view }: { date: string; view: CalendarView }) {
   return (
     <>
+      <CalendarViewShortcuts date={date} view={view} />
       <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <div className="flex min-w-0 items-center gap-2.5 sm:w-52">
             <DaylineMark className="size-8 shrink-0 sm:hidden" />
-            <h1 className="truncate text-lg font-semibold tracking-tight">
-              {view === 'day' ? formatDayLong(date) : formatMonth(date)}
-            </h1>
+            <h1 className="truncate text-lg font-semibold tracking-tight">{formatMonth(date)}</h1>
           </div>
           <div className="hidden items-center gap-2 sm:flex">
             <CalendarControls date={date} view={view} />

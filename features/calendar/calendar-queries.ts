@@ -6,8 +6,8 @@ import { isSlowEnabled } from '@/components/demo/demo-slow';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { delay } from '@/lib/utils';
-import { dateKey, getWeekDays, isDateKey } from './calendar-utils';
-import type { Calendar, CalendarColor, CalendarEvent, CalendarWeek } from './types/calendar';
+import { dateKey, getMonthDays, getWeekDays, isDateKey } from './calendar-utils';
+import type { Calendar, CalendarColor, CalendarEvent, CalendarRange } from './types/calendar';
 
 export const calendarCache = {
   calendarsTag: 'calendars',
@@ -67,22 +67,37 @@ async function getCalendarsForUser(userId: string | null): Promise<Calendar[]> {
   }));
 }
 
-export async function getCalendarWeek(date: string): Promise<CalendarWeek> {
+export async function getCalendarWeek(date: string): Promise<CalendarRange> {
   if (!isDateKey(date)) notFound();
 
   const userId = await getCurrentUserId();
-  return getCalendarWeekForUser(date, userId, await isSlowEnabled());
+  const days = getWeekDays(date);
+  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), calendarCache.weekTag(days[0]));
 }
 
-async function getCalendarWeekForUser(date: string, userId: string | null, slow: boolean): Promise<CalendarWeek> {
+export async function getCalendarMonth(date: string): Promise<CalendarRange> {
+  if (!isDateKey(date)) notFound();
+
+  const userId = await getCurrentUserId();
+  const days = getMonthDays(date);
+  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), `calendar-month:${date.slice(0, 7)}`);
+}
+
+async function getCalendarRangeForUser(
+  days: string[],
+  userId: string | null,
+  slow: boolean,
+  rangeTag: string,
+): Promise<CalendarRange> {
   'use cache';
-  const days = getWeekDays(date);
   const start = days[0];
 
   cacheLife('hours');
-  cacheTag(calendarCache.tag, calendarCache.weekTag(start));
+  cacheTag(calendarCache.tag, rangeTag);
 
   await delay(650, slow);
+  const rangeEnd = new Date(`${days.at(-1)}T00:00:00.000Z`);
+  rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
   const [rows, bookingRows] = await Promise.all([
     prisma.calendarEvent.findMany({
       include: { calendar: { select: { color: true } } },
@@ -96,7 +111,7 @@ async function getCalendarWeekForUser(date: string, userId: string | null, slow:
             bookingPage: { userId },
             startsAt: {
               gte: new Date(`${days[0]}T00:00:00.000Z`),
-              lt: new Date(`${days.at(-1)}T23:59:59.999Z`),
+              lt: rangeEnd,
             },
           },
         })

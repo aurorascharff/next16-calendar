@@ -1,17 +1,22 @@
 import { Suspense } from 'react';
-import { formatDayLong, formatMonth } from '@/features/calendar/calendar-utils';
+import { formatMonth } from '@/features/calendar/calendar-utils';
 import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header';
+import {
+  CalendarMonth,
+  CalendarMonthScroll,
+  CalendarMonthSkeleton,
+} from '@/features/calendar/components/calendar-month';
 import { CalendarWeek, CalendarWeekScroll, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week';
 import type { CalendarView } from '@/features/calendar/types/calendar';
 import type { Metadata } from 'next';
 
 function toView(view: string | string[] | undefined): CalendarView {
-  return view === 'day' ? 'day' : 'week';
+  return view === 'month' ? 'month' : 'week';
 }
 
-export function generateMetadata({ params, searchParams }: PageProps<'/calendar/[date]'>): Promise<Metadata> {
-  return Promise.all([params, searchParams]).then(([{ date }, { view }]) => ({
-    title: toView(view) === 'day' ? formatDayLong(date) : formatMonth(date),
+export function generateMetadata({ params }: PageProps<'/calendar/[date]'>): Promise<Metadata> {
+  return params.then(({ date }) => ({
+    title: formatMonth(date),
   }));
 }
 
@@ -25,17 +30,23 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
       </Suspense>
       <Suspense
         fallback={
-          <CalendarWeekScroll view="week">
+          <CalendarWeekScroll>
             <CalendarWeekSkeleton />
           </CalendarWeekScroll>
         }
       >
         {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
           const calendarView = toView(view);
-          return (
-            <CalendarWeekScroll date={date} view={calendarView}>
-              <Suspense fallback={<CalendarWeekSkeleton date={date} view={calendarView} />}>
-                <CalendarWeek date={date} view={calendarView} />
+          return calendarView === 'month' ? (
+            <CalendarMonthScroll>
+              <Suspense fallback={<CalendarMonthSkeleton date={date} />}>
+                <CalendarMonth date={date} />
+              </Suspense>
+            </CalendarMonthScroll>
+          ) : (
+            <CalendarWeekScroll date={date}>
+              <Suspense fallback={<CalendarWeekSkeleton date={date} />}>
+                <CalendarWeek date={date} />
               </Suspense>
             </CalendarWeekScroll>
           );

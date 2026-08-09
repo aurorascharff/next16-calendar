@@ -184,6 +184,7 @@ export function EventCreateDialog({
       <form
         action={formAction}
         className="mt-3 space-y-3"
+        data-calendar-editing
         key={state.key ?? 'new-event'}
         onKeyDown={handleSubmitShortcut}
       >

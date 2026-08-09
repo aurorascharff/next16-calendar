@@ -18,7 +18,7 @@ import {
   START_MINUTES,
 } from '../utils/grid';
 import { useNow } from './use-now';
-import type { Calendar, CalendarColor, CalendarEvent, CalendarView } from '../types/calendar';
+import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 import type { EventAction } from '../utils/event-optimistic-reducer';
 
 type MoveOrigin = {
@@ -61,16 +61,14 @@ export function useCalendarBoard({
   calendars,
   days,
   events,
-  view,
 }: {
   calendars: Calendar[];
   days: string[];
   events: CalendarEvent[];
-  view: CalendarView;
 }) {
   const { hidden } = useCalendarVisibility();
   const gridTemplate = `4.5rem repeat(${days.length}, minmax(0, 1fr))`;
-  const gridMinWidth = view === 'week' ? 760 : undefined;
+  const gridMinWidth = 760;
   const [optimisticEvents, addOptimisticEvent] = useOptimistic(events, applyEventAction);
   const [isPending, startTransition] = useTransition();
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
