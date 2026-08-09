@@ -2,8 +2,8 @@
 
 import * as Ariakit from '@ariakit/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
 import { useState } from 'react';
+import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { calendarHref, dateKey } from '../calendar-utils';
@@ -104,7 +104,7 @@ function DatePickerCalendar({
           const isToday = key === todayKey;
           const isOutside = day.getUTCMonth() !== visibleMonth.month;
           return (
-            <Link
+            <HoverPrefetchLink
               className={cn(
                 'relative grid size-8 place-items-center rounded-md text-sm tabular-nums',
                 isSelected ? 'bg-accent font-semibold text-white' : 'hover:bg-card dark:hover:bg-card-dark',
@@ -114,10 +114,9 @@ function DatePickerCalendar({
               href={calendarHref(key, calendarView)}
               key={key}
               onNavigate={onPick}
-              prefetch={false}
             >
               {day.getUTCDate()}
-            </Link>
+            </HoverPrefetchLink>
           );
         })}
       </div>

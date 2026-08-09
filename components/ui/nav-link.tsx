@@ -46,8 +46,8 @@ function NavLinkInner<T extends string>(props: Props<T>) {
 
 function NavLinkShell<T extends string>({
   href,
-  match: _match,
-  exact: _exact,
+  match,
+  exact,
   className,
   children,
   isActive,
@@ -56,12 +56,15 @@ function NavLinkShell<T extends string>({
 }: Props<T> & { isActive: boolean }) {
   const defaultPrefetch = usePrefetchDefault();
   const prefetch = explicitPrefetch ?? defaultPrefetch;
+  const target = (match ?? href.toString()).split('?')[0].split('#')[0];
 
   return (
     <Link
       href={href as Route}
       aria-current={isActive ? 'page' : undefined}
       className={resolve(className, { isActive })}
+      data-navlink-exact={exact || undefined}
+      data-navlink-href={target}
       suppressHydrationWarning
       prefetch={prefetch}
       {...rest}

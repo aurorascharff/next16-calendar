@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { cacheLife } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
@@ -10,6 +11,7 @@ export type CurrentUser = { handle: string; id: string; name: string };
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   'use cache: private';
+  cacheLife('hours');
 
   const store = await cookies();
   const id = store.get(SESSION_COOKIE)?.value;
