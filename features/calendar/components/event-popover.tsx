@@ -231,7 +231,7 @@ function EventPopoverHeader({ busy, children, event }: { busy: boolean; children
 
 function EventDetails({ calendar, event }: { calendar?: Calendar; event: CalendarEvent }) {
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:flex-none">
+    <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-6 sm:flex-none">
       <div className="grid grid-cols-[1rem_minmax(0,1fr)] gap-x-3 gap-y-3 text-sm">
         <CalendarDays className="text-muted mt-0.5 size-4" />
         <div>

@@ -15,7 +15,7 @@ import type { Calendar, CalendarEvent } from '../types/calendar';
 import type { EventAction } from '../utils/event-optimistic-reducer';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const MAX_VISIBLE_EVENTS = 4;
+const MAX_EVENT_ROWS = 4;
 
 function sortEvents(events: CalendarEvent[]) {
   return [...events].sort((left, right) => {
@@ -119,7 +119,8 @@ export function CalendarMonthBoard({
         {days.map(day => {
           const outside = !day.startsWith(month);
           const dayEvents = sortEvents(visibleEvents.filter(event => event.day === day));
-          const visible = dayEvents.slice(0, MAX_VISIBLE_EVENTS);
+          const hasOverflow = dayEvents.length > MAX_EVENT_ROWS;
+          const visible = dayEvents.slice(0, hasOverflow ? MAX_EVENT_ROWS - 1 : MAX_EVENT_ROWS);
           const remaining = dayEvents.length - visible.length;
           return (
             <div

@@ -162,6 +162,31 @@ main:has([data-calendar-pending]) .calendar-pending-spinner {
   }
 }
 
+@keyframes dayline-mark-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-5px) scaleX(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scaleX(1);
+  }
+}
+
+.dayline-mark-enter rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dayline-mark-enter 320ms ease-out both;
+}
+
+.dayline-mark-enter rect:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.dayline-mark-enter rect:nth-child(3) {
+  animation-delay: 140ms;
+}
+
 :root {
   --duration-exit: 130ms;
   --duration-enter: 190ms;
@@ -308,6 +333,7 @@ html.boundary-mode :is([data-component], [data-sonner-toast]) {
     animation-delay: 0s !important;
   }
   .skeleton-animation,
+  .dayline-mark-enter rect,
   [style*='now-pulse'] {
     animation: none !important;
   }

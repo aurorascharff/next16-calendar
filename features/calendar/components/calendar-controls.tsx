@@ -83,6 +83,10 @@ export function CalendarViewShortcuts({ date, view }: { date: string; view: Cale
       if (!nextView || nextView === view) return;
 
       event.preventDefault();
+      const focusedElement = document.activeElement;
+      if (focusedElement instanceof HTMLElement && focusedElement.closest('[data-calendar-view-toggle]')) {
+        focusedElement.blur();
+      }
       router.push(calendarHref(date, nextView));
     }
 
@@ -107,7 +111,10 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
 
   return (
     <Boundary label="ViewToggle" asChild>
-      <div className="border-divider dark:border-divider-dark flex items-center rounded-md border p-0.5">
+      <div
+        className="border-divider dark:border-divider-dark flex items-center rounded-md border p-0.5"
+        data-calendar-view-toggle
+      >
         <Link
           aria-keyshortcuts="W"
           aria-current={optimisticView === 'week' ? 'page' : undefined}

@@ -40,9 +40,11 @@ export function CalendarMonthSkeleton({ date }: { date?: string }) {
             key={day ?? index}
           >
             {day ? (
-              <span className="text-muted grid size-6 place-items-center text-xs font-medium tabular-nums">
-                {Number(day.slice(-2))}
-              </span>
+              <div className="mb-0.5 flex h-7 items-center pl-1">
+                <span className="text-muted grid size-6 place-items-center text-xs font-medium tabular-nums">
+                  {Number(day.slice(-2))}
+                </span>
+              </div>
             ) : null}
           </div>
         ))}

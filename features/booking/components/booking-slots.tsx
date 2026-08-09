@@ -6,6 +6,7 @@ import { useActionState, useOptimistic, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
+import { DaylineMark } from '@/components/ui/dayline-mark';
 import { DirectionalSlide } from '@/components/ui/directional-slide';
 import { IconButton } from '@/components/ui/icon-button';
 import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
@@ -98,12 +99,17 @@ export function BookingSlots({
         </div>
         {bookedTime ? (
           <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 rounded-lg border p-4">
-            <p className="text-sm font-semibold">You&apos;re booked</p>
-            <p className="text-muted mt-1 text-sm">
-              {formatDayLong(day)} at{' '}
-              <span className="font-medium text-black tabular-nums dark:text-white">{bookedTime}</span>
-            </p>
-            <p className="text-muted mt-1 text-xs">{duration} minutes. A confirmation is on its way.</p>
+            <div className="flex items-start gap-3">
+              <DaylineMark animated className="size-9 shrink-0" />
+              <div className="min-w-0 pt-0.5">
+                <p className="text-sm font-semibold">You&apos;re booked</p>
+                <p className="text-muted mt-1 text-sm">
+                  {formatDayLong(day)} at{' '}
+                  <span className="font-medium text-black tabular-nums dark:text-white">{bookedTime}</span>
+                </p>
+                <p className="text-muted mt-1 text-xs">{duration} minutes. A confirmation is on its way.</p>
+              </div>
+            </div>
             <div className="mt-4 flex justify-end">
               <Button render={<Link href={dayHref(handle, day)} />} variant="secondary">
                 Book another

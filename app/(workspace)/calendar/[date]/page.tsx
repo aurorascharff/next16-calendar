@@ -6,6 +6,7 @@ import {
   CalendarMonthScroll,
   CalendarMonthSkeleton,
 } from '@/features/calendar/components/calendar-month';
+import { CalendarViewFallback } from '@/features/calendar/components/calendar-scroll-section';
 import { CalendarWeek, CalendarWeekScroll, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week';
 import type { CalendarView } from '@/features/calendar/types/calendar';
 import type { Metadata } from 'next';
@@ -28,13 +29,7 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
           <CalendarHeader date={date} view={toView(view)} />
         ))}
       </Suspense>
-      <Suspense
-        fallback={
-          <CalendarWeekScroll>
-            <CalendarWeekSkeleton />
-          </CalendarWeekScroll>
-        }
-      >
+      <Suspense fallback={<CalendarViewFallback />}>
         {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
           const calendarView = toView(view);
           return calendarView === 'month' ? (
