@@ -27,7 +27,7 @@ The architecture follows the [Next.js App Architecture](https://github.com/auror
 
 ## Getting started
 
-Flow runs on SQLite locally with zero setup:
+Flow runs on Postgres. Set `DATABASE_URL` in `.env.local`, then:
 
 ```bash
 pnpm install
@@ -36,12 +36,14 @@ pnpm run prisma.seed
 pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser. The default `DATABASE_URL` is `file:./prisma/pace.db`. You can browse the data with `pnpm run prisma.studio`, or wipe and re-seed the database with `pnpm run prisma.reset`.
+Open [http://localhost:3000](http://localhost:3000) in your browser. You can browse the data with `pnpm run prisma.studio`, or wipe and re-seed the database with `pnpm run prisma.reset`.
 
 <details>
-<summary>Run on Postgres for production</summary>
+<summary>Run locally without Postgres</summary>
 
-Swap `provider = "sqlite"` to `provider = "postgresql"` in `prisma/schema.prisma`, replace `@prisma/adapter-better-sqlite3` with `@prisma/adapter-pg` in `lib/db.ts` and `prisma/seed.ts`, and set `DATABASE_URL` to your Postgres connection string in `.env.local`.
+Drop this prompt into your agent to swap the datasource for SQLite:
+
+> Set up Flow to run locally on SQLite instead of Postgres. Keep both database adapter stacks installed so the production Postgres setup remains available. Swap `provider = "postgresql"` to `provider = "sqlite"` in `prisma/schema.prisma`. Replace `@prisma/adapter-pg` with `@prisma/adapter-better-sqlite3` in `lib/db.ts` and `prisma/seed.ts`, using `new PrismaBetterSqlite3({ url })` where `url` is `process.env.DATABASE_URL` with the `file:` prefix stripped. Write `DATABASE_URL=file:./prisma/dev.db` to `.env.local`, then run `pnpm run prisma.push` and `pnpm run prisma.seed`.
 
 The schema is otherwise identical, so the rest of the app behaves the same as production.
 
@@ -49,7 +51,7 @@ The schema is otherwise identical, so the rest of the app behaves the same as pr
 
 ## Testing
 
-The end-to-end tests use [`@next/playwright`](https://nextjs.org/docs/app/guides/testing/playwright) with the [`instant()`](https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config/instant) API to assert that loading states appear and that navigations stay instant.
+The end-to-end tests use [`@next/playwright`](https://nextjs.org/docs/app/guides/testing/playwright) with the [`instant()`](https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config/instant) API to assert that loading states appear and that navigations stay instant, and they run in CI.
 
 ```bash
 pnpm test:e2e
@@ -60,7 +62,7 @@ pnpm test:e2e
 - **[Next.js 16.3](https://nextjs.org/)**: App Router, Cache Components, Server Functions
 - **[React 19](https://react.dev/)** with React Compiler: Suspense, View Transitions, `useOptimistic`
 - **[TypeScript](https://www.typescriptlang.org/)** and **[Tailwind CSS v4](https://tailwindcss.com/)**
-- **[Prisma 7](https://www.prisma.io/)** on SQLite (Postgres-ready)
+- **[Prisma 7](https://www.prisma.io/)** on PostgreSQL
 - **[Ariakit](https://ariakit.org/)** for accessible dialogs and popovers
 
 ## License

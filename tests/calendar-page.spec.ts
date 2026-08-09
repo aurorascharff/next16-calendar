@@ -1,0 +1,36 @@
+import { instant } from '@next/playwright';
+import { expect, test } from '@playwright/test';
+import { signIn } from './helpers';
+
+test.describe('Calendar', () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page);
+  });
+
+  test('initial load exposes the calendar shell immediately', async ({ baseURL, page }) => {
+    await instant(
+      page,
+      async () => {
+        await page.goto('/calendar/2026-08-10');
+        await expect(page.getByRole('navigation').getByText('Calendar')).toBeVisible();
+        await expect(page.getByRole('status', { name: 'Loading calendar view' })).toBeVisible();
+      },
+      { baseURL },
+    );
+
+    await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
+  });
+
+  test('switching to month keeps the navigation instant', async ({ page }) => {
+    await page.goto('/calendar/2026-08-10');
+    await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
+
+    await instant(page, async () => {
+      await page.getByRole('link', { name: 'Month' }).click();
+      await page.waitForURL(url => url.searchParams.get('view') === 'month');
+      await expect(page.getByRole('status', { name: 'Loading month' })).toBeVisible();
+    });
+
+    await expect(page.getByText('Focus time').first()).toBeVisible();
+  });
+});
