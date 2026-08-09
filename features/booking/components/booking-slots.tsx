@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { bookSlot } from '../calendar-actions'
+import { bookSlot } from '../booking-actions'
 
 function toDateKey(date: Date) {
   return date.toISOString().slice(0, 10)

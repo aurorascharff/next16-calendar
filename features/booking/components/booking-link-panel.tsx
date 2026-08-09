@@ -1,5 +1,5 @@
 import { Link2 } from 'lucide-react'
-import { getBookingProfile } from '../calendar-queries'
+import { getBookingProfile } from '../booking-queries'
 import { BookingLink } from './booking-link'
 
 export async function BookingLinkPanel() {

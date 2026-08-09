@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { BookingLinkPanel, BookingLinkPanelSkeleton } from '@/features/calendar/components/booking-link-panel'
+import { BookingLinkPanel, BookingLinkPanelSkeleton } from '@/features/booking/components/booking-link-panel'
 
 export default function BookingPage() {
   return (

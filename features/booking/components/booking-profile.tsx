@@ -1,6 +1,5 @@
-import { CalendarCheck, ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
-import { getBookingProfile } from '../calendar-queries'
+import { CalendarCheck } from 'lucide-react'
+import { getBookingProfile } from '../booking-queries'
 import { BookingSlots } from './booking-slots'
 
 export async function BookingProfile({ handle }: { handle: string }) {
@@ -9,11 +8,7 @@ export async function BookingProfile({ handle }: { handle: string }) {
   return (
     <main className="grid min-h-dvh place-items-center bg-surface px-4 py-8 dark:bg-surface-dark">
       <section className="w-full max-w-xl rounded-lg border border-divider bg-card/40 p-5 sm:p-8 dark:border-divider-dark dark:bg-card-dark/30">
-        <Link className="text-muted inline-flex items-center gap-1.5 text-sm transition-colors hover:text-black dark:hover:text-white" href="/">
-          <ChevronLeft className="size-4" />
-          Cadence
-        </Link>
-        <div className="mt-8 flex items-start gap-4">
+        <div className="flex items-start gap-4">
           <div className="grid size-11 place-items-center rounded-full bg-primary/15 text-primary">
             <CalendarCheck className="size-5" />
           </div>
