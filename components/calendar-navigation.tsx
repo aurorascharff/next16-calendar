@@ -1,50 +1,81 @@
-import { CalendarDays, Link2, Settings } from 'lucide-react'
+import { CalendarDays, Link2, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { ViewTransition } from 'react'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { GitHubIcon } from '@/components/ui/github-icon'
+import { NavLink } from '@/components/ui/nav-link'
+import { CalendarLegend } from '@/features/calendar/components/calendar-legend'
+import { MiniMonth } from '@/features/calendar/components/mini-month'
 
-const mainLink =
-  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white'
+const REPO_URL = 'https://github.com/aurorascharff/next16-calendar'
+
+const sidebarLink =
+  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent/10 aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]'
 
 export function CalendarNavigation() {
   return (
     <ViewTransition name="sidebar" default="none">
-      <aside className="border-divider hidden h-dvh w-64 shrink-0 flex-col border-r bg-surface p-3 dark:border-divider-dark dark:bg-surface-dark md:flex">
-        <Link href="/calendar/2026-08-10" className="mb-7 flex items-center gap-3 px-2">
-          <div className="grid size-8 place-items-center rounded-md bg-primary text-sm font-bold text-white">D</div>
-          <div>
-            <p className="font-semibold tracking-tight">Pace</p>
-            <p className="text-muted text-xs">Calendar workspace</p>
-          </div>
+      <aside className="border-divider hidden h-dvh w-64 shrink-0 flex-col border-r bg-surface p-3 md:flex dark:border-divider-dark dark:bg-surface-dark">
+        <Link href="/" className="mb-6 flex items-center gap-2.5 px-2">
+          <span className="grid size-8 place-items-center rounded-md bg-accent text-white">
+            <CalendarDays className="size-4.5" strokeWidth={2.25} />
+          </span>
+          <span>
+            <span className="block font-semibold tracking-tight">Pace</span>
+            <span className="text-muted block text-xs">Calendar workspace</span>
+          </span>
         </Link>
 
         <nav className="flex flex-col gap-1">
-          <Link className={mainLink} href="/calendar/2026-08-10">
+          <NavLink href="/" match="/calendar" className={sidebarLink}>
             <CalendarDays className="size-4" />
             Calendar
-          </Link>
-          <Link className={mainLink} href="/booking">
+          </NavLink>
+          <NavLink href="/booking" className={sidebarLink}>
             <Link2 className="size-4" />
-            Booking links
-          </Link>
+            Booking link
+          </NavLink>
         </nav>
 
-        <div className="mt-8">
-          <p className="text-muted px-3 text-xs font-semibold tracking-wide uppercase">Calendars</p>
-          <div className="mt-3 space-y-1 px-3 text-sm">
-            <CalendarLabel color="bg-blue-400" label="Aurora" />
-            <CalendarLabel color="bg-violet-400" label="Focus" />
-            <CalendarLabel color="bg-amber-400" label="Team" />
-          </div>
+        <div className="mt-6 px-1">
+          <MiniMonth />
         </div>
 
-        <div className="mt-auto border-t border-divider pt-3 dark:border-divider-dark">
-          <div className="flex items-center gap-3 px-2 py-2">
-            <div className="grid size-8 place-items-center rounded-full bg-blue-400/20 text-sm font-semibold text-blue-300">A</div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">Aurora</p>
-              <p className="text-muted text-xs">Personal workspace</p>
+        <div className="mt-6">
+          <p className="text-muted mb-2 px-3 text-xs font-semibold tracking-wide uppercase">Calendars</p>
+          <CalendarLegend />
+        </div>
+
+        <div className="mt-auto">
+          <div className="mb-3 flex items-center justify-between px-1">
+            <ThemeToggle />
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View source on GitHub"
+              className="text-muted rounded-md p-1.5 transition-colors hover:text-black dark:hover:text-white"
+            >
+              <GitHubIcon className="size-4" />
+            </a>
+          </div>
+          <div className="-mx-3 -mb-3 border-t border-divider dark:border-divider-dark">
+            <div className="flex items-center gap-2.5 px-3 py-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent text-sm font-semibold text-white">
+                A
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">Aurora Scharff</p>
+                <p className="text-muted truncate text-xs">@aurora</p>
+              </div>
+              <Link
+                href="/login"
+                aria-label="Log out"
+                className="text-muted rounded-md p-1.5 transition-colors hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white"
+              >
+                <LogOut className="size-4" />
+              </Link>
             </div>
-            <Settings className="text-muted size-4" />
           </div>
         </div>
       </aside>
@@ -52,27 +83,24 @@ export function CalendarNavigation() {
   )
 }
 
-function CalendarLabel({ color, label }: { color: string; label: string }) {
-  return (
-    <div className="flex items-center gap-2 py-1.5 text-muted">
-      <span className={`size-2 rounded-full ${color}`} />
-      {label}
-    </div>
-  )
-}
+const mobileTab =
+  'flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted transition-colors hover:text-black dark:hover:text-white aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]'
 
 export function MobileCalendarNavigation() {
   return (
     <ViewTransition name="mobile-nav" default="none">
-      <nav className="border-divider fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t bg-surface px-4 pb-[env(safe-area-inset-bottom)] md:hidden dark:border-divider-dark dark:bg-surface-dark">
-        <Link className="flex flex-col items-center gap-1 text-xs font-medium text-muted hover:text-white" href="/calendar/2026-08-10">
+      <nav
+        aria-label="Primary"
+        className="border-divider fixed inset-x-0 bottom-0 z-30 flex border-t bg-surface pb-[env(safe-area-inset-bottom)] md:hidden dark:border-divider-dark dark:bg-surface-dark"
+      >
+        <NavLink href="/" match="/calendar" className={mobileTab}>
           <CalendarDays className="size-5" />
           Calendar
-        </Link>
-        <Link className="flex flex-col items-center gap-1 text-xs font-medium text-muted hover:text-white" href="/booking">
+        </NavLink>
+        <NavLink href="/booking" className={mobileTab}>
           <Link2 className="size-5" />
           Booking
-        </Link>
+        </NavLink>
       </nav>
     </ViewTransition>
   )

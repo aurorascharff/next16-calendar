@@ -1,6 +1,5 @@
 node_modules
 .next
-.env*
-!.env.example
-playwright-report
-test-results
+generated
+prisma/*.db
+.env.local

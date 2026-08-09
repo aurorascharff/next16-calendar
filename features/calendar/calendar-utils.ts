@@ -19,6 +19,13 @@ export function dateKey(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
+export function isDateKey(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+
+  const date = dateFromKey(value)
+  return !Number.isNaN(date.valueOf()) && dateKey(date) === value
+}
+
 export function formatDay(value: string) {
   return dayFormatter.format(dateFromKey(value))
 }

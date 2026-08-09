@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  handle       String        @unique
+  createdAt    DateTime      @default(now())
+  events       CalendarEvent[]
+  bookingPages BookingPage[]
+}
+
+model CalendarEvent {
+  id         String   @id @default(cuid())
+  title      String
+  day        DateTime
+  start      String
+  duration   Int      @default(60)
+  calendar   String   @default("personal")
+  color      String   @default("blue")
+  recurrence String?
+  userId     String
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, day])
+}
+
+model BookingPage {
+  id          String    @id @default(cuid())
+  handle      String    @unique
+  title       String
+  duration    Int       @default(30)
+  startTime   String    @default("09:30")
+  endTime     String    @default("16:00")
+  active      Boolean   @default(true)
+  userId      String
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings    Booking[]
+}
+
+model Booking {
+  id            String      @id @default(cuid())
+  guestName     String
+  startsAt      DateTime
+  bookingPageId String
+  createdAt     DateTime    @default(now())
+
+  bookingPage BookingPage @relation(fields: [bookingPageId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingPageId, startsAt])
+}

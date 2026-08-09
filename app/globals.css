@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-gray: #9ca3af;
+  --color-gray: #a1a1aa;
   --color-muted: #71717a;
   --color-divider-dark: #282828;
   --color-divider: #e4e4e7;
@@ -9,17 +9,24 @@
   --color-card: #f4f4f5;
   --color-surface-dark: #121212;
   --color-surface: #fafafa;
-  --color-primary: #4f6ef7;
-  --color-primary-dark: #3d5bd9;
-  --color-primary-darker: #2c42a0;
-  --color-accent: #4f6ef7;
-  --color-accent-hover: #3d5bd9;
-  --color-accent-fade: #4f6ef722;
+
+  --color-primary: #1b50ff;
+  --color-primary-dark: #1340d1;
+  --color-primary-darker: #142f8b;
+  --color-accent: #1b50ff;
+  --color-accent-hover: #1340d1;
+  --color-accent-fade: #214fff22;
+
   --color-success: #0fa958;
   --color-danger: #e54848;
   --color-warning: #f5a524;
+
   --font-mono: var(--font-geist-mono);
   --font-sans: var(--font-geist-sans);
+
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.04em;
+
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -29,63 +36,193 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
-  * { border-color: var(--color-divider-dark); }
-
   body {
-    @apply bg-surface font-sans text-black antialiased dark:bg-surface-dark dark:text-white;
+    @apply selection:bg-accent selection:text-white bg-surface font-sans text-black antialiased dark:bg-surface-dark dark:text-white;
   }
 
-  button, input { font: inherit; }
+  h1 {
+    @apply font-sans text-lg font-semibold tracking-tight text-black dark:text-white;
+  }
 
-  button { cursor: pointer; }
+  h2 {
+    @apply font-sans text-base font-semibold tracking-tight text-black dark:text-white;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply border-divider placeholder-gray focus:border-accent focus:ring-accent/25 dark:border-divider-dark w-full rounded-md border bg-white px-3 py-2 text-sm text-black transition-colors focus:ring-2 focus:outline-none dark:bg-[#1c1c1c] dark:text-white;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
 }
 
+/* Skeleton shimmer */
+.skeleton-animation {
+  background: rgba(150, 150, 150, 0.15);
+  background: linear-gradient(
+    to right,
+    rgba(130, 130, 130, 0.15) 8%,
+    rgba(170, 170, 170, 0.25) 18%,
+    rgba(150, 150, 150, 0.15) 33%
+  );
+  background-size: 800px 100px;
+  animation: wave-lines 2s infinite ease-out;
+}
+
+.skeleton-animation:not([class*='rounded-']) {
+  border-radius: var(--radius-sm);
+}
+
+@keyframes wave-lines {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+/* Live "now" indicator pulse */
+@keyframes now-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Indeterminate top loading bar */
+@keyframes loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* View transitions -------------------------------------------------------- */
 :root {
   --duration-exit: 130ms;
-  --duration-enter: 180ms;
+  --duration-enter: 190ms;
   --duration-move: 260ms;
 }
 
 @keyframes fade {
-  from { filter: blur(2px); opacity: 0; }
-  to { filter: blur(0); opacity: 1; }
+  from {
+    filter: blur(2px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
 }
 
-@keyframes slide-x {
-  from { transform: translateX(14px); }
-  to { transform: translateX(0); }
+/* Directional week slide. The pinned header/controls stay live; only the grid
+   region animates. Forward: old week slides out to the left while the new week
+   slides in from the right. Back: the mirror. This is the whole trick — a plain
+   left/right carousel keyed off the navigation direction. */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(22px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-22px);
+  }
+}
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-22px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(22px);
+  }
 }
 
-::view-transition-old(.calendar-forward) {
-  animation: var(--duration-exit) ease-out both fade reverse;
+::view-transition-old(.week-forward) {
+  animation:
+    var(--duration-exit) ease-in both fade reverse,
+    var(--duration-move) ease-in both slide-out-left;
 }
-
-::view-transition-new(.calendar-forward) {
+::view-transition-new(.week-forward) {
   animation:
     var(--duration-enter) ease-out var(--duration-exit) both fade,
-    var(--duration-move) ease-out both slide-x;
+    var(--duration-move) ease-out both slide-in-right;
 }
-
-::view-transition-old(.calendar-back) {
-  animation: var(--duration-exit) ease-out both fade reverse;
+::view-transition-old(.week-back) {
+  animation:
+    var(--duration-exit) ease-in both fade reverse,
+    var(--duration-move) ease-in both slide-out-right;
 }
-
-::view-transition-new(.calendar-back) {
+::view-transition-new(.week-back) {
   animation:
     var(--duration-enter) ease-out var(--duration-exit) both fade,
-    var(--duration-move) ease-out both slide-x reverse;
+    var(--duration-move) ease-out both slide-in-left;
 }
 
-::view-transition { pointer-events: none; }
-::view-transition-old(root) { display: none; }
-::view-transition-new(root) { animation: none; }
+/* Neutral crossfade for non-directional jumps (Today, the date picker). */
+::view-transition-old(.week-fade) {
+  animation: var(--duration-exit) ease-in both fade reverse;
+}
+::view-transition-new(.week-fade) {
+  animation: var(--duration-enter) ease-out var(--duration-exit) both fade;
+}
 
+/* let cursor/clicks pass through the snapshot overlay to live content */
+::view-transition {
+  pointer-events: none;
+}
+
+/* No root cross-fade: keep unnamed chrome live during transitions. */
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Persistent chrome is excluded from transition animation so it stays put and
+   keeps its exact footprint while only the schedule grid animates. */
 ::view-transition-group(sidebar),
 ::view-transition-group(mobile-nav),
+::view-transition-group(calendar-controls),
+::view-transition-group(theme-toggle),
 ::view-transition-group(toaster),
-::view-transition-group(calendar-controls) {
+::view-transition-group(dialog),
+::view-transition-group(dialog-backdrop) {
   animation: none;
   z-index: 100;
+}
+
+::view-transition-group(toaster) {
+  z-index: 200;
 }
 
 ::view-transition-old(sidebar),
@@ -94,13 +231,31 @@
 ::view-transition-new(mobile-nav),
 ::view-transition-old(calendar-controls),
 ::view-transition-new(calendar-controls),
+::view-transition-old(theme-toggle),
+::view-transition-new(theme-toggle),
 ::view-transition-old(toaster),
-::view-transition-new(toaster) {
+::view-transition-new(toaster),
+::view-transition-old(dialog),
+::view-transition-new(dialog),
+::view-transition-new(dialog-backdrop) {
   animation: none;
+}
+
+/* backdrop-blur element: hide the old snapshot so two translucent layers
+   don't stack during the transition. */
+::view-transition-old(dialog-backdrop) {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*),
-  ::view-transition-group(*) { animation-duration: 0s !important; }
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+  .skeleton-animation,
+  [style*='now-pulse'] {
+    animation: none !important;
+  }
 }
