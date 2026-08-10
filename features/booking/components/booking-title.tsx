@@ -25,7 +25,7 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
   }
 
   return (
-    <div className="mt-2 sm:-mx-2 sm:mt-1 sm:w-[calc(100%+1rem)]">
+    <div className="mt-1">
       <Input form={formId} name="title" type="hidden" value={title} variant="unstyled" />
       <div className="relative h-12 sm:h-9">
         {editing ? (
@@ -44,12 +44,12 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
             variant="title"
           />
         ) : (
-          <h1 className="line-clamp-2 h-12 min-w-0 px-2 py-1 pr-10 text-base leading-5 font-semibold tracking-tight sm:h-9 sm:truncate sm:py-1 sm:text-xl sm:leading-7 sm:whitespace-nowrap">
+          <h1 className="line-clamp-2 h-12 min-w-0 pt-0.5 pr-10 text-base leading-5 font-semibold tracking-tight sm:h-9 sm:truncate sm:pt-0.5 sm:text-xl sm:leading-7 sm:whitespace-nowrap">
             {title}
           </h1>
         )}
         <IconButton
-          className="absolute top-1/2 right-1 -translate-y-1/2"
+          className="absolute top-1/2 right-0 -translate-y-1/2"
           label={editing ? 'Finish editing meeting title' : 'Edit meeting title'}
           onClick={toggleEditing}
           size="sm"
