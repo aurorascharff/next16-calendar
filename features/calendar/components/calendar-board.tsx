@@ -10,7 +10,12 @@ import { formatDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { useTodayKey } from '../hooks/use-now';
 import { expandOptimisticEvent } from '../utils/event-optimistic-reducer';
-import { GRID_HEIGHT, HOURS } from '../utils/grid';
+import {
+  DAY_COLUMN_MIN_WIDTH,
+  GRID_HEIGHT,
+  HOURS,
+  TIME_COLUMN_WIDTH,
+} from '../utils/grid';
 import { CalendarBoardHeader } from './calendar-board-header';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
@@ -151,8 +156,9 @@ export function CalendarBoardFrame({
     },
   });
   const todayKey = useTodayKey();
-  const gridTemplate = `4.5rem repeat(${dayKeys.length}, minmax(0, 1fr))`;
-  const minWidth = dayKeys.length > 1 ? 760 : undefined;
+  const gridTemplate = `${TIME_COLUMN_WIDTH}px repeat(${dayKeys.length}, minmax(${DAY_COLUMN_MIN_WIDTH}px, 1fr))`;
+  const minWidth =
+    dayKeys.length > 1 ? TIME_COLUMN_WIDTH + dayKeys.length * DAY_COLUMN_MIN_WIDTH : undefined;
   return (
     <div className="relative grid [grid-template-rows:auto_auto_auto] select-none">
       <div className="sticky top-0 z-30 col-start-1 row-start-1" style={{ minWidth }}>
@@ -180,7 +186,7 @@ export function CalendarBoardFrame({
                     <span
                       className={cn(
                         'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums',
-                        isToday && 'bg-accent/15 text-accent ring-accent/25 ring-1',
+                        isToday && 'bg-accent/15 text-accent',
                       )}
                     >
                       {dayNumber}

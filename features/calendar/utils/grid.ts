@@ -2,6 +2,8 @@ import { timeToMinutes } from '../calendar-utils';
 import type { CalendarEvent } from '../types/calendar';
 
 export const HOUR_HEIGHT = 72;
+export const TIME_COLUMN_WIDTH = 72;
+export const DAY_COLUMN_MIN_WIDTH = 144;
 export const START_HOUR = 6;
 export const HOURS = Array.from({ length: 24 }, (_, index) => (START_HOUR + index) % 24);
 export const START_MINUTES = START_HOUR * 60;

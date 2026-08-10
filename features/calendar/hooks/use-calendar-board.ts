@@ -8,6 +8,7 @@ import { dateKey } from '../calendar-utils';
 import { useCalendarVisibility } from '../components/calendar-visibility';
 import { applyEventAction } from '../utils/event-optimistic-reducer';
 import {
+  DAY_COLUMN_MIN_WIDTH,
   END_MINUTES,
   eventStartMinutes,
   HOUR_HEIGHT,
@@ -16,6 +17,7 @@ import {
   SNAP_MINUTES,
   snapMinutes,
   START_MINUTES,
+  TIME_COLUMN_WIDTH,
 } from '../utils/grid';
 import { useNow } from './use-now';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
@@ -67,8 +69,8 @@ export function useCalendarBoard({
   events: CalendarEvent[];
 }) {
   const { hidden } = useCalendarVisibility();
-  const gridTemplate = `4.5rem repeat(${days.length}, minmax(0, 1fr))`;
-  const gridMinWidth = 760;
+  const gridTemplate = `${TIME_COLUMN_WIDTH}px repeat(${days.length}, minmax(${DAY_COLUMN_MIN_WIDTH}px, 1fr))`;
+  const gridMinWidth = TIME_COLUMN_WIDTH + days.length * DAY_COLUMN_MIN_WIDTH;
   const [optimisticEvents, addOptimisticEvent] = useOptimistic(events, applyEventAction);
   const [isPending, startTransition] = useTransition();
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
@@ -108,7 +110,7 @@ export function useCalendarBoard({
     const grid = gridRef.current;
     if (!grid) return 0;
     const rect = grid.getBoundingClientRect();
-    const gutter = 72;
+    const gutter = TIME_COLUMN_WIDTH;
     const colWidth = (rect.width - gutter) / days.length;
     return Math.max(0, Math.min(days.length - 1, Math.floor((clientX - rect.left - gutter) / colWidth)));
   }
