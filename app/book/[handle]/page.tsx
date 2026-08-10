@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: PageProps<'/book/[handle]'>):
 
 export default function BookingPage({ params, searchParams }: PageProps<'/book/[handle]'>) {
   return (
-    <main className="bg-surface dark:bg-surface-dark grid h-svh items-start justify-items-center overflow-hidden px-3 py-3 sm:min-h-dvh sm:px-4 sm:py-8">
-      <section className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-lg border p-4 sm:p-8">
+    <main className="bg-surface dark:bg-surface-dark grid min-h-svh items-start justify-items-center overflow-x-hidden px-3 py-3 sm:h-svh sm:min-h-0 sm:overflow-hidden sm:px-4 sm:py-8">
+      <section className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 flex w-full max-w-xl flex-col rounded-lg border p-4 sm:max-h-full sm:overflow-hidden sm:p-8">
         <Link
           className="text-muted hover:text-accent mb-5 inline-flex items-center gap-1.5 text-sm font-medium sm:mb-7"
           href="/"
@@ -30,7 +30,7 @@ export default function BookingPage({ params, searchParams }: PageProps<'/book/[
           <ChevronLeft className="size-4" />
           Flow
         </Link>
-        <div className="grid min-h-0 flex-1 grid-cols-[2.5rem_minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-x-3 sm:grid-cols-[2.75rem_minmax(0,1fr)] sm:gap-x-4">
+        <div className="grid grid-cols-[2.5rem_minmax(0,1fr)] grid-rows-[auto_auto] gap-x-3 sm:min-h-0 sm:flex-1 sm:grid-cols-[2.75rem_minmax(0,1fr)] sm:grid-rows-[auto_minmax(0,1fr)] sm:gap-x-4">
           <div className="bg-primary/15 text-primary grid size-10 place-items-center rounded-full sm:size-11">
             <CalendarCheck className="size-5" />
           </div>

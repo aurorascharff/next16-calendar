@@ -67,7 +67,7 @@ export function BookingSlots({
 
   return (
     <Boundary label="BookingSlots" asChild>
-      <div className="flex h-full min-h-0 w-full flex-col">
+      <div className="flex w-full flex-col sm:h-full sm:min-h-0">
         <div className="mb-3 flex items-center justify-between gap-3 sm:mb-4">
           <IconButton
             label="Previous day"
@@ -119,7 +119,7 @@ export function BookingSlots({
             </div>
           </div>
         ) : (
-          <form action={formAction} className="flex min-h-0 flex-1 flex-col">
+          <form action={formAction} className="flex flex-col sm:min-h-0 sm:flex-1">
             <input name="day" type="hidden" value={day} />
             <input name="handle" type="hidden" value={handle} />
             <input name="slot" type="hidden" value={selectedAvailable?.time ?? ''} />
@@ -139,7 +139,7 @@ export function BookingSlots({
             </div>
             <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
             <DirectionalSlide key={day} name="booking-slots">
-              <div className="h-[13.625rem] shrink-0 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain py-1 pr-1 sm:h-[17rem]">
+              <div className="shrink-0 overflow-visible py-1 sm:h-[17rem] sm:[scrollbar-gutter:stable] sm:overflow-y-auto sm:overscroll-contain sm:pr-1">
                 {allTaken ? (
                   <p className="text-muted border-divider dark:border-divider-dark flex h-full items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
                     No open {duration}-minute slots on this day. Try another date.
