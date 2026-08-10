@@ -60,7 +60,7 @@ export function CalendarControls({
           <Button
             aria-keyshortcuts="T"
             className="h-8 px-3"
-            render={<Link href={calendarHref(today, view)} prefetch />}
+            render={<Link href={calendarHref(today, view)} prefetch transitionTypes={['nav-crossfade']} />}
             variant="ghost"
           >
             Today

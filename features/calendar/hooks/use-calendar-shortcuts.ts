@@ -6,6 +6,8 @@ import { calendarHref, shiftMonth, shiftWeek } from '../calendar-utils';
 import { useTodayKey } from './use-now';
 import type { CalendarView } from '../types/calendar';
 
+type CalendarTransitionType = 'nav-back' | 'nav-crossfade' | 'nav-forward';
+
 const INTERACTIVE_SELECTOR =
   'input, textarea, select, [contenteditable="true"], [role="dialog"], [role="menu"], [role="listbox"]';
 
@@ -38,6 +40,7 @@ export function useCalendarShortcuts({ date, view }: { date: string; view: Calen
       const next = view === 'month' ? shiftMonth(date, 1) : shiftWeek(date, 1);
       const key = event.key.toLowerCase();
       let destination: ReturnType<typeof calendarHref> | null = null;
+      let transitionType: CalendarTransitionType = 'nav-crossfade';
 
       switch (key) {
         case 'w':
@@ -48,9 +51,11 @@ export function useCalendarShortcuts({ date, view }: { date: string; view: Calen
           break;
         case 'arrowleft':
           destination = calendarHref(previous, view);
+          transitionType = 'nav-back';
           break;
         case 'arrowright':
           destination = calendarHref(next, view);
+          transitionType = 'nav-forward';
           break;
         case 't':
           destination = today ? calendarHref(today, view) : null;
@@ -64,7 +69,7 @@ export function useCalendarShortcuts({ date, view }: { date: string; view: Calen
       if (focusedElement instanceof HTMLElement && focusedElement.closest('[data-calendar-view-toggle]')) {
         focusedElement.blur();
       }
-      router.push(destination);
+      router.push(destination, { transitionTypes: [transitionType] });
     }
 
     window.addEventListener('keydown', handleKeyDown);
