@@ -158,7 +158,7 @@ export function BookingSlots({
                 )}
               </div>
             </DirectionalSlide>
-            <div className="border-divider dark:border-divider-dark mt-auto flex min-h-20 items-center gap-4 border-t pt-4">
+            <div className="border-divider dark:border-divider-dark mt-auto flex min-h-20 items-center gap-4 border-t py-4">
               {selectedAvailable ? (
                 <div className="min-w-0">
                   <p className="text-sm font-semibold tabular-nums">{selectedAvailable.time}</p>
