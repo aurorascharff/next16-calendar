@@ -13,17 +13,19 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
     <CalendarVisibilityProvider>
       <div className="bg-surface dark:bg-surface-dark flex min-h-svh md:h-dvh md:min-h-0">
         <ViewTransition name="sidebar" default="none">
-          <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-64 shrink-0 flex-col border-r p-3 md:flex">
+          <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-[4.5rem] shrink-0 flex-col items-center border-r p-3 md:flex min-[110rem]:w-64 min-[110rem]:items-stretch">
             <CalendarSidebarBrand />
             <WorkspaceNavigationLinks />
-            <div className="mt-6 px-1">
+            <div className="mt-6 hidden px-1 min-[110rem]:block">
               <Suspense fallback={<MiniMonthSkeleton />}>
                 <MiniMonth />
               </Suspense>
             </div>
-            <div className="mt-6 flex min-h-0 flex-1 flex-col">
-              <div className="mb-2 flex items-center justify-between px-3">
-                <p className="text-muted text-xs font-semibold tracking-wide uppercase">Calendars</p>
+            <div className="mt-6 flex min-h-0 w-full flex-1 flex-col">
+              <div className="mb-2 flex items-center justify-center px-0 min-[110rem]:justify-between min-[110rem]:px-3">
+                <p className="text-muted hidden text-xs font-semibold tracking-wide uppercase min-[110rem]:block">
+                  Calendars
+                </p>
                 <NewCalendarButton />
               </div>
               <div className="relative min-h-0 flex-1 overflow-hidden">
@@ -41,7 +43,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="mt-2">
-              <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t">
+              <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t min-[110rem]:mx-0 min-[110rem]:-mx-3">
                 <Suspense fallback={<div className="h-[60px]" />}>
                   <CurrentUserFooter />
                 </Suspense>

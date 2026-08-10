@@ -40,12 +40,13 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
           const isHidden = hidden.has(calendar.id);
           return (
             <div
-              className="group hover:bg-card dark:hover:bg-card-dark flex items-center gap-2 rounded-md pr-1 pl-3 transition-colors"
+              className="group hover:bg-card dark:hover:bg-card-dark flex items-center justify-center rounded-md transition-colors min-[110rem]:justify-start min-[110rem]:pr-1 min-[110rem]:pl-3"
               key={calendar.id}
             >
               <button
+                aria-label={`${isHidden ? 'Show' : 'Hide'} ${calendar.name} calendar`}
                 aria-pressed={!isHidden}
-                className="flex min-w-0 flex-1 items-center gap-2.5 py-1.5 text-left text-sm"
+                className="grid size-9 shrink-0 place-items-center text-sm min-[110rem]:flex min-[110rem]:min-w-0 min-[110rem]:flex-1 min-[110rem]:justify-start min-[110rem]:gap-2.5 min-[110rem]:py-1.5 min-[110rem]:text-left"
                 onClick={() => toggle(calendar.id)}
                 type="button"
               >
@@ -53,13 +54,18 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
                   className={cn('size-2.5 shrink-0 rounded-full transition-opacity', isHidden && 'opacity-25')}
                   style={colorStyle(calendar.color)}
                 />
-                <span className={cn('text-muted truncate', isHidden && 'line-through opacity-60')}>
+                <span
+                  className={cn(
+                    'text-muted hidden truncate min-[110rem]:inline',
+                    isHidden && 'line-through opacity-60',
+                  )}
+                >
                   {calendar.name}
                 </span>
               </button>
               <Ariakit.MenuProvider>
                 <IconButton
-                  className="opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100"
+                  className="hidden opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 min-[110rem]:inline-flex"
                   disabled={isDeleting}
                   label={`${calendar.name} options`}
                   render={<Ariakit.MenuButton />}
@@ -125,11 +131,11 @@ export function CalendarManagerSkeleton() {
   const widths = ['w-20', 'w-24', 'w-16', 'w-20'];
 
   return (
-    <div aria-label="Loading calendars" className="space-y-0.5 px-3">
+    <div aria-label="Loading calendars" className="space-y-0.5 px-0 min-[110rem]:px-3">
       {widths.map((width, index) => (
-        <div className="flex h-8 items-center gap-2.5" key={index}>
+        <div className="flex h-9 items-center justify-center gap-2.5 min-[110rem]:h-8 min-[110rem]:justify-start" key={index}>
           <Skeleton className="size-2.5 shrink-0 rounded-full" />
-          <Skeleton className={cn('h-3 rounded-full', width)} />
+          <Skeleton className={cn('hidden h-3 rounded-full min-[110rem]:block', width)} />
         </div>
       ))}
     </div>
