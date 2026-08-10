@@ -18,7 +18,7 @@ test.describe('Booking settings', () => {
       { baseURL },
     );
 
-    await expect(page.getByText('No booking link yet')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'No booking link yet' }).filter({ visible: true })).toBeVisible();
   });
 
   test('client navigation reveals the page immediately', async ({ page }) => {
@@ -29,9 +29,9 @@ test.describe('Booking settings', () => {
       await page.getByRole('link', { name: 'Booking link' }).click();
       await page.waitForURL(url => url.pathname === '/booking');
       await expect(page.getByRole('heading', { name: 'Booking link', level: 1 })).toBeVisible();
-      await expect(page.getByText('No booking link yet')).toHaveCount(0);
+      await expect(page.getByRole('heading', { name: 'No booking link yet' }).filter({ visible: true })).toBeVisible();
     });
 
-    await expect(page.getByText('No booking link yet')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'No booking link yet' }).filter({ visible: true })).toBeVisible();
   });
 });

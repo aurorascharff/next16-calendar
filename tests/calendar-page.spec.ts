@@ -28,7 +28,8 @@ test.describe('Calendar', () => {
     await instant(page, async () => {
       await page.getByRole('link', { name: 'Month' }).click();
       await page.waitForURL(url => url.searchParams.get('view') === 'month');
-      await expect(page.getByRole('status', { name: 'Loading month' })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Month' })).toHaveAttribute('aria-current', 'page');
+      await expect(page.getByText('Focus time').first()).toBeVisible();
     });
 
     await expect(page.getByText('Focus time').first()).toBeVisible();
