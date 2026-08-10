@@ -23,6 +23,10 @@ function eventHeight(duration: number) {
   return Math.max(22, (duration / 60) * HOUR_HEIGHT - 3);
 }
 
+function visibleEventHeight(duration: number, startMin: number) {
+  return Math.max(0, Math.min(eventHeight(duration), GRID_HEIGHT - topFor(startMin)));
+}
+
 type PointerHandler = (event: React.PointerEvent<HTMLElement>) => void;
 
 function titleLineCount(height: number, hasTimeLabel: boolean) {
@@ -47,7 +51,7 @@ export function CalendarEventLayer({
         const isResizing = interaction.resize?.sourceId === event.sourceId;
         const isDragging = interaction.dragMove?.id === event.id;
         const displayDuration = isResizing ? interaction.resize!.endMin - interaction.resize!.startMin : event.duration;
-        const height = eventHeight(displayDuration);
+        const height = visibleEventHeight(displayDuration, startMin);
         const place = layout.get(event.id) ?? { col: 0, cols: 1 };
         const widthPct = 100 / place.cols;
         return (
