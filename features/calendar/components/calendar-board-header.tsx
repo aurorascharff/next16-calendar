@@ -1,17 +1,15 @@
-import { ChevronUp, Plus } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDay } from '../calendar-utils';
 import { chipStyle } from '../utils/colors';
 import type { SelectedEvent } from '../hooks/use-calendar-board';
 import type { CalendarEvent } from '../types/calendar';
-import type { MouseEvent } from 'react';
 
 export function CalendarBoardHeader({
   days,
   events,
   getEffectiveDay,
   gridTemplate,
-  onCreateAllDay,
   onSelectEvent,
   todayKey,
 }: {
@@ -19,83 +17,18 @@ export function CalendarBoardHeader({
   events: CalendarEvent[];
   getEffectiveDay: (event: CalendarEvent) => string;
   gridTemplate: string;
-  onCreateAllDay: (day: string, event: MouseEvent<HTMLElement>) => void;
   onSelectEvent: (event: SelectedEvent) => void;
   todayKey: string | null;
 }) {
   return (
-    <>
-      <CalendarDayHeaderRow
-        days={days}
-        gridTemplate={gridTemplate}
-        onCreateAllDay={onCreateAllDay}
-        todayKey={todayKey}
-      />
-      <CalendarAllDayRow
-        days={days}
-        events={events}
-        getEffectiveDay={getEffectiveDay}
-        gridTemplate={gridTemplate}
-        onSelectEvent={onSelectEvent}
-        todayKey={todayKey}
-      />
-    </>
-  );
-}
-
-function CalendarDayHeaderRow({
-  days,
-  gridTemplate,
-  onCreateAllDay,
-  todayKey,
-}: {
-  days: string[];
-  gridTemplate: string;
-  onCreateAllDay: (day: string, event: MouseEvent<HTMLElement>) => void;
-  todayKey: string | null;
-}) {
-  return (
-    <div
-      className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark grid border-b"
-      style={{ gridTemplateColumns: gridTemplate }}
-    >
-      <div className="border-divider dark:border-divider-dark border-r" />
-      {days.map(day => {
-        const [weekday, dayNumber] = formatDay(day).split(' ');
-        const isToday = day === todayKey;
-        return (
-          <div
-            className={cn(
-              'border-divider dark:border-divider-dark border-r px-3 py-1.5',
-              isToday && 'bg-card dark:bg-card-dark',
-            )}
-            key={day}
-          >
-            <div className="flex min-w-0 items-center gap-1.5">
-              <span className={cn('text-[11px] font-medium uppercase', isToday ? 'text-accent' : 'text-muted')}>
-                {weekday}
-              </span>
-              <span
-                className={cn(
-                  'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums',
-                  isToday && 'bg-accent text-white',
-                )}
-              >
-                {dayNumber}
-              </span>
-              <button
-                aria-label={`Add all-day event on ${formatDay(day)}`}
-                className="text-muted focus-visible:ring-accent ml-auto hidden size-8 place-items-center rounded-full transition-colors hover:text-black focus-visible:ring-2 focus-visible:outline-none sm:grid dark:hover:text-white"
-                onClick={event => onCreateAllDay(day, event)}
-                type="button"
-              >
-                <Plus className="size-5" />
-              </button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <CalendarAllDayRow
+      days={days}
+      events={events}
+      getEffectiveDay={getEffectiveDay}
+      gridTemplate={gridTemplate}
+      onSelectEvent={onSelectEvent}
+      todayKey={todayKey}
+    />
   );
 }
 
@@ -163,17 +96,16 @@ function CalendarAllDayRow({
     </div>
   );
 
-  if (!canExpand) {
-    return (
-      <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark border-b">{content}</div>
-    );
-  }
-
   return (
-    <details className="group border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark border-b">
+    <details className="group border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark sticky top-10 z-40 col-start-1 row-start-2 border-b">
       <summary
-        aria-label="Toggle all-day events"
+        aria-disabled={!canExpand || undefined}
+        aria-label={canExpand ? 'Toggle all-day events' : 'All-day events'}
         className="group/summary list-none focus-visible:outline-none [&::-webkit-details-marker]:hidden"
+        onClick={event => {
+          if (!canExpand) event.preventDefault();
+        }}
+        tabIndex={canExpand ? 0 : -1}
       >
         {content}
       </summary>

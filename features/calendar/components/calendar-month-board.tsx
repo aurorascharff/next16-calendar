@@ -4,13 +4,15 @@ import * as Ariakit from '@ariakit/react';
 import { Plus, Repeat } from 'lucide-react';
 import { useOptimistic, useState, useTransition } from 'react';
 import { IconButton } from '@/components/ui/icon-button';
+import { Crossfade } from '@/components/ui/crossfade';
 import { cn } from '@/lib/utils';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
-import { applyEventAction, expandOptimisticEvent } from '../utils/event-optimistic-reducer';
+import { applyEventAction } from '../utils/event-optimistic-reducer';
 import { useCalendarVisibility } from './calendar-visibility';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventPopover } from './event-popover';
+import type { ReactNode } from 'react';
 import type { Calendar, CalendarEvent } from '../types/calendar';
 import type { EventAction } from '../utils/event-optimistic-reducer';
 
@@ -29,7 +31,7 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
     return (
       <button
         className={cn(
-          'cal-chip focus-visible:ring-accent flex h-6 w-full min-w-0 items-center gap-1 rounded-[5px] px-2 text-left text-xs leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none',
+          'cal-chip focus-visible:ring-accent pointer-events-auto flex h-6 w-full min-w-0 items-center gap-1 rounded-[5px] px-2 text-left text-xs leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none',
           event.isBooking && 'cal-chip-booking',
         )}
         onClick={clickEvent => onSelect(clickEvent.currentTarget.getBoundingClientRect())}
@@ -46,7 +48,7 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
   return (
     <button
       className={cn(
-        'hover:bg-card dark:hover:bg-card-dark focus-visible:ring-accent flex h-6 w-full min-w-0 items-center gap-1 rounded px-1.5 text-left text-xs focus-visible:ring-2 focus-visible:outline-none',
+        'hover:bg-card dark:hover:bg-card-dark focus-visible:ring-accent pointer-events-auto flex h-6 w-full min-w-0 items-center gap-1 rounded px-1.5 text-left text-xs focus-visible:ring-2 focus-visible:outline-none',
         event.isBooking && 'cal-booking-row',
       )}
       onClick={clickEvent => onSelect(clickEvent.currentTarget.getBoundingClientRect())}
@@ -64,12 +66,10 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
 
 export function CalendarMonthBoard({
   calendars,
-  date,
   days,
   events,
 }: {
   calendars: Calendar[];
-  date: string;
   days: string[];
   events: CalendarEvent[];
 }) {
@@ -77,6 +77,69 @@ export function CalendarMonthBoard({
   const [optimisticEvents, applyOptimisticEvent] = useOptimistic(events, applyEventAction);
   const [isPending, startTransition] = useTransition();
   const [selectedEvent, setSelectedEvent] = useState<{ anchorRect: DOMRect; event: CalendarEvent } | null>(null);
+  const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));
+
+  function updateOptimistically(action: EventAction) {
+    startTransition(() => applyOptimisticEvent(action));
+  }
+
+  return (
+    <>
+      <Crossfade>
+        <div className="pointer-events-none col-start-1 row-start-2 grid auto-rows-[11rem] grid-cols-7">
+          {days.map(day => {
+            const dayEvents = sortEvents(visibleEvents.filter(event => event.day === day));
+            const hasOverflow = dayEvents.length > MAX_EVENT_ROWS;
+            const visible = dayEvents.slice(0, hasOverflow ? MAX_EVENT_ROWS - 1 : MAX_EVENT_ROWS);
+            const remaining = dayEvents.length - visible.length;
+            return (
+              <div className="min-w-0 overflow-hidden px-1.5 pt-9 pb-1.5" key={day}>
+                <div className="space-y-1">
+                  {visible.map(event => (
+                    <MonthEvent
+                      event={event}
+                      key={event.id}
+                      onSelect={anchorRect => setSelectedEvent({ anchorRect, event })}
+                    />
+                  ))}
+                  {remaining > 0 ? (
+                    <span className="text-muted block h-6 px-1.5 text-xs leading-6 font-medium">+{remaining} more</span>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Crossfade>
+      {isPending ? (
+        <span className="sr-only" data-calendar-pending role="status">
+          Saving calendar changes
+        </span>
+      ) : null}
+      {selectedEvent ? (
+        <EventPopover
+          anchorRect={selectedEvent.anchorRect}
+          calendar={calendars.find(calendar => calendar.id === selectedEvent.event.calendarId)}
+          event={selectedEvent.event}
+          key={selectedEvent.event.id}
+          onClose={() => setSelectedEvent(null)}
+          onDeleted={sourceId => updateOptimistically({ sourceId, type: 'delete' })}
+          onUpdated={event => updateOptimistically({ event, type: 'update' })}
+        />
+      ) : null}
+    </>
+  );
+}
+
+export function CalendarMonthFrame({
+  children,
+  date,
+  days,
+}: {
+  children: ReactNode;
+  date: string;
+  days: string[];
+}) {
   const [createDraft, setCreateDraft] = useState<{ anchorRect: DOMRect; day: string } | null>(null);
   const createStore = Ariakit.usePopoverStore({
     placement: 'bottom-start',
@@ -86,26 +149,10 @@ export function CalendarMonthBoard({
   });
   const today = useTodayKey();
   const month = date.slice(0, 7);
-  const defaultCalendar = calendars[0];
-  const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));
-
-  function updateOptimistically(action: EventAction) {
-    startTransition(() => applyOptimisticEvent(action));
-  }
-
-  function openCreate(day: string, target: HTMLElement) {
-    setCreateDraft({ anchorRect: target.getBoundingClientRect(), day });
-    createStore.show();
-  }
 
   return (
-    <div className="relative flex min-h-full min-w-[760px] flex-col select-none">
-      {isPending ? (
-        <span className="sr-only" data-calendar-pending role="status">
-          Saving calendar changes
-        </span>
-      ) : null}
-      <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark sticky top-0 z-20 grid grid-cols-7 border-b">
+    <div className="relative grid min-h-full min-w-[760px] select-none [grid-template-rows:auto_auto]">
+      <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark sticky top-0 z-20 col-start-1 row-start-1 grid grid-cols-7 border-b">
         {WEEKDAY_LABELS.map(label => (
           <div
             className="text-muted border-divider dark:border-divider-dark border-r px-2 py-2 text-center text-[11px] font-semibold uppercase"
@@ -115,13 +162,9 @@ export function CalendarMonthBoard({
           </div>
         ))}
       </div>
-      <div className="grid auto-rows-[11rem] grid-cols-7">
+      <div className="col-start-1 row-start-2 grid auto-rows-[11rem] grid-cols-7">
         {days.map(day => {
           const outside = !day.startsWith(month);
-          const dayEvents = sortEvents(visibleEvents.filter(event => event.day === day));
-          const hasOverflow = dayEvents.length > MAX_EVENT_ROWS;
-          const visible = dayEvents.slice(0, hasOverflow ? MAX_EVENT_ROWS - 1 : MAX_EVENT_ROWS);
-          const remaining = dayEvents.length - visible.length;
           return (
             <div
               className={cn(
@@ -144,52 +187,26 @@ export function CalendarMonthBoard({
                 <IconButton
                   className="hidden sm:inline-flex sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                   label={`Add event on ${day}`}
-                  onClick={event => openCreate(day, event.currentTarget)}
+                  onClick={event => {
+                    setCreateDraft({ anchorRect: event.currentTarget.getBoundingClientRect(), day });
+                    createStore.show();
+                  }}
                   size="sm"
                 >
                   <Plus className="size-4" />
                 </IconButton>
               </div>
-              <div className="space-y-1">
-                {visible.map(event => (
-                  <MonthEvent
-                    event={event}
-                    key={event.id}
-                    onSelect={anchorRect => setSelectedEvent({ anchorRect, event })}
-                  />
-                ))}
-                {remaining > 0 ? (
-                  <span className="text-muted block h-6 px-1.5 text-xs leading-6 font-medium">+{remaining} more</span>
-                ) : null}
-              </div>
             </div>
           );
         })}
       </div>
-      {selectedEvent ? (
-        <EventPopover
-          anchorRect={selectedEvent.anchorRect}
-          calendar={calendars.find(calendar => calendar.id === selectedEvent.event.calendarId)}
-          event={selectedEvent.event}
-          key={selectedEvent.event.id}
-          onClose={() => setSelectedEvent(null)}
-          onDeleted={sourceId => updateOptimistically({ sourceId, type: 'delete' })}
-          onUpdated={event => updateOptimistically({ event, type: 'update' })}
-        />
-      ) : null}
+      {children}
       {createDraft ? (
         <EventCreateDialog
           anchorRect={createDraft.anchorRect}
-          calendars={calendars}
           day={createDraft.day}
-          defaultCalendarId={defaultCalendar?.id}
+          defaultAllDay
           key={createDraft.day}
-          onCreated={event => {
-            for (const createdEvent of expandOptimisticEvent(event, days)) {
-              updateOptimistically({ event: createdEvent, type: 'create' });
-            }
-          }}
-          onCreateFailed={sourceId => updateOptimistically({ sourceId, type: 'delete' })}
           store={createStore}
         />
       ) : null}

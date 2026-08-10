@@ -83,12 +83,14 @@ export function DayColumn({
   interaction,
   isToday,
   nowMinutes,
+  renderGrid = true,
   showNow,
 }: {
   day: string;
   interaction: CalendarBoardInteractions;
   isToday: boolean;
   nowMinutes: number;
+  renderGrid?: boolean;
   showNow: boolean;
 }) {
   const selection = interaction.getSelection(day);
@@ -96,7 +98,8 @@ export function DayColumn({
   return (
     <div
       className={cn(
-        'border-divider dark:border-divider-dark relative border-r',
+        'relative',
+        renderGrid && 'border-divider dark:border-divider-dark border-r',
         isToday && 'bg-card/40 dark:bg-card-dark/40',
       )}
       data-day-column
@@ -106,12 +109,17 @@ export function DayColumn({
       onPointerUp={event => interaction.create.onPointerUp(day, event)}
       style={{ height: GRID_HEIGHT }}
     >
-      {HOURS.map(hour => (
-        <div
-          className={cn('border-divider/60 dark:border-divider-dark/60 h-[72px] border-b', hour === 0 && 'border-t')}
-          key={hour}
-        />
-      ))}
+      {renderGrid
+        ? HOURS.map(hour => (
+            <div
+              className={cn(
+                'border-divider/60 dark:border-divider-dark/60 h-[72px] border-b',
+                hour === 0 && 'border-t',
+              )}
+              key={hour}
+            />
+          ))
+        : null}
       {showNow ? <NowLine minutes={nowMinutes} /> : null}
       {selection ? (
         <div

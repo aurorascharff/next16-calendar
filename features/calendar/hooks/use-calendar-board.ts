@@ -273,18 +273,6 @@ export function useCalendarBoard({
     setCreateSel(null);
   }
 
-  function handleAllDayCreate(day: string, event: React.MouseEvent<HTMLElement>) {
-    setCreateSel(null);
-    setCreateDraft({
-      allDay: true,
-      anchorRect: event.currentTarget.getBoundingClientRect(),
-      day,
-      duration: 24 * 60,
-      start: '00:00',
-    });
-    createStore.show();
-  }
-
   function handleEventSelect(event: CalendarEvent, anchorRect: DOMRect) {
     if (suppressClickRef.current) return;
     setSelectedEvent({ anchorRect, event });
@@ -330,7 +318,6 @@ export function useCalendarBoard({
     gridMinWidth,
     gridRef,
     gridTemplate,
-    handleAllDayCreate,
     interactions,
     isPending,
     nowMinutes,

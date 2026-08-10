@@ -3,11 +3,17 @@ import { formatMonth } from '@/features/calendar/calendar-utils';
 import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header';
 import {
   CalendarMonth,
+  CalendarMonthEventsFallback,
   CalendarMonthScroll,
-  CalendarMonthSkeleton,
+  CalendarMonthSurface,
 } from '@/features/calendar/components/calendar-month';
 import { CalendarViewFallback } from '@/features/calendar/components/calendar-scroll-section';
-import { CalendarWeek, CalendarWeekScroll, CalendarWeekSkeleton } from '@/features/calendar/components/calendar-week';
+import {
+  CalendarWeek,
+  CalendarWeekEventsFallback,
+  CalendarWeekFrame,
+  CalendarWeekScroll,
+} from '@/features/calendar/components/calendar-week';
 import type { CalendarView } from '@/features/calendar/types/calendar';
 import type { Metadata } from 'next';
 
@@ -34,15 +40,19 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
           const calendarView = toView(view);
           return calendarView === 'month' ? (
             <CalendarMonthScroll date={date}>
-              <Suspense fallback={<CalendarMonthSkeleton date={date} />}>
-                <CalendarMonth date={date} />
-              </Suspense>
+              <CalendarMonthSurface date={date}>
+                <Suspense fallback={<CalendarMonthEventsFallback />}>
+                  <CalendarMonth date={date} />
+                </Suspense>
+              </CalendarMonthSurface>
             </CalendarMonthScroll>
           ) : (
             <CalendarWeekScroll date={date}>
-              <Suspense fallback={<CalendarWeekSkeleton date={date} />}>
-                <CalendarWeek date={date} />
-              </Suspense>
+              <CalendarWeekFrame date={date}>
+                <Suspense fallback={<CalendarWeekEventsFallback />}>
+                  <CalendarWeek date={date} />
+                </Suspense>
+              </CalendarWeekFrame>
             </CalendarWeekScroll>
           );
         })}
