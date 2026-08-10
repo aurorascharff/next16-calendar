@@ -10,7 +10,6 @@ import { DirectionalSlide } from '@/components/ui/directional-slide';
 import { FlowMark } from '@/components/ui/flow-mark';
 import { IconButton } from '@/components/ui/icon-button';
 import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
-import { cn } from '@/lib/utils';
 import { bookSlotAction, type BookSlotState } from '../booking-actions';
 import type { BookingSlot } from '../booking-queries';
 import type { Route } from 'next';
@@ -121,7 +120,6 @@ export function BookingSlots({
           <form action={formAction} className="flex flex-col sm:min-h-0 sm:flex-1" id={formId}>
             <input name="day" type="hidden" value={day} />
             <input name="handle" type="hidden" value={handle} />
-            <input name="slot" type="hidden" value={selectedAvailable?.time ?? ''} />
             <div className="mb-3 grid gap-3 sm:mb-4 sm:grid-cols-2">
               <label className="block min-w-0">
                 <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
@@ -152,36 +150,38 @@ export function BookingSlots({
                           <span className="ml-2 text-[11px] no-underline">Booked</span>
                         </div>
                       ) : (
-                        <button
-                          aria-pressed={selectedSlot?.day === day && selectedSlot.time === slot.time}
-                          className={cn(
-                            'focus-visible:ring-primary/25 rounded-md border bg-transparent px-4 py-3 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100',
-                            selectedSlot?.day === day && selectedSlot.time === slot.time
-                              ? 'border-primary text-black shadow-[inset_0_0_0_1px_var(--color-primary)] dark:text-white'
-                              : 'border-divider text-muted hover:border-primary/45 dark:border-divider-dark dark:hover:border-primary/60 hover:text-black dark:hover:text-white',
-                          )}
-                          key={slot.time}
-                          onClick={() => setSelectedSlot({ day, time: slot.time })}
-                          type="button"
-                        >
-                          {slot.time}
-                        </button>
+                        <label className="relative block h-full cursor-pointer" key={slot.time}>
+                          <input
+                            checked={selectedSlot?.day === day && selectedSlot.time === slot.time}
+                            className="peer absolute inset-0 size-full cursor-pointer opacity-0"
+                            name="slot"
+                            onChange={() => setSelectedSlot({ day, time: slot.time })}
+                            required
+                            type="radio"
+                            value={slot.time}
+                          />
+                          <span className="border-divider text-muted hover:border-primary/45 peer-checked:border-primary peer-focus-visible:ring-primary/25 dark:border-divider-dark dark:hover:border-primary/60 flex h-full items-center rounded-md border bg-transparent px-4 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out peer-checked:text-black peer-checked:shadow-[inset_0_0_0_1px_var(--color-primary)] peer-focus-visible:ring-2 peer-focus-visible:outline-none hover:text-black active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100 dark:peer-checked:text-white dark:hover:text-white">
+                            {slot.time}
+                          </span>
+                        </label>
                       ),
                     )}
                   </div>
                 )}
               </div>
             </DirectionalSlide>
-            <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 mt-4 flex min-h-16 items-center justify-between gap-3 rounded-lg border p-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold tabular-nums">{selectedAvailable?.time ?? 'Choose a time'}</p>
-                <p className="text-muted text-xs">
-                  {selectedAvailable ? `${duration} minutes` : `${duration}-minute meeting`}
-                </p>
+            <div className="mt-4 min-h-16">
+              <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 flex min-h-16 items-center justify-between gap-3 rounded-lg border p-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold tabular-nums">{selectedAvailable?.time ?? 'Choose a time'}</p>
+                  <p className="text-muted text-xs">
+                    {selectedAvailable ? `${duration} minutes` : `${duration}-minute meeting`}
+                  </p>
+                </div>
+                <Button className="h-10 shrink-0 px-4" type="submit">
+                  Book
+                </Button>
               </div>
-              <Button className="h-10 shrink-0 px-4" disabled={!selectedAvailable} type="submit">
-                Book
-              </Button>
             </div>
           </form>
         )}
