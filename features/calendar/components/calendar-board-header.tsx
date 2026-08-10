@@ -1,4 +1,4 @@
-import { ChevronUp } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDay } from '../calendar-utils';
 import { chipStyle } from '../utils/colors';
@@ -54,8 +54,8 @@ function CalendarAllDayRow({
     <div className="grid min-h-8" style={{ gridTemplateColumns: gridTemplate }}>
       <div className="border-divider dark:border-divider-dark text-muted flex items-start justify-center border-r p-1">
         {canExpand ? (
-          <span className="group-focus-visible/summary:ring-accent hidden size-6 place-items-center rounded-full group-open:grid group-focus-visible/summary:ring-2">
-            <ChevronUp className="size-3.5" />
+          <span className="group-focus-visible/summary:ring-accent group-hover/summary:bg-divider/70 dark:group-hover/summary:bg-divider-dark grid size-6 place-items-center rounded-full transition-colors group-hover/summary:text-black group-focus-visible/summary:ring-2 dark:group-hover/summary:text-white">
+            <ChevronDown className="size-3.5 transition-transform duration-200 group-open:rotate-180" />
           </span>
         ) : null}
       </div>
@@ -79,7 +79,7 @@ function CalendarAllDayRow({
               {hiddenEventCount > 0 ? (
                 <span
                   aria-label={`${hiddenEventCount} more all-day events on ${formatDay(day)}`}
-                  className="text-muted hidden h-6 shrink-0 px-1 text-[11px] leading-6 font-semibold group-open:hidden sm:inline"
+                  className="text-muted group-hover/summary:bg-divider/70 dark:group-hover/summary:bg-divider-dark hidden h-6 shrink-0 rounded px-1.5 text-[11px] leading-6 font-semibold transition-colors group-open:hidden group-hover/summary:text-black sm:inline dark:group-hover/summary:text-white"
                 >
                   +{hiddenEventCount}
                 </span>
@@ -100,8 +100,12 @@ function CalendarAllDayRow({
     <details className="group border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark sticky top-10 z-40 col-start-1 row-start-2 border-b">
       <summary
         aria-disabled={!canExpand || undefined}
-        aria-label={canExpand ? 'Toggle all-day events' : 'All-day events'}
-        className="group/summary list-none focus-visible:outline-none [&::-webkit-details-marker]:hidden"
+        aria-label={canExpand ? 'Show or hide all-day events' : 'All-day events'}
+        className={cn(
+          'group/summary list-none focus-visible:outline-none [&::-webkit-details-marker]:hidden',
+          canExpand &&
+            'hover:bg-card/60 focus-visible:bg-card/60 dark:hover:bg-card-dark/60 dark:focus-visible:bg-card-dark/60 cursor-pointer transition-colors',
+        )}
         onClick={event => {
           if (!canExpand) event.preventDefault();
         }}
