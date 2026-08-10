@@ -125,7 +125,11 @@ export function BookingSlots({
 
   return (
     <Boundary label="BookingSlots" asChild>
-      <div className="col-span-full grid grid-rows-[auto_auto] md:min-h-0 md:grid-cols-[minmax(18rem,0.9fr)_minmax(0,1.1fr)] md:grid-rows-[minmax(0,1fr)] md:gap-8">
+      <form
+        action={formAction}
+        className="col-span-full grid grid-rows-[auto_auto] md:min-h-0 md:grid-cols-[minmax(18rem,0.9fr)_minmax(0,1.1fr)] md:grid-rows-[minmax(0,1fr)] md:gap-8"
+        id={formId}
+      >
         <div className="flex min-w-0 flex-col md:min-h-0">
           {children}
           {!bookedTime ? (
@@ -174,7 +178,7 @@ export function BookingSlots({
                     <ChevronRight className="size-4.5" />
                   </IconButton>
                 </div>
-                <form action={formAction} className="flex flex-col md:min-h-0 md:flex-1 md:overflow-hidden" id={formId}>
+                <div className="flex flex-col md:min-h-0 md:flex-1 md:overflow-hidden">
                   <Input name="day" type="hidden" value={day} variant="unstyled" />
                   <Input name="handle" type="hidden" value={handle} variant="unstyled" />
                   <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
@@ -216,12 +220,12 @@ export function BookingSlots({
                     formId={formId}
                     selected={selectedAvailable}
                   />
-                </form>
+                </div>
               </>
             )}
           </div>
         </div>
-      </div>
+      </form>
     </Boundary>
   );
 }
