@@ -1,8 +1,7 @@
 import { FlowMark } from '@/components/ui/flow-mark';
 import { Spinner } from '@/components/ui/spinner';
 import { formatMonth } from '../calendar-utils';
-import { CalendarControls, CalendarViewShortcuts, ViewToggle } from './calendar-controls';
-import { DatePicker } from './date-picker';
+import { CalendarControls, CalendarViewShortcuts, DatePicker, ViewToggle } from './calendar-controls';
 import { NewEventButton } from './new-event-button';
 import type { CalendarView } from '../types/calendar';
 

@@ -5,8 +5,7 @@ import { formatDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { expandOptimisticEvent } from '../utils/event-optimistic-reducer';
 import { GRID_HEIGHT, HOURS } from '../utils/grid';
-import { CalendarAllDayRow } from './calendar-all-day-row';
-import { CalendarDayHeaderRow } from './calendar-board-rows';
+import { CalendarBoardHeader } from './calendar-board-header';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventPopover } from './event-popover';
@@ -49,17 +48,12 @@ export function CalendarBoard({
         </span>
       ) : null}
       <div className="sticky top-0 z-30" style={{ minWidth: gridMinWidth }}>
-        <CalendarDayHeaderRow
-          days={days}
-          gridTemplate={gridTemplate}
-          onCreateAllDay={handleAllDayCreate}
-          todayKey={todayKey}
-        />
-        <CalendarAllDayRow
+        <CalendarBoardHeader
           days={days}
           events={allDayEvents}
           getEffectiveDay={effectiveDay}
           gridTemplate={gridTemplate}
+          onCreateAllDay={handleAllDayCreate}
           onSelectEvent={setSelectedEvent}
           todayKey={todayKey}
         />

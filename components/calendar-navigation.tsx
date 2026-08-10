@@ -1,17 +1,22 @@
 'use client';
 
 import { CalendarDays, Link2 } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense, useOptimistic, useTransition } from 'react';
 import { FlowMark } from '@/components/ui/flow-mark';
-import { GitHubIcon } from '@/components/ui/github-icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { NavLink } from '@/components/ui/nav-link';
-import { CalendarHomeLink, CalendarHomeNavLink } from '@/features/calendar/components/calendar-home-link';
+import { useTodayKey } from '@/features/calendar/hooks/use-now';
+import type { Route } from 'next';
+import type { ComponentProps } from 'react';
 
 const sidebarLink =
   'flex min-h-10 w-10 max-w-full items-center justify-center gap-3 rounded-xl px-0 text-sm font-medium text-muted transition-colors lg:w-52 lg:justify-start lg:px-3 not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent-fade aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
 const REPO_URL = 'https://github.com/aurorascharff/next16-calendar';
+
+type CalendarLinkProps = Omit<ComponentProps<typeof Link>, 'href'> & { href?: Route };
+type CalendarNavLinkProps = Omit<ComponentProps<typeof NavLink>, 'href' | 'match'> & { href?: Route };
 
 export function CalendarSidebarBrand() {
   return (
@@ -34,6 +39,53 @@ export function CalendarSidebarBrand() {
       </IconButton>
     </div>
   );
+}
+
+function GitHubIcon({ className }: { className?: string }) {
+  return (
+    <svg aria-hidden className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+    </svg>
+  );
+}
+
+function useCalendarHomeHref() {
+  const today = useTodayKey();
+  return (today ? `/calendar/${today}` : '/') as Route;
+}
+
+function CalendarHomeLink(props: CalendarLinkProps) {
+  return (
+    <Suspense fallback={<CalendarHomeLinkView {...props} />}>
+      <CalendarHomeLinkInner {...props} />
+    </Suspense>
+  );
+}
+
+function CalendarHomeLinkInner({ href, ...props }: CalendarLinkProps) {
+  const homeHref = useCalendarHomeHref();
+  return <CalendarHomeLinkView href={href ?? homeHref} {...props} />;
+}
+
+function CalendarHomeLinkView({ href = '/', ...props }: CalendarLinkProps) {
+  return <Link href={href} {...props} />;
+}
+
+function CalendarHomeNavLink(props: CalendarNavLinkProps) {
+  return (
+    <Suspense fallback={<CalendarHomeNavLinkView {...props} />}>
+      <CalendarHomeNavLinkInner {...props} />
+    </Suspense>
+  );
+}
+
+function CalendarHomeNavLinkInner({ href, ...props }: CalendarNavLinkProps) {
+  const homeHref = useCalendarHomeHref();
+  return <CalendarHomeNavLinkView href={href ?? homeHref} {...props} />;
+}
+
+function CalendarHomeNavLinkView({ href = '/', ...props }: CalendarNavLinkProps) {
+  return <NavLink href={href} match="/calendar" {...props} />;
 }
 
 export function WorkspaceNavigationLinks() {
