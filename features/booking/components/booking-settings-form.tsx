@@ -4,6 +4,8 @@ import { useActionState } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { NewCalendarButton } from '@/features/calendar/components/calendar-manager';
 import { updateBookingAvailability } from '../booking-actions';
 
@@ -77,12 +79,12 @@ export function BookingSettingsForm({ settings }: { settings: Settings }) {
             <p className="text-muted mt-1 text-sm">Control the shared booking link for @{settings.handle}.</p>
           </div>
           <label className="flex items-center gap-2 text-sm font-medium">
-            <input
-              className="size-4 w-auto"
+            <Input
               defaultChecked={hasCalendars && values.active}
               disabled={!hasCalendars}
               name="active"
               type="checkbox"
+              variant="checkbox"
             />
             Active
           </label>
@@ -90,18 +92,18 @@ export function BookingSettingsForm({ settings }: { settings: Settings }) {
         <div className="mt-5 space-y-4">
           <label className="block">
             <span className={fieldLabel}>Title</span>
-            <input defaultValue={values.title} name="title" />
+            <Input defaultValue={values.title} name="title" />
           </label>
           {hasCalendars ? (
             <label className="block">
               <span className={fieldLabel}>Calendar</span>
-              <select defaultValue={values.calendarId} name="calendarId">
+              <Select defaultValue={values.calendarId} name="calendarId">
                 {settings.calendars.map(calendar => (
                   <option key={calendar.id} value={calendar.id}>
                     {calendar.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           ) : (
             <div>
@@ -115,20 +117,20 @@ export function BookingSettingsForm({ settings }: { settings: Settings }) {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <label className="block">
               <span className={fieldLabel}>Start</span>
-              <input defaultValue={values.startTime} name="startTime" type="time" />
+              <Input defaultValue={values.startTime} name="startTime" type="time" />
             </label>
             <label className="block">
               <span className={fieldLabel}>End</span>
-              <input defaultValue={values.endTime} name="endTime" type="time" />
+              <Input defaultValue={values.endTime} name="endTime" type="time" />
             </label>
             <label className="block">
               <span className={fieldLabel}>Duration</span>
-              <select defaultValue={values.duration} name="duration">
+              <Select defaultValue={values.duration} name="duration">
                 <option value="15">15 minutes</option>
                 <option value="30">30 minutes</option>
                 <option value="45">45 minutes</option>
                 <option value="60">1 hour</option>
-              </select>
+              </Select>
             </label>
           </div>
         </div>

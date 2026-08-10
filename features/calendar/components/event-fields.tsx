@@ -1,5 +1,8 @@
 'use client';
 
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { DURATION_OPTIONS } from '../utils/grid';
 
 export type EventFieldValues = {
@@ -46,7 +49,7 @@ export function EventFields({
     <>
       <label className="block">
         <span className={fieldLabel}>Title</span>
-        <input
+        <Input
           autoFocus
           className={controlHeight}
           defaultValue={values.title}
@@ -60,13 +63,13 @@ export function EventFields({
         />
       </label>
       <label className="flex items-center gap-2 text-sm">
-        <input
+        <Input
           checked={allDay}
-          className="size-4 w-auto"
           disabled={busy}
           name="allDay"
           onChange={event => onAllDayChange(event.target.checked)}
           type="checkbox"
+          variant="checkbox"
         />
         All day
       </label>
@@ -76,18 +79,18 @@ export function EventFields({
       >
         <label className="min-w-0 overflow-hidden">
           <span className={fieldLabel}>Starts at</span>
-          <input
+          <Input
             className={`${controlHeight} block w-full max-w-full min-w-0 overflow-hidden`}
             defaultValue={values.start}
             disabled={allDay || busy}
             name={allDay ? undefined : 'start'}
             type="time"
           />
-          {allDay ? <input name="start" type="hidden" value={values.start} /> : null}
+          {allDay ? <Input name="start" type="hidden" value={values.start} variant="unstyled" /> : null}
         </label>
         <label className="min-w-0">
           <span className={fieldLabel}>Duration</span>
-          <select
+          <Select
             className={`${controlHeight} min-w-0`}
             defaultValue={values.duration}
             disabled={allDay || busy}
@@ -98,13 +101,13 @@ export function EventFields({
                 {durationLabel(duration)}
               </option>
             ))}
-          </select>
-          {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
+          </Select>
+          {allDay ? <Input name="duration" type="hidden" value={values.duration} variant="unstyled" /> : null}
         </label>
       </div>
       <label className="block">
         <span className={fieldLabel}>Description</span>
-        <textarea
+        <Textarea
           defaultValue={values.description}
           disabled={busy}
           name="description"

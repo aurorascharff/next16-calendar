@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3002';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 
 export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
@@ -19,10 +19,10 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'pnpm dev --port 3002',
+    command: 'pnpm dev',
     reuseExistingServer: true,
     stdout: 'pipe',
-    url: `${baseURL}/login`,
+    url: baseURL,
   },
   workers: 1,
 });

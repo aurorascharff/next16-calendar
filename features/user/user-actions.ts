@@ -3,8 +3,10 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { dateKey } from '@/features/calendar/calendar-utils';
 import { prisma } from '@/lib/db';
 import { deleteSessionCookies, SESSION_COOKIE, SESSION_COOKIE_MAX_AGE } from './session';
+import type { Route } from 'next';
 
 type SignInState = { error?: string } | null;
 
@@ -40,7 +42,7 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
 
   const store = await cookies();
   store.set(SESSION_COOKIE, userId, { maxAge: SESSION_COOKIE_MAX_AGE, path: '/', sameSite: 'lax' });
-  redirect('/');
+  redirect(`/calendar/${dateKey(new Date())}` as Route);
 }
 
 export async function signOut() {

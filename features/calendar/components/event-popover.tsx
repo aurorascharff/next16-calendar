@@ -171,12 +171,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
                 <Trash2 className="size-4" />
                 Delete
               </Button>
-              <Button
-                className="max-sm:flex-1"
-                disabled={busy}
-                onClick={() => setMode('edit')}
-                variant="secondary"
-              >
+              <Button className="max-sm:flex-1" disabled={busy} onClick={() => setMode('edit')} variant="secondary">
                 <Pencil className="size-4" />
                 Edit
               </Button>
@@ -195,12 +190,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
               values={values}
             />
             <EventPopoverFooter>
-              <Button
-                className="max-sm:flex-1"
-                disabled={busy}
-                onClick={() => setMode('details')}
-                variant="secondary"
-              >
+              <Button className="max-sm:flex-1" disabled={busy} onClick={() => setMode('details')} variant="secondary">
                 Cancel
               </Button>
               <Button className="max-sm:flex-1" disabled={busy} form={formId} type="submit">
@@ -214,13 +204,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
   );
 }
 
-function EventPopoverHeader({
-  busy,
-  event,
-}: {
-  busy: boolean;
-  event: CalendarEvent;
-}) {
+function EventPopoverHeader({ busy, event }: { busy: boolean; event: CalendarEvent }) {
   return (
     <div className="border-divider dark:border-divider-dark flex min-h-16 items-start justify-between gap-3 border-b px-4 py-3 max-sm:[&_button]:size-10 max-sm:[&_svg]:size-5">
       <div className="min-w-0">

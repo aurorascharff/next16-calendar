@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
+import { Select } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
@@ -201,11 +202,11 @@ export function EventCreateDialog({
               ) : null}
               <label className="min-w-0">
                 <span className={fieldLabel}>Repeat</span>
-                <select defaultValue={values.repeat} name="repeat">
+                <Select defaultValue={values.repeat} name="repeat">
                   <option value="">Does not repeat</option>
                   <option value="weekly">Weekly on {weekdayLabel.format(new Date(`${day}T00:00:00.000Z`))}</option>
                   <option value="weekday">Every weekday</option>
-                </select>
+                </Select>
               </label>
             </div>
           </div>

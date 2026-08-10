@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { DirectionalSlide } from '@/components/ui/directional-slide';
 import { FlowMark } from '@/components/ui/flow-mark';
 import { IconButton } from '@/components/ui/icon-button';
+import { Input, RadioCard } from '@/components/ui/input';
 import { formatDayLong, shiftDay } from '@/features/calendar/calendar-utils';
 import { bookSlotAction, type BookSlotState } from '../booking-actions';
 import type { BookingSlot } from '../booking-queries';
@@ -118,16 +119,16 @@ export function BookingSlots({
           </div>
         ) : (
           <form action={formAction} className="flex flex-col sm:min-h-0 sm:flex-1" id={formId}>
-            <input name="day" type="hidden" value={day} />
-            <input name="handle" type="hidden" value={handle} />
+            <Input name="day" type="hidden" value={day} variant="unstyled" />
+            <Input name="handle" type="hidden" value={handle} variant="unstyled" />
             <div className="mb-3 grid gap-3 sm:mb-4 sm:grid-cols-2">
               <label className="block min-w-0">
                 <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-                <input autoComplete="name" name="guestName" placeholder="Name" required />
+                <Input autoComplete="name" name="guestName" placeholder="Name" required />
               </label>
               <label className="block min-w-0">
                 <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
-                <input autoComplete="email" name="guestEmail" placeholder="you@example.com" required type="email" />
+                <Input autoComplete="email" name="guestEmail" placeholder="you@example.com" required type="email" />
               </label>
             </div>
             <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
@@ -139,49 +140,34 @@ export function BookingSlots({
                   </p>
                 ) : (
                   <div className="grid auto-rows-[2.875rem] gap-2 p-px sm:grid-cols-2">
-                    {visibleSlots.map(slot =>
-                      slot.taken ? (
-                        <div
-                          aria-disabled="true"
-                          className="border-divider bg-card/35 text-muted/50 dark:border-divider-dark dark:bg-card-dark/35 rounded-md border px-4 py-3 text-left text-sm font-medium tabular-nums line-through"
-                          key={slot.time}
-                        >
-                          {slot.time}
-                          <span className="ml-2 text-[11px] no-underline">Booked</span>
-                        </div>
-                      ) : (
-                        <label className="relative block h-full cursor-pointer" key={slot.time}>
-                          <input
-                            checked={selectedSlot?.day === day && selectedSlot.time === slot.time}
-                            className="peer absolute inset-0 size-full cursor-pointer opacity-0"
-                            name="slot"
-                            onChange={() => setSelectedSlot({ day, time: slot.time })}
-                            required
-                            type="radio"
-                            value={slot.time}
-                          />
-                          <span className="border-divider text-muted hover:border-primary/45 peer-checked:border-primary peer-focus-visible:ring-primary/25 dark:border-divider-dark dark:hover:border-primary/60 flex h-full items-center rounded-md border bg-transparent px-4 text-left text-sm font-medium tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out peer-checked:text-black peer-checked:shadow-[inset_0_0_0_1px_var(--color-primary)] peer-focus-visible:ring-2 peer-focus-visible:outline-none hover:text-black active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100 dark:peer-checked:text-white dark:hover:text-white">
-                            {slot.time}
-                          </span>
-                        </label>
-                      ),
-                    )}
+                    {visibleSlots.map(slot => (
+                      <RadioCard
+                        checked={selectedSlot?.day === day && selectedSlot.time === slot.time}
+                        disabled={slot.taken}
+                        key={slot.time}
+                        name="slot"
+                        onChange={() => setSelectedSlot({ day, time: slot.time })}
+                        required
+                        value={slot.time}
+                      >
+                        {slot.time}
+                        {slot.taken ? <span className="ml-2 text-[11px] no-underline">Booked</span> : null}
+                      </RadioCard>
+                    ))}
                   </div>
                 )}
               </div>
             </DirectionalSlide>
-            <div className="mt-4 min-h-16">
-              <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 flex min-h-16 items-center justify-between gap-3 rounded-lg border p-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold tabular-nums">{selectedAvailable?.time ?? 'Choose a time'}</p>
-                  <p className="text-muted text-xs">
-                    {selectedAvailable ? `${duration} minutes` : `${duration}-minute meeting`}
-                  </p>
+            <div className="mt-auto flex items-center justify-end gap-4 pt-4">
+              {selectedAvailable ? (
+                <div className="mr-auto min-w-0">
+                  <p className="text-sm font-semibold tabular-nums">{selectedAvailable.time}</p>
+                  <p className="text-muted text-xs">{duration} minutes</p>
                 </div>
-                <Button className="h-10 shrink-0 px-4" type="submit">
-                  Book
-                </Button>
-              </div>
+              ) : null}
+              <Button className="h-10 shrink-0 px-4" type="submit">
+                Book
+              </Button>
             </div>
           </form>
         )}

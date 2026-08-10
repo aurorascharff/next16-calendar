@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { IconButton } from '@/components/ui/icon-button';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { createCalendar, deleteCalendar, updateCalendar } from '../calendar-actions';
@@ -94,12 +95,7 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
         })}
       </div>
       {editing ? (
-        <CalendarFormDialog
-          calendar={editing}
-          colors={CALENDAR_COLORS}
-          key={editing.id}
-          store={store}
-        />
+        <CalendarFormDialog calendar={editing} colors={CALENDAR_COLORS} key={editing.id} store={store} />
       ) : null}
     </>
   );
@@ -175,7 +171,7 @@ function CalendarFormDialog({
       <form action={formAction} className="mt-4 space-y-4" key={state.key ?? calendar?.id ?? 'new-calendar'}>
         <label className="block">
           <span className="text-muted mb-1.5 block text-xs font-medium">Name</span>
-          <input autoFocus defaultValue={name} name="name" placeholder="e.g. Side project" required />
+          <Input autoFocus defaultValue={name} name="name" placeholder="e.g. Side project" required />
         </label>
         <div>
           <span className="text-muted mb-1.5 block text-xs font-medium">Color</span>

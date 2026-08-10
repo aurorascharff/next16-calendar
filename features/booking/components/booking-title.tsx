@@ -3,11 +3,13 @@
 import { Check, Pencil } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { IconButton } from '@/components/ui/icon-button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 export function BookingTitle({ defaultValue, formId }: { defaultValue: string; formId: string }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(defaultValue);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   function toggleEditing() {
     if (editing) {
@@ -23,13 +25,12 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
   }
 
   return (
-    <div className="-mx-2 mt-2 w-[calc(100%+1rem)] sm:mt-1">
-      <input form={formId} name="title" type="hidden" value={title} />
-      <div className="relative h-9">
+    <div className="mt-2 sm:-mx-2 sm:mt-1 sm:w-[calc(100%+1rem)]">
+      <Input form={formId} name="title" type="hidden" value={title} variant="unstyled" />
+      <div className="relative h-12 sm:h-9">
         {editing ? (
-          <input
+          <Textarea
             aria-label="Meeting title"
-            className="border-divider bg-card/35 focus:border-primary dark:border-divider-dark dark:bg-card-dark/35 h-9 w-full rounded-md border px-2 pr-10 text-xl font-semibold tracking-tight transition-colors outline-none"
             onChange={event => setTitle(event.target.value)}
             onKeyDown={event => {
               if (event.key !== 'Enter') return;
@@ -38,10 +39,12 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
             }}
             ref={inputRef}
             required
+            rows={2}
             value={title}
+            variant="title"
           />
         ) : (
-          <h1 className="flex h-9 min-w-0 items-center truncate px-2 pr-10 text-xl font-semibold tracking-tight">
+          <h1 className="line-clamp-2 h-12 min-w-0 px-2 py-1 pr-10 text-base leading-5 font-semibold tracking-tight sm:h-9 sm:truncate sm:py-1 sm:text-xl sm:leading-7 sm:whitespace-nowrap">
             {title}
           </h1>
         )}

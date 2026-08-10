@@ -36,7 +36,15 @@ function monthGrid(year: number, month: number) {
   });
 }
 
-export function DatePicker({ date, label = 'date', view }: { date: string; label?: 'date' | 'month'; view: CalendarView }) {
+export function DatePicker({
+  date,
+  label = 'date',
+  view,
+}: {
+  date: string;
+  label?: 'date' | 'month';
+  view: CalendarView;
+}) {
   const selected = fromKey(date);
   const store = Ariakit.usePopoverStore();
 
