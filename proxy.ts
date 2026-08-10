@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { dateKey } from '@/features/calendar/calendar-utils';
 import { SESSION_COOKIE } from '@/features/user/session';
 import type { NextRequest } from 'next/server';
 
@@ -7,7 +8,10 @@ export function proxy(request: NextRequest) {
   const isPublic = pathname === '/login' || pathname === '/logout' || pathname.startsWith('/book');
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
-  return !hasSession && !isPublic ? NextResponse.redirect(new URL('/login', request.url)) : NextResponse.next();
+  if (!hasSession && !isPublic) return NextResponse.redirect(new URL('/login', request.url));
+  if (pathname === '/') return NextResponse.redirect(new URL(`/calendar/${dateKey(new Date())}`, request.url));
+
+  return NextResponse.next();
 }
 
 export const config = {
