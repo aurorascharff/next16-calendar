@@ -19,10 +19,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             <CalendarSidebarContent />
           </aside>
         </ViewTransition>
-        <MobileCalendarSidebar>
-          <CalendarSidebarContent expanded />
-        </MobileCalendarSidebar>
-        {children}
+        <MobileCalendarSidebar sidebar={<CalendarSidebarContent expanded />}>{children}</MobileCalendarSidebar>
       </div>
     </CalendarVisibilityProvider>
   );

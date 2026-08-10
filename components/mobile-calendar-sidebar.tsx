@@ -1,22 +1,18 @@
 'use client';
 
 import * as Ariakit from '@ariakit/react';
-import { X } from 'lucide-react';
-import { FlowMark } from '@/components/ui/flow-mark';
-import type { ReactNode } from 'react';
+import { Menu, X } from 'lucide-react';
+import { createContext, useContext, type ReactNode } from 'react';
+import { IconButton } from '@/components/ui/icon-button';
 
-export function MobileCalendarSidebar({ children }: { children: ReactNode }) {
+const MobileCalendarSidebarContext = createContext<Ariakit.DialogStore | null>(null);
+
+export function MobileCalendarSidebar({ children, sidebar }: { children: ReactNode; sidebar: ReactNode }) {
   const store = Ariakit.useDialogStore();
 
   return (
-    <>
-      <Ariakit.DialogDisclosure
-        aria-label="Open navigation"
-        className="border-divider bg-surface/90 focus-visible:ring-accent dark:border-divider-dark dark:bg-surface-dark/90 fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-4 z-30 grid size-11 place-items-center rounded-full border shadow-lg backdrop-blur-md focus-visible:ring-2 focus-visible:outline-none md:hidden"
-        store={store}
-      >
-        <FlowMark className="size-6" />
-      </Ariakit.DialogDisclosure>
+    <MobileCalendarSidebarContext.Provider value={store}>
+      {children}
       <Ariakit.Dialog
         backdrop={<div className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px] md:hidden" />}
         className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-3rem))] flex-col border-r p-4 shadow-2xl outline-none md:hidden"
@@ -34,8 +30,23 @@ export function MobileCalendarSidebar({ children }: { children: ReactNode }) {
         >
           <X className="size-5" />
         </Ariakit.DialogDismiss>
-        {children}
+        {sidebar}
       </Ariakit.Dialog>
-    </>
+    </MobileCalendarSidebarContext.Provider>
+  );
+}
+
+export function MobileCalendarSidebarTrigger({ className }: { className?: string }) {
+  const store = useContext(MobileCalendarSidebarContext);
+  if (!store) return null;
+
+  return (
+    <IconButton
+      className={`md:hidden ${className ?? ''}`}
+      label="Open navigation"
+      render={<Ariakit.DialogDisclosure store={store} />}
+    >
+      <Menu className="size-5" />
+    </IconButton>
   );
 }

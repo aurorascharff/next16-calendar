@@ -1,3 +1,4 @@
+import { MobileCalendarSidebarTrigger } from '@/components/mobile-calendar-sidebar';
 import { FlowMark } from '@/components/ui/flow-mark';
 import { Spinner } from '@/components/ui/spinner';
 import { formatMonth } from '../calendar-utils';
@@ -29,7 +30,10 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
         </div>
       </header>
       <div className="border-divider dark:border-divider-dark flex items-center justify-between gap-2 border-b px-4 py-2 sm:hidden">
-        <CalendarControls date={date} showDatePicker={false} view={view} />
+        <div className="flex items-center gap-1">
+          <MobileCalendarSidebarTrigger />
+          <CalendarControls date={date} showDatePicker={false} view={view} />
+        </div>
         <ViewToggle date={date} view={view} />
       </div>
       <NewEventButton day={date} />
@@ -47,7 +51,10 @@ export function CalendarHeaderSkeleton() {
         </div>
       </header>
       <div className="border-divider dark:border-divider-dark flex items-center justify-between border-b px-4 py-2 sm:hidden">
-        <span className="bg-card dark:bg-card-dark block h-8 w-36 rounded-md" />
+        <div className="flex items-center gap-1">
+          <MobileCalendarSidebarTrigger />
+          <span className="bg-card dark:bg-card-dark block h-8 w-36 rounded-md" />
+        </div>
         <span className="bg-card dark:bg-card-dark block h-8 w-20 rounded-md" />
       </div>
     </>
