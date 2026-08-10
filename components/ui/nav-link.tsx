@@ -14,6 +14,7 @@ type Props<T extends string = string> = Omit<React.ComponentProps<typeof Link>, 
   href: Route<T> | URL;
   match?: string;
   exact?: boolean;
+  active?: boolean;
   className?: Renderable<string | undefined>;
   children?: Renderable<React.ReactNode>;
 };
@@ -30,7 +31,7 @@ function checkActive(pathname: string, target: string, exact?: boolean): boolean
 export function NavLink<T extends string>(props: Props<T>) {
   return (
     <Boundary label="NavLink">
-      <Suspense fallback={<NavLinkShell {...props} isActive={false} />}>
+      <Suspense fallback={<NavLinkShell {...props} isActive={props.active ?? false} />}>
         <NavLinkInner {...props} />
       </Suspense>
     </Boundary>
@@ -40,7 +41,7 @@ export function NavLink<T extends string>(props: Props<T>) {
 function NavLinkInner<T extends string>(props: Props<T>) {
   const pathname = usePathname();
   const target = (props.match ?? props.href.toString()).split('?')[0].split('#')[0];
-  const isActive = checkActive(pathname, target, props.exact);
+  const isActive = props.active ?? checkActive(pathname, target, props.exact);
   return <NavLinkShell {...props} isActive={isActive} />;
 }
 
@@ -48,6 +49,7 @@ function NavLinkShell<T extends string>({
   href,
   match,
   exact,
+  active,
   className,
   children,
   isActive,

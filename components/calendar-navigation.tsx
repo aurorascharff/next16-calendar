@@ -1,4 +1,8 @@
+'use client';
+
 import { CalendarDays, Link2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Suspense, useOptimistic, useTransition } from 'react';
 import { FlowMark } from '@/components/ui/flow-mark';
 import { GitHubIcon } from '@/components/ui/github-icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -28,12 +32,49 @@ export function CalendarSidebarBrand() {
 
 export function WorkspaceNavigationLinks() {
   return (
+    <Suspense fallback={<WorkspaceNavigationLinksView />}>
+      <WorkspaceNavigationLinksInner />
+    </Suspense>
+  );
+}
+
+function WorkspaceNavigationLinksInner() {
+  const pathname = usePathname();
+  const current: 'booking' | 'calendar' = pathname.startsWith('/booking') ? 'booking' : 'calendar';
+  const [active, setActive] = useOptimistic(current);
+  const [, startTransition] = useTransition();
+
+  function navigate(next: 'booking' | 'calendar') {
+    if (next === active) return;
+    startTransition(() => setActive(next));
+  }
+
+  return <WorkspaceNavigationLinksView active={active} onNavigate={navigate} />;
+}
+
+function WorkspaceNavigationLinksView({
+  active,
+  onNavigate,
+}: {
+  active?: 'booking' | 'calendar';
+  onNavigate?: (next: 'booking' | 'calendar') => void;
+} = {}) {
+  return (
     <nav className="flex flex-col gap-1">
-      <CalendarHomeNavLink className={sidebarLink}>
+      <CalendarHomeNavLink
+        active={active === undefined ? undefined : active === 'calendar'}
+        className={sidebarLink}
+        onNavigate={() => onNavigate?.('calendar')}
+      >
         <CalendarDays className="size-4" />
         Calendar
       </CalendarHomeNavLink>
-      <NavLink href="/booking" className={sidebarLink}>
+      <NavLink
+        active={active === undefined ? undefined : active === 'booking'}
+        href="/booking"
+        className={sidebarLink}
+        onNavigate={() => onNavigate?.('booking')}
+      >
         <Link2 className="size-4" />
         Booking link
       </NavLink>

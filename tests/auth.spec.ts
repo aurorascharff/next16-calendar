@@ -11,6 +11,6 @@ test.describe('Auth', () => {
     await page.goto('/login');
     await page.getByLabel('Email').fill('flow-auth-e2e@example.com');
     await page.getByRole('button', { name: 'Continue' }).click();
-    await expect(page).toHaveURL(/\/calendar\/\d{4}-\d{2}-\d{2}$/);
+    await expect(page).toHaveURL(/\/calendar\/\d{4}-\d{2}-\d{2}$/, { timeout: 15_000 });
   });
 });

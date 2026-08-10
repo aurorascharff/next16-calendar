@@ -26,12 +26,23 @@ test.describe('Calendar', () => {
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
 
     await instant(page, async () => {
-      await page.getByRole('link', { name: 'Month' }).click();
+      await page.getByRole('link', { name: 'Month', exact: true }).click();
       await page.waitForURL(url => url.searchParams.get('view') === 'month');
-      await expect(page.getByRole('link', { name: 'Month' })).toHaveAttribute('aria-current', 'page');
+      await expect(page.getByRole('link', { name: 'Month', exact: true })).toHaveAttribute('aria-current', 'page');
       await expect(page.getByText('Focus time').first()).toBeVisible();
     });
 
     await expect(page.getByText('Focus time').first()).toBeVisible();
+  });
+
+  test('client navigation marks the calendar active immediately', async ({ page }) => {
+    await page.goto('/booking');
+    await expect(page.getByRole('heading', { name: 'Booking link', level: 1 })).toBeVisible();
+
+    await instant(page, async () => {
+      await page.getByRole('link', { name: 'Calendar' }).click();
+      await page.waitForURL(url => url.pathname.startsWith('/calendar/'));
+      await expect(page.getByRole('link', { name: 'Calendar' })).toHaveAttribute('aria-current', 'page');
+    });
   });
 });

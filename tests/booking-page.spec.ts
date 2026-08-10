@@ -28,6 +28,7 @@ test.describe('Booking settings', () => {
     await instant(page, async () => {
       await page.getByRole('link', { name: 'Booking link' }).click();
       await page.waitForURL(url => url.pathname === '/booking');
+      await expect(page.getByRole('link', { name: 'Booking link' })).toHaveAttribute('aria-current', 'page');
       await expect(page.getByRole('heading', { name: 'Booking link', level: 1 })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'No booking link yet' }).filter({ visible: true })).toBeVisible();
     });
