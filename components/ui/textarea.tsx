@@ -10,10 +10,8 @@ const base =
 
 const variants: Record<NonNullable<Props['variant']>, string> = {
   default: cn(base, 'resize-y'),
-  title: cn(
-    base,
-    'h-12 resize-none bg-card/35 px-2 py-1 pr-10 text-base font-semibold leading-5 tracking-tight sm:h-14 sm:py-1.5 sm:text-xl sm:leading-7 dark:bg-card-dark/35',
-  ),
+  title:
+    'border-divider placeholder-gray focus:border-primary dark:border-divider-dark -mx-2 h-12 w-[calc(100%+1rem)] resize-none overflow-hidden rounded-md border bg-white px-2 py-0 pr-12 text-base leading-5 font-semibold tracking-tight text-black transition-colors focus:ring-0 focus:outline-none sm:h-14 sm:text-xl sm:leading-7 dark:bg-card-dark dark:text-white',
 };
 
 export function Textarea({ className, variant = 'default', ...props }: Props) {

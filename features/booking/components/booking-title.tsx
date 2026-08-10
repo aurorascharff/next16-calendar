@@ -4,12 +4,11 @@ import { Check, Pencil } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { IconButton } from '@/components/ui/icon-button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 
 export function BookingTitle({ defaultValue, formId }: { defaultValue: string; formId: string }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(defaultValue);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function toggleEditing() {
     if (editing) {
@@ -27,9 +26,9 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
   return (
     <div className="mt-1">
       <Input form={formId} name="title" type="hidden" value={title} variant="unstyled" />
-      <div className="relative h-12 sm:h-14">
+      <div className="relative h-12">
         {editing ? (
-          <Textarea
+          <Input
             aria-label="Meeting title"
             onChange={event => setTitle(event.target.value)}
             onKeyDown={event => {
@@ -39,17 +38,16 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
             }}
             ref={inputRef}
             required
-            rows={2}
             value={title}
             variant="title"
           />
         ) : (
-          <h1 className="line-clamp-2 h-12 min-w-0 pt-0.5 pr-10 text-base leading-5 font-semibold tracking-tight sm:h-14 sm:pt-0.5 sm:text-xl sm:leading-7">
+          <h1 className="flex h-12 min-w-0 items-center truncate pr-10 text-base font-semibold tracking-tight sm:text-xl" title={title}>
             {title}
           </h1>
         )}
         <IconButton
-          className="absolute top-1/2 right-0 -translate-y-1/2"
+          className="absolute top-1/2 right-1 -translate-y-1/2"
           label={editing ? 'Finish editing meeting title' : 'Edit meeting title'}
           onClick={toggleEditing}
           size="sm"

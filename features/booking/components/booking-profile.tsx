@@ -11,57 +11,63 @@ export async function BookingProfile({ booked, date, handle }: { booked?: string
   const bookedTime = booked && /^([01]\d|2[0-3]):[0-5]\d$/.test(booked) ? booked : undefined;
   const formId = 'public-booking-form';
   const editableTitle = availability.hasCalendar && !bookedTime;
+  const details = (
+    <div className="min-w-0">
+      <p className="text-muted truncate text-sm leading-5">{availability.name}</p>
+      {editableTitle ? (
+        <BookingTitle defaultValue={availability.title} formId={formId} />
+      ) : (
+        <h1 className="mt-1 flex h-12 items-center truncate pr-10 text-base font-semibold tracking-tight sm:text-xl" title={availability.title}>
+          {availability.title}
+        </h1>
+      )}
+      <p className="text-muted mt-1 text-sm">
+        {availability.duration}-minute slots, {availability.startTime}–{availability.endTime}
+      </p>
+      {availability.hasCalendar && !bookedTime ? (
+        <div className="mt-6 grid gap-3">
+          <label className="block min-w-0">
+            <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
+            <Input autoComplete="name" form={formId} name="guestName" placeholder="Name" required />
+          </label>
+          <label className="block min-w-0">
+            <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
+            <Input
+              autoComplete="email"
+              form={formId}
+              name="guestEmail"
+              placeholder="you@example.com"
+              required
+              type="email"
+            />
+          </label>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  if (availability.hasCalendar) {
+    return (
+      <BookingSlots
+        bookedTime={bookedTime}
+        day={availability.day}
+        duration={availability.duration}
+        formId={formId}
+        handle={availability.handle}
+        slots={availability.slots}
+      >
+        {details}
+      </BookingSlots>
+    );
+  }
 
   return (
     <>
-      <div className="min-w-0">
-        <p className="text-muted truncate text-sm leading-5">{availability.name}</p>
-        {editableTitle ? (
-          <BookingTitle defaultValue={availability.title} formId={formId} />
-        ) : (
-          <h1 className="mt-1 flex min-h-12 items-center text-base leading-5 font-semibold tracking-tight sm:min-h-14 sm:text-xl sm:leading-7">
-            {availability.title}
-          </h1>
-        )}
-        <p className="text-muted mt-1 text-sm">
-          {availability.duration}-minute slots, {availability.startTime}–{availability.endTime}
-        </p>
-        {!bookedTime ? (
-          <div className="mt-6 grid gap-3">
-            <label className="block min-w-0">
-              <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-              <Input autoComplete="name" form={formId} name="guestName" placeholder="Name" required />
-            </label>
-            <label className="block min-w-0">
-              <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
-              <Input
-                autoComplete="email"
-                form={formId}
-                name="guestEmail"
-                placeholder="you@example.com"
-                required
-                type="email"
-              />
-            </label>
-          </div>
-        ) : null}
-      </div>
+      {details}
       <div className="border-divider dark:border-divider-dark col-span-full mt-5 min-h-0 overflow-hidden border-t pt-5 sm:mt-8 sm:h-full sm:pt-6 md:col-span-1 md:col-start-2 md:row-start-1 md:mt-0 md:border-t-0 md:border-l md:pt-0 md:pl-8">
-        {availability.hasCalendar ? (
-          <BookingSlots
-            bookedTime={bookedTime}
-            day={availability.day}
-            duration={availability.duration}
-            formId={formId}
-            handle={availability.handle}
-            key={availability.day}
-            slots={availability.slots}
-          />
-        ) : (
-          <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
-            This booking link is not accepting meetings yet.
-          </p>
-        )}
+        <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
+          This booking link is not accepting meetings yet.
+        </p>
       </div>
     </>
   );

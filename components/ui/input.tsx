@@ -11,7 +11,7 @@ const base =
 const variants: Record<NonNullable<Props['variant']>, string> = {
   checkbox: 'accent-primary size-4 w-auto cursor-pointer disabled:cursor-not-allowed disabled:opacity-60',
   default: base,
-  title: cn(base, 'h-9 bg-card/35 px-2 pr-10 text-base font-semibold tracking-tight sm:text-xl dark:bg-card-dark/35'),
+  title: cn(base, 'h-12 bg-white px-3 pr-11 text-base font-semibold tracking-tight sm:text-xl dark:bg-card-dark'),
   unstyled: '',
 };
 
