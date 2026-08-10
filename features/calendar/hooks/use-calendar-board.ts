@@ -30,6 +30,9 @@ type MoveOrigin = {
   y0: number;
 };
 
+type ResizeTarget = { endMin: number; sourceId: string; startMin: number };
+type ResizeOrigin = ResizeTarget & { pointerId: number };
+
 export type SelectedEvent = { anchorRect?: DOMRect | null; event: CalendarEvent };
 export type CalendarBoardInteractions = {
   create: {
@@ -49,6 +52,7 @@ export type CalendarBoardInteractions = {
   onEventSelect: (event: CalendarEvent, anchorRect: DOMRect) => void;
   resize: { endMin: number; sourceId: string; startMin: number } | null;
   resizeHandlers: {
+    onPointerCancel: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerDown: (event: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerMove: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerUp: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
@@ -71,7 +75,7 @@ export function useCalendarBoard({
   const gridMinWidth = TIME_COLUMN_WIDTH + days.length * DAY_COLUMN_MIN_WIDTH;
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
   const [dragMove, setDragMove] = useState<{ day: string; id: string; startMin: number } | null>(null);
-  const [resize, setResize] = useState<{ endMin: number; sourceId: string; startMin: number } | null>(null);
+  const [resize, setResize] = useState<ResizeTarget | null>(null);
   const [createSel, setCreateSel] = useState<{ aMin: number; bMin: number; day: string } | null>(null);
   const [createDraft, setCreateDraft] = useState<{
     allDay?: boolean;
@@ -82,6 +86,7 @@ export function useCalendarBoard({
   } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const moveRef = useRef<MoveOrigin | null>(null);
+  const resizeRef = useRef<ResizeOrigin | null>(null);
   const resizeColTopRef = useRef(0);
   const dragMoveRef = useRef<{ day: string; id: string; startMin: number } | null>(null);
   const createRef = useRef<{ aMin: number; day: string; pointerId: number } | null>(null);
@@ -195,24 +200,48 @@ export function useCalendarBoard({
     resizeColTopRef.current = column ? column.getBoundingClientRect().top : 0;
     pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
     const startMin = eventStartMinutes(event.start);
-    setResize({ endMin: startMin + event.duration, sourceId: event.sourceId, startMin });
+    const next = {
+      endMin: startMin + event.duration,
+      pointerId: pointerEvent.pointerId,
+      sourceId: event.sourceId,
+      startMin,
+    };
+    resizeRef.current = next;
+    setResize(next);
+  }
+
+  function targetResizeFromPointer(active: ResizeOrigin, pointerEvent: React.PointerEvent<HTMLElement>) {
+    const raw = snapMinutes(pointerEvent.clientY, resizeColTopRef.current);
+    return { ...active, endMin: Math.max(active.startMin + SNAP_MINUTES, raw) };
   }
 
   function handleResizeMove(pointerEvent: React.PointerEvent<HTMLElement>) {
-    if (!resize) return;
-    const raw = snapMinutes(pointerEvent.clientY, resizeColTopRef.current);
-    setResize(current => (current ? { ...current, endMin: Math.max(current.startMin + SNAP_MINUTES, raw) } : current));
+    const active = resizeRef.current;
+    if (!active || active.pointerId !== pointerEvent.pointerId) return;
+    const next = targetResizeFromPointer(active, pointerEvent);
+    resizeRef.current = next;
+    setResize(next);
   }
 
   function handleResizeUp(pointerEvent: React.PointerEvent<HTMLElement>) {
-    if (!resize) return;
+    const active = resizeRef.current;
+    if (!active || active.pointerId !== pointerEvent.pointerId) return;
+    const target = targetResizeFromPointer(active, pointerEvent);
+    resizeRef.current = null;
     try {
       pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId);
     } catch {}
-    const duration = resize.endMin - resize.startMin;
-    const sourceId = resize.sourceId;
     setResize(null);
+    const duration = target.endMin - target.startMin;
+    const sourceId = target.sourceId;
     void mutate({ duration, sourceId, type: 'resize' });
+  }
+
+  function handleResizeCancel(pointerEvent: React.PointerEvent<HTMLElement>) {
+    if (resizeRef.current?.pointerId !== pointerEvent.pointerId) return;
+    pointerEvent.stopPropagation();
+    resizeRef.current = null;
+    setResize(null);
   }
 
   function handleCreateDown(day: string, event: React.PointerEvent<HTMLDivElement>) {
@@ -289,6 +318,7 @@ export function useCalendarBoard({
     onEventSelect: handleEventSelect,
     resize,
     resizeHandlers: {
+      onPointerCancel: handleResizeCancel,
       onPointerDown: handleResizeDown,
       onPointerMove: handleResizeMove,
       onPointerUp: handleResizeUp,

@@ -39,15 +39,13 @@ test.describe('Calendar', () => {
     await page.goto('/calendar/2026-08-10');
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
 
-    const dayColumn = page.locator('[data-day-column]').first();
-    const timeCell = dayColumn.locator(':scope > div').nth(8);
-    await timeCell.scrollIntoViewIfNeeded();
-    const bounds = await timeCell.boundingBox();
+    const dayColumn = page.locator('[data-day-column]').nth(2);
+    const bounds = await dayColumn.boundingBox();
     expect(bounds).not.toBeNull();
     if (!bounds) return;
 
     const x = bounds.x + bounds.width / 2;
-    const startY = bounds.y + bounds.height / 2;
+    const startY = bounds.y + 6 * 72;
     await page.mouse.move(x, startY);
     await page.mouse.down();
     await page.mouse.move(x, startY + 72, { steps: 4 });
@@ -56,6 +54,30 @@ test.describe('Calendar', () => {
 
     await page.mouse.up();
     await expect(page.getByRole('dialog', { name: 'New event' })).toBeVisible();
+  });
+
+  test('releasing a resize handle commits the final duration', async ({ page }) => {
+    await page.goto('/calendar/2026-08-10');
+    const event = page.getByTitle('Focus time · 08:30').first();
+    await expect(event).toBeVisible();
+
+    const initialBounds = await event.boundingBox();
+    const resizeHandle = event.locator('[data-resize-handle]');
+    const handleBounds = await resizeHandle.boundingBox();
+    expect(initialBounds).not.toBeNull();
+    expect(handleBounds).not.toBeNull();
+    if (!initialBounds || !handleBounds) return;
+
+    const x = handleBounds.x + handleBounds.width / 2;
+    const y = handleBounds.y + handleBounds.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y + 72);
+
+    await expect.poll(async () => (await event.boundingBox())?.height).toBeGreaterThan(initialBounds.height);
+
+    await page.mouse.up();
+    await expect(page.getByText('Create your own calendar to make changes.')).toBeVisible();
   });
 
   test('client navigation marks the calendar active immediately', async ({ page }) => {
