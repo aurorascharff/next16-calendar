@@ -128,22 +128,6 @@
   box-shadow: inset 0 0 0 1px var(--cal-db);
 }
 
-.calendar-saving-indicator {
-  visibility: hidden;
-  opacity: 0;
-  transform: scale(0.9);
-  transition:
-    opacity 150ms ease,
-    transform 150ms ease,
-    visibility 150ms;
-}
-
-main:has([data-calendar-pending]) .calendar-saving-indicator {
-  visibility: visible;
-  opacity: 1;
-  transform: scale(1);
-}
-
 .skeleton-animation {
   --skeleton-base: rgb(0 0 0 / 0.055);
   --skeleton-shine: rgb(0 0 0 / 0.1);

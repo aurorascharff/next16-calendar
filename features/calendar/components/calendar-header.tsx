@@ -1,8 +1,8 @@
 import { MobileCalendarSidebarTrigger } from '@/components/mobile-calendar-sidebar';
 import { FlowMark } from '@/components/ui/flow-mark';
-import { Spinner } from '@/components/ui/spinner';
 import { formatMonth } from '../calendar-utils';
 import { CalendarControls, CalendarShortcuts, DatePicker, ViewToggle } from './calendar-controls';
+import { CalendarSavingIndicator } from './calendar-saving-indicator';
 import { NewEventButton } from './new-event-button';
 import type { CalendarView } from '../types/calendar';
 
@@ -16,9 +16,7 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
             <FlowMark className="size-8 shrink-0 sm:hidden" />
             <h1 className="hidden truncate text-lg font-semibold tracking-tight sm:block">{formatMonth(date)}</h1>
             <DatePicker date={date} label="month" view={view} />
-            <span className="calendar-saving-indicator text-accent grid size-5 shrink-0 place-items-center" aria-hidden>
-              <Spinner className="size-4 motion-reduce:animate-none" />
-            </span>
+            <CalendarSavingIndicator />
           </div>
           <div className="hidden items-center gap-2 sm:flex">
             <CalendarControls date={date} view={view} />

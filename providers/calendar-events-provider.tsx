@@ -50,11 +50,6 @@ export function CalendarEventsProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-      {isPending ? (
-        <span className="sr-only" data-calendar-pending role="status">
-          Saving calendar changes
-        </span>
-      ) : null}
     </CalendarEventsContext.Provider>
   );
 }
