@@ -27,7 +27,7 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
   return (
     <div className="mt-1">
       <Input form={formId} name="title" type="hidden" value={title} variant="unstyled" />
-      <div className="relative h-12 sm:h-9">
+      <div className="relative h-12 sm:h-14">
         {editing ? (
           <Textarea
             aria-label="Meeting title"
@@ -44,7 +44,7 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
             variant="title"
           />
         ) : (
-          <h1 className="line-clamp-2 h-12 min-w-0 pt-0.5 pr-10 text-base leading-5 font-semibold tracking-tight sm:h-9 sm:truncate sm:pt-0.5 sm:text-xl sm:leading-7 sm:whitespace-nowrap">
+          <h1 className="line-clamp-2 h-12 min-w-0 pt-0.5 pr-10 text-base leading-5 font-semibold tracking-tight sm:h-14 sm:pt-0.5 sm:text-xl sm:leading-7">
             {title}
           </h1>
         )}

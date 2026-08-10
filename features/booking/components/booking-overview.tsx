@@ -13,7 +13,7 @@ export async function BookingLinkDetails() {
 
 export function BookingLinkCard({ children }: { children: ReactNode }) {
   return (
-    <div className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 min-h-72 rounded-lg border p-6">
+    <div className="border-divider bg-white dark:border-divider-dark dark:bg-card-dark min-h-72 rounded-lg border p-6">
       <div className="bg-accent/15 text-accent mb-4 grid size-10 place-items-center rounded-lg">
         <Link2 className="size-5" />
       </div>
@@ -24,7 +24,7 @@ export function BookingLinkCard({ children }: { children: ReactNode }) {
 
 export function BookingSettingsCard({ children }: { children: ReactNode }) {
   return (
-    <div className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 flex min-h-[26rem] flex-col rounded-lg border p-5">
+    <div className="border-divider bg-white dark:border-divider-dark dark:bg-card-dark flex min-h-[26rem] flex-col rounded-lg border p-5">
       {children}
     </div>
   );

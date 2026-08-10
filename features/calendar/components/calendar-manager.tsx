@@ -15,7 +15,7 @@ import { CALENDAR_COLORS, colorStyle } from '../utils/colors';
 import { useCalendarVisibility } from './calendar-visibility';
 import type { Calendar, CalendarColor } from '../types/calendar';
 
-export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
+export function CalendarManager({ calendars, expanded = false }: { calendars: Calendar[]; expanded?: boolean }) {
   const { hidden, toggle } = useCalendarVisibility();
   const [editing, setEditing] = useState<Calendar | null>(null);
   const [isDeleting, startDelete] = useTransition();
@@ -40,13 +40,21 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
           const isHidden = hidden.has(calendar.id);
           return (
             <div
-              className="group hover:bg-card dark:hover:bg-card-dark flex items-center justify-center rounded-md transition-colors lg:justify-start lg:pr-1 lg:pl-3"
+              className={cn(
+                'group hover:bg-card dark:hover:bg-card-dark flex items-center justify-center rounded-md transition-colors',
+                expanded ? 'justify-start pr-1 pl-3' : 'lg:justify-start lg:pr-1 lg:pl-3',
+              )}
               key={calendar.id}
             >
               <button
                 aria-label={`${isHidden ? 'Show' : 'Hide'} ${calendar.name} calendar`}
                 aria-pressed={!isHidden}
-                className="grid size-9 shrink-0 place-items-center text-sm lg:flex lg:min-w-0 lg:flex-1 lg:justify-start lg:gap-2.5 lg:py-1.5 lg:text-left"
+                className={cn(
+                  'grid size-9 shrink-0 place-items-center text-sm',
+                  expanded
+                    ? 'flex min-w-0 flex-1 justify-start gap-2.5 py-1.5 text-left'
+                    : 'lg:flex lg:min-w-0 lg:flex-1 lg:justify-start lg:gap-2.5 lg:py-1.5 lg:text-left',
+                )}
                 onClick={() => toggle(calendar.id)}
                 type="button"
               >
@@ -54,13 +62,22 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
                   className={cn('size-2.5 shrink-0 rounded-full transition-opacity', isHidden && 'opacity-25')}
                   style={colorStyle(calendar.color)}
                 />
-                <span className={cn('text-muted hidden truncate lg:inline', isHidden && 'line-through opacity-60')}>
+                <span
+                  className={cn(
+                    'text-muted truncate',
+                    expanded ? 'inline' : 'hidden lg:inline',
+                    isHidden && 'line-through opacity-60',
+                  )}
+                >
                   {calendar.name}
                 </span>
               </button>
               <Ariakit.MenuProvider>
                 <IconButton
-                  className="hidden opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 lg:inline-flex"
+                  className={cn(
+                    'opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100',
+                    expanded ? 'inline-flex' : 'hidden lg:inline-flex',
+                  )}
                   disabled={isDeleting}
                   label={`${calendar.name} options`}
                   render={<Ariakit.MenuButton />}
@@ -122,15 +139,21 @@ export function NewCalendarButton({ children, className }: { children?: ReactNod
   );
 }
 
-export function CalendarManagerSkeleton() {
+export function CalendarManagerSkeleton({ expanded = false }: { expanded?: boolean }) {
   const widths = ['w-20', 'w-24', 'w-16', 'w-20'];
 
   return (
-    <div aria-label="Loading calendars" className="space-y-0.5 px-0 lg:px-3">
+    <div aria-label="Loading calendars" className={cn('space-y-0.5', expanded ? 'px-3' : 'px-0 lg:px-3')}>
       {widths.map((width, index) => (
-        <div className="flex h-9 items-center justify-center gap-2.5 lg:h-8 lg:justify-start" key={index}>
+        <div
+          className={cn(
+            'flex items-center gap-2.5',
+            expanded ? 'h-8 justify-start' : 'h-9 justify-center lg:h-8 lg:justify-start',
+          )}
+          key={index}
+        >
           <Skeleton className="size-2.5 shrink-0 rounded-full" />
-          <Skeleton className={cn('hidden h-3 rounded-full lg:block', width)} />
+          <Skeleton className={cn('h-3 rounded-full', expanded ? 'block' : 'hidden lg:block', width)} />
         </div>
       ))}
     </div>

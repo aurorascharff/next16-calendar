@@ -71,27 +71,27 @@
 }
 
 .cal-chip-booking {
-  background-color: color-mix(in srgb, var(--cal-lb) 12%, var(--color-surface));
-  color: var(--cal-lb);
-  --tw-ring-color: var(--cal-lb);
-  box-shadow: inset 0 0 0 2px var(--cal-lb);
+  background-color: var(--cal-lb);
+  color: var(--cal-lt);
+  --tw-ring-color: rgb(255 255 255 / 0.68);
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.68);
 }
 
 .dark .cal-chip-booking {
-  background-color: color-mix(in srgb, var(--cal-db) 12%, var(--color-surface-dark));
-  color: var(--cal-db);
-  --tw-ring-color: var(--cal-db);
-  box-shadow: inset 0 0 0 2px var(--cal-db);
+  background-color: var(--cal-db);
+  color: var(--cal-dt);
+  --tw-ring-color: rgb(255 255 255 / 0.52);
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.52);
 }
 
 .cal-booking-row {
-  background-color: color-mix(in srgb, var(--cal-lb) 7%, transparent);
-  box-shadow: inset 0 0 0 1px var(--cal-lb);
+  background-color: color-mix(in srgb, var(--cal-lb) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cal-lb) 60%, transparent);
 }
 
 .dark .cal-booking-row {
-  background-color: color-mix(in srgb, var(--cal-db) 7%, transparent);
-  box-shadow: inset 0 0 0 1px var(--cal-db);
+  background-color: color-mix(in srgb, var(--cal-db) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cal-db) 68%, transparent);
 }
 
 .calendar-pending-spinner {

@@ -12,7 +12,7 @@ const variants: Record<NonNullable<Props['variant']>, string> = {
   default: cn(base, 'resize-y'),
   title: cn(
     base,
-    'h-12 resize-none bg-card/35 px-2 py-1 pr-10 text-base font-semibold leading-5 tracking-tight sm:h-9 sm:py-1 sm:text-xl sm:leading-7 dark:bg-card-dark/35',
+    'h-12 resize-none bg-card/35 px-2 py-1 pr-10 text-base font-semibold leading-5 tracking-tight sm:h-14 sm:py-1.5 sm:text-xl sm:leading-7 dark:bg-card-dark/35',
   ),
 };
 

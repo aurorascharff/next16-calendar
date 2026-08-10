@@ -44,7 +44,9 @@ function BookingConfirmation({
         <p className="text-muted mt-2 text-sm">
           {formatDayLong(day)} at <span className="font-medium text-black tabular-nums dark:text-white">{time}</span>
         </p>
-        <p className="text-muted mt-1 text-sm">{duration} minutes. A confirmation is on its way.</p>
+        <p className="text-muted mt-1 text-sm">
+          Your {duration}-minute meeting is booked. A confirmation is on its way.
+        </p>
         <Button className="mt-6" render={<Link href={dayHref(handle, day)} />} variant="secondary">
           Book another
         </Button>
@@ -94,7 +96,7 @@ export function BookingSlots({
 
   return (
     <Boundary label="BookingSlots" asChild>
-      <div className="flex w-full flex-col sm:h-full sm:min-h-0">
+      <div className="flex w-full flex-col md:h-full md:min-h-0">
         {bookedTime ? (
           <BookingConfirmation day={day} duration={duration} handle={handle} time={bookedTime} />
         ) : (
@@ -130,28 +132,18 @@ export function BookingSlots({
                 <DayNavigationIcon direction="next" />
               </IconButton>
             </div>
-            <form action={formAction} className="flex flex-col sm:min-h-0 sm:flex-1" id={formId}>
+            <form action={formAction} className="flex flex-col md:min-h-0 md:flex-1 md:overflow-hidden" id={formId}>
               <Input name="day" type="hidden" value={day} variant="unstyled" />
               <Input name="handle" type="hidden" value={handle} variant="unstyled" />
-              <div className="mb-3 grid gap-3 sm:mb-4 sm:grid-cols-2">
-                <label className="block min-w-0">
-                  <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-                  <Input autoComplete="name" name="guestName" placeholder="Name" required />
-                </label>
-                <label className="block min-w-0">
-                  <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
-                  <Input autoComplete="email" name="guestEmail" placeholder="you@example.com" required type="email" />
-                </label>
-              </div>
               <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
               <DirectionalSlide key={day} name="booking-slots">
-                <div className="min-h-0 overflow-visible py-1 sm:flex-1 sm:[scrollbar-gutter:stable] sm:overflow-y-auto sm:overscroll-contain sm:pr-1">
+                <div className="min-h-0 overflow-visible pt-1 pb-3 md:flex-1 md:[scrollbar-gutter:stable] md:overflow-y-auto md:overscroll-contain md:pr-1">
                   {allTaken ? (
                     <p className="text-muted border-divider dark:border-divider-dark flex h-full items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
                       No open {duration}-minute slots on this day. Try another date.
                     </p>
                   ) : (
-                    <div className="grid auto-rows-[2.875rem] gap-2 p-px sm:grid-cols-2">
+                    <div className="grid auto-rows-[2.625rem] gap-2 p-px sm:grid-cols-2">
                       {visibleSlots.map(slot => (
                         <RadioCard
                           checked={selectedSlot?.day === day && selectedSlot.time === slot.time}
@@ -170,7 +162,7 @@ export function BookingSlots({
                   )}
                 </div>
               </DirectionalSlide>
-              <div className="border-divider dark:border-divider-dark mt-4 grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-1 pt-2 pb-4 sm:mt-auto sm:min-h-20 sm:border-t sm:py-4">
+              <div className="border-divider dark:border-divider-dark mt-3 grid min-h-16 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-t px-1 py-3 md:mt-auto">
                 {selectedAvailable ? (
                   <div className="min-w-0">
                     <p className="text-sm font-semibold tabular-nums">{selectedAvailable.time}</p>

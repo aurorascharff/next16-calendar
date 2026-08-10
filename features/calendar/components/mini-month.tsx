@@ -136,8 +136,8 @@ function MiniMonthCalendar({
                 className={cn(
                   'relative grid h-7 w-full place-items-center text-xs tabular-nums',
                   inWeek && 'bg-divider/70 dark:bg-divider-dark/80',
-                  inWeek && key === firstKey && 'rounded-l-md',
-                  inWeek && key === lastKey && 'rounded-r-md',
+                  inWeek && key === firstKey && 'rounded-l-full',
+                  inWeek && key === lastKey && 'rounded-r-full',
                 )}
                 href={calendarHref(key, calendarView)}
                 key={key}
@@ -149,9 +149,9 @@ function MiniMonthCalendar({
               >
                 <span
                   className={cn(
-                    'grid size-7 place-items-center rounded-md',
-                    isToday && 'bg-accent/15 text-accent font-semibold',
-                    !isToday && isSelected && 'bg-accent/10 text-accent font-semibold',
+                    'grid size-7 place-items-center rounded-full',
+                    isToday && 'bg-accent font-semibold text-white',
+                    !isToday && isSelected && 'bg-accent font-semibold text-white',
                     !isToday && !isSelected && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
                     !isToday && isOutside && 'text-muted/40',
                   )}

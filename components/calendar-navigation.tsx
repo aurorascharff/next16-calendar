@@ -18,17 +18,25 @@ const REPO_URL = 'https://github.com/aurorascharff/next16-calendar';
 type CalendarLinkProps = Omit<ComponentProps<typeof Link>, 'href'> & { href?: Route };
 type CalendarNavLinkProps = Omit<ComponentProps<typeof NavLink>, 'href' | 'match'> & { href?: Route };
 
-export function CalendarSidebarBrand() {
+export function CalendarSidebarBrand({ expanded = false }: { expanded?: boolean }) {
   return (
-    <div className="mb-6 flex flex-col items-center gap-2 px-0 lg:flex-row lg:justify-between lg:px-2">
+    <div
+      className={`mb-6 flex items-center gap-2 ${expanded ? 'flex-row justify-between px-2' : 'flex-col px-0 lg:flex-row lg:justify-between lg:px-2'}`}
+    >
       <CalendarHomeLink aria-label="Flow home" className="flex min-w-0 items-center gap-2.5">
         <FlowMark className="size-8 shrink-0" />
-        <span className="hidden min-w-0 lg:block">
+        <span className={expanded ? 'min-w-0' : 'hidden min-w-0 lg:block'}>
           <span className="block truncate font-semibold tracking-tight">Flow</span>
           <span className="text-muted block truncate text-xs">Shape your day</span>
         </span>
       </CalendarHomeLink>
-      <IconButton className="hidden lg:inline-flex" external href={REPO_URL} label="View source on GitHub" size="sm">
+      <IconButton
+        className={expanded ? 'mr-8' : 'hidden lg:inline-flex'}
+        external
+        href={REPO_URL}
+        label="View source on GitHub"
+        size="sm"
+      >
         <GitHubIcon className="size-4" />
       </IconButton>
     </div>
@@ -82,15 +90,15 @@ function CalendarHomeNavLinkView({ href = '/', ...props }: CalendarNavLinkProps)
   return <NavLink href={href} match="/calendar" {...props} />;
 }
 
-export function WorkspaceNavigationLinks() {
+export function WorkspaceNavigationLinks({ expanded = false }: { expanded?: boolean }) {
   return (
-    <Suspense fallback={<WorkspaceNavigationLinksView />}>
-      <WorkspaceNavigationLinksInner />
+    <Suspense fallback={<WorkspaceNavigationLinksView expanded={expanded} />}>
+      <WorkspaceNavigationLinksInner expanded={expanded} />
     </Suspense>
   );
 }
 
-function WorkspaceNavigationLinksInner() {
+function WorkspaceNavigationLinksInner({ expanded }: { expanded: boolean }) {
   const pathname = usePathname();
   const current: 'booking' | 'calendar' = pathname.startsWith('/booking') ? 'booking' : 'calendar';
   const [active, setActive] = useOptimistic(current);
@@ -101,36 +109,39 @@ function WorkspaceNavigationLinksInner() {
     startTransition(() => setActive(next));
   }
 
-  return <WorkspaceNavigationLinksView active={active} onNavigate={navigate} />;
+  return <WorkspaceNavigationLinksView active={active} expanded={expanded} onNavigate={navigate} />;
 }
 
 function WorkspaceNavigationLinksView({
   active,
+  expanded = false,
   onNavigate,
 }: {
   active?: 'booking' | 'calendar';
+  expanded?: boolean;
   onNavigate?: (next: 'booking' | 'calendar') => void;
 } = {}) {
+  const linkClass = expanded ? `${sidebarLink} w-full justify-start px-3` : sidebarLink;
   return (
     <nav className="flex flex-col gap-1">
       <CalendarHomeNavLink
         active={active === undefined ? undefined : active === 'calendar'}
         aria-label="Calendar"
-        className={sidebarLink}
+        className={linkClass}
         onNavigate={() => onNavigate?.('calendar')}
       >
         <CalendarDays className="size-4" />
-        <span className="hidden lg:inline">Calendar</span>
+        <span className={expanded ? undefined : 'hidden lg:inline'}>Calendar</span>
       </CalendarHomeNavLink>
       <NavLink
         active={active === undefined ? undefined : active === 'booking'}
         aria-label="Booking link"
         href="/booking"
-        className={sidebarLink}
+        className={linkClass}
         onNavigate={() => onNavigate?.('booking')}
       >
         <Link2 className="size-4" />
-        <span className="hidden lg:inline">Booking link</span>
+        <span className={expanded ? undefined : 'hidden lg:inline'}>Booking link</span>
       </NavLink>
     </nav>
   );
