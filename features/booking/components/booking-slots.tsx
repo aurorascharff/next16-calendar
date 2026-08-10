@@ -171,14 +171,14 @@ export function BookingSlots({
                   )}
                 </div>
               </DirectionalSlide>
-              <div className="border-divider dark:border-divider-dark mt-auto grid min-h-20 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-t px-1 py-4">
+              <div className="border-divider dark:border-divider-dark mt-4 grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-1 pt-2 pb-4 sm:mt-auto sm:min-h-20 sm:border-t sm:py-4">
                 {selectedAvailable ? (
                   <div className="min-w-0">
                     <p className="text-sm font-semibold tabular-nums">{selectedAvailable.time}</p>
                     <p className="text-muted text-xs">{duration} minutes</p>
                   </div>
                 ) : null}
-                <Button className="h-11 min-w-24 shrink-0 px-5" type="submit">
+                <Button className="col-start-2 justify-self-end" type="submit">
                   Book
                 </Button>
               </div>
