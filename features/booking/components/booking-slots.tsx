@@ -25,6 +25,35 @@ function DayNavigationIcon({ direction }: { direction: 'next' | 'previous' }) {
   return direction === 'previous' ? <ChevronLeft className="size-4.5" /> : <ChevronRight className="size-4.5" />;
 }
 
+function BookingConfirmation({
+  day,
+  duration,
+  handle,
+  time,
+}: {
+  day: string;
+  duration: number;
+  handle: string;
+  time: string;
+}) {
+  return (
+    <div className="flex min-h-72 flex-1 items-center justify-center py-6 sm:min-h-0">
+      <div className="w-full max-w-sm text-center">
+        <FlowMark animated className="mx-auto size-12" />
+        <h2 className="mt-4 text-lg font-semibold">You&apos;re booked</h2>
+        <p className="text-muted mt-2 text-sm">
+          {formatDayLong(day)} at{' '}
+          <span className="font-medium text-black tabular-nums dark:text-white">{time}</span>
+        </p>
+        <p className="text-muted mt-1 text-sm">{duration} minutes. A confirmation is on its way.</p>
+        <Button className="mt-6" render={<Link href={dayHref(handle, day)} />} variant="secondary">
+          Book another
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function BookingSlots({
   bookedTime,
   day,
@@ -67,109 +96,94 @@ export function BookingSlots({
   return (
     <Boundary label="BookingSlots" asChild>
       <div className="flex w-full flex-col sm:h-full sm:min-h-0">
-        <div className="mb-3 flex items-center justify-between gap-3 sm:mb-4">
-          <IconButton
-            label="Previous day"
-            render={
-              <Link
-                href={dayHref(handle, previousDay)}
-                onNavigate={() => navigateDay(previousDay)}
-                prefetch
-                transitionTypes={['nav-back']}
-              />
-            }
-          >
-            <DayNavigationIcon direction="previous" />
-          </IconButton>
-          <span aria-live="polite" className="text-sm font-semibold tabular-nums">
-            {formatDayLong(displayDay)}
-          </span>
-          <IconButton
-            label="Next day"
-            render={
-              <Link
-                href={dayHref(handle, nextDay)}
-                onNavigate={() => navigateDay(nextDay)}
-                prefetch
-                transitionTypes={['nav-forward']}
-              />
-            }
-          >
-            <DayNavigationIcon direction="next" />
-          </IconButton>
-        </div>
         {bookedTime ? (
-          <div className="border-divider bg-card/60 dark:border-divider-dark dark:bg-card-dark/60 rounded-lg border p-4">
-            <div className="flex items-start gap-3">
-              <FlowMark animated className="size-9 shrink-0" />
-              <div className="min-w-0 pt-0.5">
-                <p className="text-sm font-semibold">You&apos;re booked</p>
-                <p className="text-muted mt-1 text-sm">
-                  {formatDayLong(day)} at{' '}
-                  <span className="font-medium text-black tabular-nums dark:text-white">{bookedTime}</span>
-                </p>
-                <p className="text-muted mt-1 text-xs">{duration} minutes. A confirmation is on its way.</p>
-              </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Button render={<Link href={dayHref(handle, day)} />} variant="secondary">
-                Book another
-              </Button>
-            </div>
-          </div>
+          <BookingConfirmation day={day} duration={duration} handle={handle} time={bookedTime} />
         ) : (
-          <form action={formAction} className="flex flex-col sm:min-h-0 sm:flex-1" id={formId}>
-            <Input name="day" type="hidden" value={day} variant="unstyled" />
-            <Input name="handle" type="hidden" value={handle} variant="unstyled" />
-            <div className="mb-3 grid gap-3 sm:mb-4 sm:grid-cols-2">
-              <label className="block min-w-0">
-                <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
-                <Input autoComplete="name" name="guestName" placeholder="Name" required />
-              </label>
-              <label className="block min-w-0">
-                <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
-                <Input autoComplete="email" name="guestEmail" placeholder="you@example.com" required type="email" />
-              </label>
+          <>
+            <div className="mb-3 flex items-center justify-between gap-3 sm:mb-4">
+              <IconButton
+                label="Previous day"
+                render={
+                  <Link
+                    href={dayHref(handle, previousDay)}
+                    onNavigate={() => navigateDay(previousDay)}
+                    prefetch
+                    transitionTypes={['nav-back']}
+                  />
+                }
+              >
+                <DayNavigationIcon direction="previous" />
+              </IconButton>
+              <span aria-live="polite" className="text-sm font-semibold tabular-nums">
+                {formatDayLong(displayDay)}
+              </span>
+              <IconButton
+                label="Next day"
+                render={
+                  <Link
+                    href={dayHref(handle, nextDay)}
+                    onNavigate={() => navigateDay(nextDay)}
+                    prefetch
+                    transitionTypes={['nav-forward']}
+                  />
+                }
+              >
+                <DayNavigationIcon direction="next" />
+              </IconButton>
             </div>
-            <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
-            <DirectionalSlide key={day} name="booking-slots">
-              <div className="min-h-0 overflow-visible py-1 sm:flex-1 sm:[scrollbar-gutter:stable] sm:overflow-y-auto sm:overscroll-contain sm:pr-1">
-                {allTaken ? (
-                  <p className="text-muted border-divider dark:border-divider-dark flex h-full items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
-                    No open {duration}-minute slots on this day. Try another date.
-                  </p>
-                ) : (
-                  <div className="grid auto-rows-[2.875rem] gap-2 p-px sm:grid-cols-2">
-                    {visibleSlots.map(slot => (
-                      <RadioCard
-                        checked={selectedSlot?.day === day && selectedSlot.time === slot.time}
-                        disabled={slot.taken}
-                        key={slot.time}
-                        name="slot"
-                        onChange={() => setSelectedSlot({ day, time: slot.time })}
-                        required
-                        value={slot.time}
-                      >
-                        {slot.time}
-                        {slot.taken ? <span className="ml-2 text-[11px] no-underline">Booked</span> : null}
-                      </RadioCard>
-                    ))}
-                  </div>
-                )}
+            <form action={formAction} className="flex flex-col sm:min-h-0 sm:flex-1" id={formId}>
+              <Input name="day" type="hidden" value={day} variant="unstyled" />
+              <Input name="handle" type="hidden" value={handle} variant="unstyled" />
+              <div className="mb-3 grid gap-3 sm:mb-4 sm:grid-cols-2">
+                <label className="block min-w-0">
+                  <span className="text-muted mb-1.5 block text-xs font-medium">Your name</span>
+                  <Input autoComplete="name" name="guestName" placeholder="Name" required />
+                </label>
+                <label className="block min-w-0">
+                  <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
+                  <Input autoComplete="email" name="guestEmail" placeholder="you@example.com" required type="email" />
+                </label>
               </div>
-            </DirectionalSlide>
-            <div className="border-divider dark:border-divider-dark mt-auto flex min-h-20 items-center gap-4 border-t py-4">
-              {selectedAvailable ? (
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold tabular-nums">{selectedAvailable.time}</p>
-                  <p className="text-muted text-xs">{duration} minutes</p>
+              <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
+              <DirectionalSlide key={day} name="booking-slots">
+                <div className="min-h-0 overflow-visible py-1 sm:flex-1 sm:[scrollbar-gutter:stable] sm:overflow-y-auto sm:overscroll-contain sm:pr-1">
+                  {allTaken ? (
+                    <p className="text-muted border-divider dark:border-divider-dark flex h-full items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
+                      No open {duration}-minute slots on this day. Try another date.
+                    </p>
+                  ) : (
+                    <div className="grid auto-rows-[2.875rem] gap-2 p-px sm:grid-cols-2">
+                      {visibleSlots.map(slot => (
+                        <RadioCard
+                          checked={selectedSlot?.day === day && selectedSlot.time === slot.time}
+                          disabled={slot.taken}
+                          key={slot.time}
+                          name="slot"
+                          onChange={() => setSelectedSlot({ day, time: slot.time })}
+                          required
+                          value={slot.time}
+                        >
+                          {slot.time}
+                          {slot.taken ? <span className="ml-2 text-[11px] no-underline">Booked</span> : null}
+                        </RadioCard>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ) : null}
-              <Button className="ml-auto h-11 min-w-24 shrink-0 px-5 max-sm:flex-1" type="submit">
-                Book
-              </Button>
-            </div>
-          </form>
+              </DirectionalSlide>
+              <div className="border-divider dark:border-divider-dark mt-auto grid min-h-20 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-t px-1 py-4">
+                {selectedAvailable ? (
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold tabular-nums">{selectedAvailable.time}</p>
+                    <p className="text-muted text-xs">{duration} minutes</p>
+                  </div>
+                ) : null}
+                <Button className="h-11 min-w-24 shrink-0 px-5" type="submit">
+                  Book
+                </Button>
+              </div>
+            </form>
+          </>
         )}
       </div>
     </Boundary>
