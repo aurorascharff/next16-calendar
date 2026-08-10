@@ -35,6 +35,29 @@ test.describe('Calendar', () => {
     await expect(page.getByText('Focus time').first()).toBeVisible();
   });
 
+  test('dragging an empty time range shows its preview before pointer release', async ({ page }) => {
+    await page.goto('/calendar/2026-08-10');
+    await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
+
+    const dayColumn = page.locator('[data-day-column]').first();
+    const timeCell = dayColumn.locator(':scope > div').nth(8);
+    await timeCell.scrollIntoViewIfNeeded();
+    const bounds = await timeCell.boundingBox();
+    expect(bounds).not.toBeNull();
+    if (!bounds) return;
+
+    const x = bounds.x + bounds.width / 2;
+    const startY = bounds.y + bounds.height / 2;
+    await page.mouse.move(x, startY);
+    await page.mouse.down();
+    await page.mouse.move(x, startY + 72, { steps: 4 });
+
+    await expect(dayColumn.locator('.cal-chip').filter({ hasText: 'New event' })).toBeVisible();
+
+    await page.mouse.up();
+    await expect(page.getByRole('dialog', { name: 'New event' })).toBeVisible();
+  });
+
   test('client navigation marks the calendar active immediately', async ({ page }) => {
     await page.goto('/booking');
     await expect(page.getByRole('heading', { name: 'Booking link', level: 1 })).toBeVisible();
