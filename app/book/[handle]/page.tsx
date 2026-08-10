@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps<'/book/[handle]'>):
 export default function BookingPage({ params, searchParams }: PageProps<'/book/[handle]'>) {
   return (
     <main className="bg-surface dark:bg-surface-dark grid min-h-svh items-start justify-items-center overflow-x-hidden px-3 py-3 sm:h-svh sm:min-h-0 sm:overflow-hidden sm:px-4 sm:py-8">
-      <section className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 flex w-full max-w-xl flex-col rounded-lg border p-4 sm:max-h-full sm:overflow-hidden sm:p-8">
+      <section className="border-divider bg-card/40 dark:border-divider-dark dark:bg-card-dark/30 flex w-full max-w-xl flex-col rounded-lg border p-4 sm:h-[min(50rem,calc(100svh-4rem))] sm:overflow-hidden sm:p-8">
         <Link
           className="text-muted hover:text-accent mb-5 inline-flex items-center gap-1.5 text-sm font-medium sm:mb-7"
           href="/"
