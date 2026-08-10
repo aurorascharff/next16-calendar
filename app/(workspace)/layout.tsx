@@ -43,8 +43,8 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="mt-2">
-              <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t min-[110rem]:mx-0 min-[110rem]:-mx-3">
-                <Suspense fallback={<div className="h-[60px]" />}>
+              <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t">
+                <Suspense fallback={<div className="h-[92px] min-[110rem]:h-[60px]" />}>
                   <CurrentUserFooter />
                 </Suspense>
               </div>
