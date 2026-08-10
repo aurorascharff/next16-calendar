@@ -50,17 +50,12 @@ function calendarColor(calendar: { color: string; isDemo: boolean; name: string 
   return calendar.isDemo ? (DEMO_CALENDAR_COLORS[calendar.name] ?? 'blue') : (calendar.color as CalendarColor);
 }
 
-async function getCurrentUserId() {
-  const user = await verifyAuth();
-  return user.id;
-}
-
 export async function getCalendars(): Promise<Calendar[]> {
-  const userId = await getCurrentUserId();
+  const { id: userId } = await verifyAuth();
   return getCalendarsForUser(userId);
 }
 
-async function getCalendarsForUser(userId: string | null): Promise<Calendar[]> {
+async function getCalendarsForUser(userId: string): Promise<Calendar[]> {
   'use cache';
   cacheLife('hours');
   cacheTag(calendarCache.calendarsTag);
@@ -80,7 +75,7 @@ async function getCalendarsForUser(userId: string | null): Promise<Calendar[]> {
 export async function getCalendarWeek(date: string): Promise<CalendarRange> {
   if (!isDateKey(date)) notFound();
 
-  const userId = await getCurrentUserId();
+  const { id: userId } = await verifyAuth();
   const days = getWeekDays(date);
   return getCalendarRangeForUser(days, userId, await isSlowEnabled(), calendarCache.weekTag(days[0]));
 }
@@ -88,14 +83,14 @@ export async function getCalendarWeek(date: string): Promise<CalendarRange> {
 export async function getCalendarMonth(date: string): Promise<CalendarRange> {
   if (!isDateKey(date)) notFound();
 
-  const userId = await getCurrentUserId();
+  const { id: userId } = await verifyAuth();
   const days = getMonthDays(date);
   return getCalendarRangeForUser(days, userId, await isSlowEnabled(), `calendar-month:${date.slice(0, 7)}`);
 }
 
 async function getCalendarRangeForUser(
   days: string[],
-  userId: string | null,
+  userId: string,
   slow: boolean,
   rangeTag: string,
 ): Promise<CalendarRange> {
@@ -114,18 +109,16 @@ async function getCalendarRangeForUser(
       orderBy: [{ start: 'asc' }, { title: 'asc' }],
       where: { OR: [{ userId }, { userId: null }] },
     }),
-    userId
-      ? prisma.booking.findMany({
-          include: { bookingPage: { select: { duration: true, title: true, userId: true } } },
-          where: {
-            bookingPage: { userId },
-            startsAt: {
-              gte: new Date(`${days[0]}T00:00:00.000Z`),
-              lt: rangeEnd,
-            },
-          },
-        })
-      : [],
+    prisma.booking.findMany({
+      include: { bookingPage: { select: { duration: true, title: true, userId: true } } },
+      where: {
+        bookingPage: { userId },
+        startsAt: {
+          gte: new Date(`${days[0]}T00:00:00.000Z`),
+          lt: rangeEnd,
+        },
+      },
+    }),
   ]);
   const bookingMatches = createBookingMatches(bookingRows);
 

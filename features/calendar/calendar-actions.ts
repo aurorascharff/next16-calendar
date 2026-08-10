@@ -39,10 +39,6 @@ const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const RECURRENCE_VALUES = new Set(['weekday', ...WEEKDAY_NAMES]);
 
-async function requireUser() {
-  return verifyAuth();
-}
-
 async function findEvent(id: string) {
   return prisma.calendarEvent.findUnique({ where: { id } });
 }
@@ -65,7 +61,7 @@ function validTimedDuration(duration: number) {
 }
 
 export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
-  const user = await requireUser();
+  const user = await verifyAuth();
   const event = await findEvent(sourceId);
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
@@ -105,7 +101,7 @@ export async function createEvent(input: CreateEventInput) {
   }
   if (!allDay && !validTimedDuration(input.duration)) return { error: 'Choose a valid duration.' };
 
-  const user = await requireUser();
+  const user = await verifyAuth();
 
   const calendar = input.calendarId
     ? await prisma.calendar.findUnique({ where: { id: input.calendarId } })
@@ -146,7 +142,7 @@ export async function updateEvent(input: UpdateEventInput) {
   }
   if (!allDay && !validTimedDuration(input.duration)) return { error: 'Choose a valid duration.' };
 
-  const user = await requireUser();
+  const user = await verifyAuth();
   const event = await findEvent(input.eventId);
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
@@ -169,7 +165,7 @@ export async function updateEvent(input: UpdateEventInput) {
 export async function resizeEvent({ duration, sourceId }: { duration: number; sourceId: string }) {
   if (!validTimedDuration(duration)) return { error: 'Choose a valid duration.' };
 
-  const user = await requireUser();
+  const user = await verifyAuth();
   const event = await findEvent(sourceId);
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
@@ -182,7 +178,7 @@ export async function resizeEvent({ duration, sourceId }: { duration: number; so
 }
 
 export async function deleteEvent(eventId: string) {
-  const user = await requireUser();
+  const user = await verifyAuth();
   const event = await findEvent(eventId);
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
@@ -248,7 +244,7 @@ export async function createCalendar({ color, name }: { color: string; name: str
   if (!trimmed) return { error: 'Give the calendar a name.' };
   if (!isCalendarColor(color)) return { error: 'Choose a color.' };
 
-  const user = await requireUser();
+  const user = await verifyAuth();
 
   const calendar = await prisma.calendar.create({ data: { color, name: trimmed, userId: user.id } });
   invalidateCalendars(user.handle);
@@ -260,7 +256,7 @@ export async function updateCalendar({ color, id, name }: { color: string; id: s
   if (!trimmed) return { error: 'Give the calendar a name.' };
   if (!isCalendarColor(color)) return { error: 'Choose a color.' };
 
-  const user = await requireUser();
+  const user = await verifyAuth();
   const calendar = await prisma.calendar.findUnique({ where: { id } });
   if (!calendar) return { error: 'This calendar no longer exists.' };
   if (calendar.isDemo) return { error: 'Create your own calendar to make changes.' };
@@ -272,7 +268,7 @@ export async function updateCalendar({ color, id, name }: { color: string; id: s
 }
 
 export async function deleteCalendar(id: string) {
-  const user = await requireUser();
+  const user = await verifyAuth();
   const calendar = await prisma.calendar.findUnique({ where: { id } });
   if (!calendar) return { error: 'This calendar no longer exists.' };
   if (calendar.isDemo) return { error: 'Create your own calendar to make changes.' };
