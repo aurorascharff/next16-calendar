@@ -21,18 +21,18 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
             <ViewToggle date={date} view={view} />
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center">
           <span className="calendar-saving-indicator text-muted grid size-5 place-items-center" role="status">
             <Spinner className="size-4 motion-reduce:animate-none" />
             <span className="sr-only">Saving calendar changes</span>
           </span>
-          <NewEventButton day={date} />
         </div>
       </header>
       <div className="border-divider dark:border-divider-dark flex items-center justify-between gap-2 border-b px-4 py-2 sm:hidden">
         <CalendarControls date={date} showDatePicker={false} view={view} />
         <ViewToggle date={date} view={view} />
       </div>
+      <NewEventButton day={date} />
     </>
   );
 }
@@ -44,9 +44,6 @@ export function CalendarHeaderSkeleton() {
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <span className="bg-card dark:bg-card-dark size-8 rounded-md sm:hidden" />
           <span className="bg-card dark:bg-card-dark h-5 w-28 rounded-md sm:w-40" />
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="bg-card dark:bg-card-dark h-9 w-9 rounded-md sm:w-28" />
         </div>
       </header>
       <div className="border-divider dark:border-divider-dark flex items-center justify-between border-b px-4 py-2 sm:hidden">
