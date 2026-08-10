@@ -6,7 +6,6 @@ import { Suspense } from 'react';
 import { DemoToolbar } from '@/components/demo/demo-toolbar';
 import { BoundaryProvider } from '@/components/internal/boundary';
 import { OfflineIndicator } from '@/components/offline-indicator';
-import { NavLinkScript } from '@/components/scripts/nav-link-script';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { Toaster } from '@/components/toaster';
 import type { Metadata, Viewport } from 'next';
@@ -49,7 +48,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
             <Toaster />
             <OfflineIndicator />
-            <NavLinkScript />
           </BoundaryProvider>
         </ThemeProvider>
         <Analytics />
