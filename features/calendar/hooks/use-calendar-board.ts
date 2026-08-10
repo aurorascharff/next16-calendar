@@ -3,9 +3,9 @@
 import * as Ariakit from '@ariakit/react';
 import { useOptimistic, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { moveEvent, resizeEvent } from '../calendar-actions';
 import { dateKey } from '../calendar-utils';
-import { useCalendarVisibility } from '../components/calendar-visibility';
 import { applyEventAction } from '../utils/event-optimistic-reducer';
 import {
   DAY_COLUMN_MIN_WIDTH,
@@ -20,6 +20,7 @@ import {
   TIME_COLUMN_WIDTH,
 } from '../utils/grid';
 import { useNow } from './use-now';
+import type { createEvent } from '../calendar-actions';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 import type { EventAction } from '../utils/event-optimistic-reducer';
 

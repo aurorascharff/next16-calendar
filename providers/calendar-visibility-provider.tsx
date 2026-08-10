@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 
 type CalendarVisibility = {
   hidden: ReadonlySet<string>;
@@ -9,7 +9,7 @@ type CalendarVisibility = {
 
 const CalendarVisibilityContext = createContext<CalendarVisibility | null>(null);
 
-export function CalendarVisibilityProvider({ children }: { children: React.ReactNode }) {
+export function CalendarVisibilityProvider({ children }: { children: ReactNode }) {
   const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 
   function toggle(calendarId: string) {

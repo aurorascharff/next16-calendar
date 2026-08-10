@@ -5,9 +5,9 @@ import { Crossfade } from '@/components/ui/crossfade';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { CalendarList } from '@/features/calendar/components/calendar-list';
 import { CalendarManagerSkeleton, NewCalendarButton } from '@/features/calendar/components/calendar-manager';
-import { CalendarVisibilityProvider } from '@/features/calendar/components/calendar-visibility';
 import { MiniMonth, MiniMonthSkeleton } from '@/features/calendar/components/mini-month';
 import { CurrentUserFooter } from '@/features/user/components/current-user-footer';
+import { CalendarVisibilityProvider } from '@/providers/calendar-visibility-provider';
 import type { ReactNode } from 'react';
 
 export default function WorkspaceLayout({ children }: { children: ReactNode }) {

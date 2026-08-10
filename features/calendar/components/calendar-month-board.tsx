@@ -6,10 +6,11 @@ import { useOptimistic, useState, useTransition } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
+import { useCalendarEvents } from '@/providers/calendar-events-provider';
+import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
-import { applyEventAction } from '../utils/event-optimistic-reducer';
-import { useCalendarVisibility } from './calendar-visibility';
+import { applyEventAction, expandOptimisticEvent } from '../utils/event-optimistic-reducer';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventPopover } from './event-popover';
 import type { Calendar, CalendarEvent } from '../types/calendar';
@@ -74,7 +75,11 @@ export function CalendarMonthBoard({
   events: CalendarEvent[];
 }) {
   const { hidden } = useCalendarVisibility();
-  const [optimisticEvents, applyOptimisticEvent] = useOptimistic(events, applyEventAction);
+  const { createdEvents } = useCalendarEvents();
+  const [optimisticEvents, applyOptimisticEvent] = useOptimistic(
+    [...createdEvents.flatMap(event => expandOptimisticEvent(event, days)), ...events],
+    applyEventAction,
+  );
   const [isPending, startTransition] = useTransition();
   const [selectedEvent, setSelectedEvent] = useState<{ anchorRect: DOMRect; event: CalendarEvent } | null>(null);
   const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));

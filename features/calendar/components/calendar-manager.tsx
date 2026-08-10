@@ -10,9 +10,9 @@ import { IconButton } from '@/components/ui/icon-button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { createCalendar, deleteCalendar, updateCalendar } from '../calendar-actions';
 import { CALENDAR_COLORS, colorStyle } from '../utils/colors';
-import { useCalendarVisibility } from './calendar-visibility';
 import type { Calendar, CalendarColor } from '../types/calendar';
 
 export function CalendarManager({ calendars, expanded = false }: { calendars: Calendar[]; expanded?: boolean }) {

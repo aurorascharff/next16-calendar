@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
+import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { formatDay, formatDayParts } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { useTodayKey } from '../hooks/use-now';
@@ -27,6 +28,7 @@ export function CalendarBoard({
   days: string[];
   events: CalendarEvent[];
 }) {
+  const { createdEvents } = useCalendarEvents();
   const {
     allDayEvents,
     createDraft,
@@ -44,7 +46,11 @@ export function CalendarBoard({
     setSelectedEvent,
     todayKey,
     visibleEvents,
-  } = useCalendarBoard({ calendars, days, events });
+  } = useCalendarBoard({
+    calendars,
+    days,
+    events: [...createdEvents.flatMap(event => expandOptimisticEvent(event, days)), ...events],
+  });
 
   return (
     <>
@@ -120,12 +126,6 @@ export function CalendarBoard({
           defaultDuration={createDraft.duration}
           defaultStart={createDraft.start}
           key={`${createDraft.day}-${createDraft.start}-${createDraft.duration}-${createDraft.allDay}`}
-          onCreated={event => {
-            for (const createdEvent of expandOptimisticEvent(event, days)) {
-              addOptimisticEvent({ event: createdEvent, type: 'create' });
-            }
-          }}
-          onCreateFailed={sourceId => addOptimisticEvent({ sourceId, type: 'delete' })}
           store={createStore}
         />
       ) : null}

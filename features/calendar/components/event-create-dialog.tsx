@@ -14,6 +14,7 @@ import { createEvent } from '../calendar-actions';
 import { formatDay } from '../calendar-utils';
 import { colorStyle } from '../utils/colors';
 import { EventFields } from './event-fields';
+import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
@@ -91,8 +92,6 @@ export function EventCreateDialog({
   defaultCalendarId,
   defaultStart = '10:00',
   defaultDuration = 60,
-  onCreated,
-  onCreateFailed,
 }: {
   store: Ariakit.PopoverStore;
   day: string;
@@ -102,9 +101,8 @@ export function EventCreateDialog({
   defaultCalendarId?: string;
   defaultStart?: string;
   defaultDuration?: number;
-  onCreated?: (event: CalendarEvent) => void;
-  onCreateFailed?: (sourceId: string) => void;
 }) {
+  const { create } = useCalendarEvents();
   const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
   const calendarOptions = calendars ?? [];
   const selectedCalendarId = defaultCalendarId ?? calendarOptions[0]?.id;
@@ -122,12 +120,21 @@ export function EventCreateDialog({
       title: String(formData.get('title')),
     };
     const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? weekday : null;
-    let tempId: string | null = null;
+    const input = {
+      allDay,
+      calendarId: values.calendarId || undefined,
+      day,
+      description: values.description,
+      duration: Number(values.duration),
+      recurrence,
+      start: values.start,
+      title: values.title,
+    };
     if (values.title.trim()) {
-      tempId = optimisticEventId(day, values);
+      const tempId = optimisticEventId(day, values);
       const calendarId = values.calendarId || selectedCalendarId || '';
       const calendar = calendarOptions.find(option => option.id === calendarId);
-      onCreated?.({
+      const optimisticEvent: CalendarEvent = {
         allDay,
         calendarId,
         color: (calendar?.color ?? 'blue') as CalendarColor,
@@ -140,31 +147,20 @@ export function EventCreateDialog({
         sourceId: tempId,
         start: allDay ? '00:00' : values.start,
         title: values.title.trim(),
-      });
+      };
+      const save = create(optimisticEvent, () => createEvent(input));
       store.hide();
+      await save;
+      return;
     }
-    const result = await createEvent({
-      allDay,
-      calendarId: values.calendarId || undefined,
-      day,
-      description: values.description,
-      duration: Number(values.duration),
-      recurrence,
-      start: values.start,
-      title: values.title,
-    });
+    const result = await createEvent(input);
     if (result.error) {
-      if (tempId) onCreateFailed?.(tempId);
       toast.error(result.error);
       return;
     }
-    const created = result.data;
-    if (!created) {
-      if (tempId) onCreateFailed?.(tempId);
+    if (!result.data) {
       toast.error('Event was saved, but the response was empty.');
-      return;
     }
-    toast.success('Event added to your calendar.');
   }
 
   const values = {
