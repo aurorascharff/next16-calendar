@@ -3,8 +3,8 @@
 import * as Ariakit from '@ariakit/react';
 import { Plus, Repeat } from 'lucide-react';
 import { useOptimistic, useState, useTransition } from 'react';
-import { IconButton } from '@/components/ui/icon-button';
 import { Crossfade } from '@/components/ui/crossfade';
+import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
@@ -12,9 +12,9 @@ import { applyEventAction } from '../utils/event-optimistic-reducer';
 import { useCalendarVisibility } from './calendar-visibility';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventPopover } from './event-popover';
-import type { ReactNode } from 'react';
 import type { Calendar, CalendarEvent } from '../types/calendar';
 import type { EventAction } from '../utils/event-optimistic-reducer';
+import type { ReactNode } from 'react';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MAX_EVENT_ROWS = 5;
