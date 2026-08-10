@@ -10,7 +10,6 @@ import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { formatDay, formatDayParts } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { useTodayKey } from '../hooks/use-now';
-import { expandOptimisticEvent, mergeEvents } from '../utils/event-optimistic-reducer';
 import { DAY_COLUMN_MIN_WIDTH, GRID_HEIGHT, HOURS, TIME_COLUMN_WIDTH } from '../utils/grid';
 import { CalendarBoardHeader } from './calendar-board-header';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
@@ -28,8 +27,7 @@ export function CalendarBoard({
   days: string[];
   events: CalendarEvent[];
 }) {
-  const { createdEvents } = useCalendarEvents();
-  const createdEventInstances = createdEvents.flatMap(event => expandOptimisticEvent(event, days));
+  const { getEvents } = useCalendarEvents();
   const {
     allDayEvents,
     createDraft,
@@ -40,17 +38,15 @@ export function CalendarBoard({
     gridRef,
     gridTemplate,
     interactions,
-    isPending,
     nowMinutes,
     selectedEvent,
-    addOptimisticEvent,
     setSelectedEvent,
     todayKey,
     visibleEvents,
   } = useCalendarBoard({
     calendars,
     days,
-    events: mergeEvents(events, createdEventInstances),
+    events: getEvents(events, days),
   });
 
   return (
@@ -101,11 +97,6 @@ export function CalendarBoard({
           </div>
         </div>
       </Crossfade>
-      {isPending ? (
-        <span className="sr-only" data-calendar-pending role="status">
-          Saving calendar changes
-        </span>
-      ) : null}
       {selectedEvent ? (
         <EventPopover
           anchorRect={selectedEvent.anchorRect}
@@ -113,8 +104,6 @@ export function CalendarBoard({
           event={selectedEvent.event}
           key={selectedEvent.event.id}
           onClose={() => setSelectedEvent(null)}
-          onDeleted={sourceId => addOptimisticEvent({ sourceId, type: 'delete' })}
-          onUpdated={event => addOptimisticEvent({ event, type: 'update' })}
         />
       ) : null}
       {createDraft ? (

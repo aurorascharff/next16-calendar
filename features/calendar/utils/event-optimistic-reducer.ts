@@ -21,14 +21,9 @@ export function expandOptimisticEvent(event: CalendarEvent, days: string[]) {
     }));
 }
 
-export function mergeEvents(events: CalendarEvent[], additions: CalendarEvent[]) {
-  const addedIds = new Set(additions.map(event => event.id));
-  return [...additions, ...events.filter(event => !addedIds.has(event.id))];
-}
-
 export type EventAction =
   | { event: CalendarEvent; type: 'create' }
-  | { day: string; id: string; start: string; type: 'move' }
+  | { day: string; id: string; sourceId: string; start: string; type: 'move' }
   | { sourceId: string; type: 'delete' }
   | { duration: number; sourceId: string; type: 'resize' }
   | {
@@ -51,4 +46,15 @@ export function applyEventAction(events: CalendarEvent[], action: EventAction) {
     case 'move':
       return events.map(event => (event.id === action.id ? { ...event, day: action.day, start: action.start } : event));
   }
+}
+
+export function applyEventActions(events: CalendarEvent[], actions: EventAction[], days: string[]) {
+  return actions.reduce((current, action) => {
+    if (action.type !== 'create') return applyEventAction(current, action);
+
+    return expandOptimisticEvent(action.event, days).reduce(
+      (created, event) => applyEventAction(created, { event, type: 'create' }),
+      current,
+    );
+  }, events);
 }

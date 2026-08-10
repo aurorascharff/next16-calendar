@@ -1,12 +1,10 @@
 'use client';
 
 import * as Ariakit from '@ariakit/react';
-import { useOptimistic, useRef, useState, useTransition } from 'react';
-import { toast } from 'sonner';
+import { useRef, useState } from 'react';
+import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
-import { moveEvent, resizeEvent } from '../calendar-actions';
 import { dateKey } from '../calendar-utils';
-import { applyEventAction } from '../utils/event-optimistic-reducer';
 import {
   DAY_COLUMN_MIN_WIDTH,
   END_MINUTES,
@@ -20,9 +18,7 @@ import {
   TIME_COLUMN_WIDTH,
 } from '../utils/grid';
 import { useNow } from './use-now';
-import type { createEvent } from '../calendar-actions';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
-import type { EventAction } from '../utils/event-optimistic-reducer';
 
 type MoveOrigin = {
   duration: number;
@@ -69,11 +65,10 @@ export function useCalendarBoard({
   days: string[];
   events: CalendarEvent[];
 }) {
+  const { mutate } = useCalendarEvents();
   const { hidden } = useCalendarVisibility();
   const gridTemplate = `${TIME_COLUMN_WIDTH}px repeat(${days.length}, minmax(${DAY_COLUMN_MIN_WIDTH}px, 1fr))`;
   const gridMinWidth = TIME_COLUMN_WIDTH + days.length * DAY_COLUMN_MIN_WIDTH;
-  const [optimisticEvents, addOptimisticEvent] = useOptimistic(events, applyEventAction);
-  const [isPending, startTransition] = useTransition();
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
   const [dragMove, setDragMove] = useState<{ day: string; id: string; startMin: number } | null>(null);
   const [resize, setResize] = useState<{ endMin: number; sourceId: string; startMin: number } | null>(null);
@@ -104,7 +99,7 @@ export function useCalendarBoard({
   const todayKey = now ? dateKey(now) : null;
   const nowMinutes = now ? now.getHours() * 60 + now.getMinutes() : 0;
   const defaultCalendar = calendars[0];
-  const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));
+  const visibleEvents = events.filter(event => !hidden.has(event.calendarId));
   const allDayEvents = visibleEvents.filter(event => event.allDay);
 
   function pointToDayIndex(clientX: number) {
@@ -183,13 +178,7 @@ export function useCalendarBoard({
     const start = minutesToTime(target.startMin);
     const { day, id } = target;
     const sourceId = origin.sourceId;
-    startTransition(async () => {
-      addOptimisticEvent({ day, id, start, type: 'move' });
-      const result = await moveEvent({ day, sourceId, start });
-      if (result.error) {
-        toast.error(result.error);
-      }
-    });
+    void mutate({ day, id, sourceId, start, type: 'move' });
   }
 
   function handleMoveCancel() {
@@ -222,13 +211,7 @@ export function useCalendarBoard({
     const duration = resize.endMin - resize.startMin;
     const sourceId = resize.sourceId;
     setResize(null);
-    startTransition(async () => {
-      addOptimisticEvent({ duration, sourceId, type: 'resize' });
-      const result = await resizeEvent({ duration, sourceId });
-      if (result.error) {
-        toast.error(result.error);
-      }
-    });
+    void mutate({ duration, sourceId, type: 'resize' });
   }
 
   function handleCreateDown(day: string, event: React.PointerEvent<HTMLDivElement>) {
@@ -322,10 +305,8 @@ export function useCalendarBoard({
     gridRef,
     gridTemplate,
     interactions,
-    isPending,
     nowMinutes,
     selectedEvent,
-    addOptimisticEvent: (action: EventAction) => startTransition(() => addOptimisticEvent(action)),
     setSelectedEvent,
     todayKey,
     visibleEvents,

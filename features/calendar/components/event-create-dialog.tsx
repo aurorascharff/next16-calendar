@@ -3,18 +3,16 @@
 import * as Ariakit from '@ariakit/react';
 import { Check, ChevronDown, X } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
-import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { createEvent } from '../calendar-actions';
+import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { formatDay } from '../calendar-utils';
 import { colorStyle } from '../utils/colors';
 import { EventFields } from './event-fields';
-import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
@@ -102,12 +100,12 @@ export function EventCreateDialog({
   defaultStart?: string;
   defaultDuration?: number;
 }) {
-  const { create } = useCalendarEvents();
+  const { mutate } = useCalendarEvents();
   const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
   const calendarOptions = calendars ?? [];
   const selectedCalendarId = defaultCalendarId ?? calendarOptions[0]?.id;
 
-  async function submitAction(formData: FormData) {
+  function submitAction(formData: FormData) {
     const repeat = String(formData.get('repeat'));
     const allDay = formData.get('allDay') === 'on';
     const values = {
@@ -120,16 +118,6 @@ export function EventCreateDialog({
       title: String(formData.get('title')),
     };
     const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? weekday : null;
-    const input = {
-      allDay,
-      calendarId: values.calendarId || undefined,
-      day,
-      description: values.description,
-      duration: Number(values.duration),
-      recurrence,
-      start: values.start,
-      title: values.title,
-    };
     if (values.title.trim()) {
       const tempId = optimisticEventId(day, values);
       const calendarId = values.calendarId || selectedCalendarId || '';
@@ -148,17 +136,8 @@ export function EventCreateDialog({
         start: allDay ? '00:00' : values.start,
         title: values.title.trim(),
       };
-      create(optimisticEvent, () => createEvent(input));
+      void mutate({ event: optimisticEvent, type: 'create' });
       store.hide();
-      return;
-    }
-    const result = await createEvent(input);
-    if (result.error) {
-      toast.error(result.error);
-      return;
-    }
-    if (!result.data) {
-      toast.error('Event was saved, but the response was empty.');
     }
   }
 

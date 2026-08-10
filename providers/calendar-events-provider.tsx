@@ -1,65 +1,99 @@
 'use client';
 
-import {
-  createContext,
-  useActionState,
-  useContext,
-  useOptimistic,
-  useTransition,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useOptimistic, useTransition, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import type { createEvent } from '@/features/calendar/calendar-actions';
+import { createEvent, deleteEvent, moveEvent, resizeEvent, updateEvent } from '@/features/calendar/calendar-actions';
 import type { CalendarEvent } from '@/features/calendar/types/calendar';
-import { applyEventAction } from '@/features/calendar/utils/event-optimistic-reducer';
+import { applyEventActions } from '@/features/calendar/utils/event-optimistic-reducer';
 import type { EventAction } from '@/features/calendar/utils/event-optimistic-reducer';
 
-type CreateRequest = {
-  event: CalendarEvent;
-  save: () => ReturnType<typeof createEvent>;
-};
-
 type CalendarEventsContextValue = {
-  createdEvents: CalendarEvent[];
-  create: (event: CalendarEvent, save: () => ReturnType<typeof createEvent>) => void;
+  getEvents: (events: CalendarEvent[], days: string[]) => CalendarEvent[];
+  mutate: (action: EventAction) => Promise<boolean>;
 };
 
 const CalendarEventsContext = createContext<CalendarEventsContextValue | null>(null);
 
-async function saveCreatedEvent(events: CalendarEvent[], { event, save }: CreateRequest) {
-  const result = await save();
-  if (result.error) {
-    toast.error(result.error);
-    return events;
+function saveEventAction(action: EventAction) {
+  switch (action.type) {
+    case 'create':
+      return createEvent({
+        allDay: action.event.allDay,
+        calendarId: action.event.calendarId || undefined,
+        day: action.event.day,
+        description: action.event.description ?? undefined,
+        duration: action.event.duration,
+        recurrence: action.event.recurrence,
+        start: action.event.start,
+        title: action.event.title,
+      });
+    case 'delete':
+      return deleteEvent(action.sourceId);
+    case 'move':
+      return moveEvent({ day: action.day, sourceId: action.sourceId, start: action.start });
+    case 'resize':
+      return resizeEvent({ duration: action.duration, sourceId: action.sourceId });
+    case 'update':
+      return updateEvent({
+        allDay: action.event.allDay,
+        description: action.event.description ?? undefined,
+        duration: action.event.duration,
+        eventId: action.event.sourceId,
+        start: action.event.start,
+        title: action.event.title,
+      });
   }
-  if (!result.data) {
-    toast.error('Event was saved, but the response was empty.');
-    return events;
-  }
+}
 
-  return applyEventAction(events, {
-    event: { ...event, id: result.data.id, sourceId: result.data.id },
-    type: 'create',
-  });
+function successMessage(action: EventAction) {
+  switch (action.type) {
+    case 'delete':
+      return 'Event removed.';
+    case 'update':
+      return 'Event updated.';
+    default:
+      return null;
+  }
 }
 
 export function CalendarEventsProvider({ children }: { children: ReactNode }) {
-  const [savedEvents, saveEvent, isPending] = useActionState(saveCreatedEvent, [] as CalendarEvent[]);
-  const [createdEvents, applyOptimisticEvent] = useOptimistic<CalendarEvent[], EventAction>(
-    savedEvents,
-    applyEventAction,
+  const [optimisticActions, applyOptimisticAction] = useOptimistic<EventAction[], EventAction>(
+    [],
+    (actions, action) => [...actions, action],
   );
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
-  function create(event: CalendarEvent, save: () => ReturnType<typeof createEvent>) {
-    startTransition(() => {
-      applyOptimisticEvent({ event, type: 'create' });
-      saveEvent({ event, save });
+  function mutate(action: EventAction) {
+    return new Promise<boolean>(resolve => {
+      startTransition(async () => {
+        applyOptimisticAction(action);
+
+        try {
+          const result = await saveEventAction(action);
+          if (result.error) {
+            toast.error(result.error);
+            resolve(false);
+            return;
+          }
+
+          const message = successMessage(action);
+          if (message) toast.success(message);
+          resolve(true);
+        } catch {
+          toast.error('Calendar change could not be saved.');
+          resolve(false);
+        }
+      });
     });
   }
 
   return (
-    <CalendarEventsContext.Provider value={{ create, createdEvents }}>
+    <CalendarEventsContext.Provider
+      value={{
+        getEvents: (events, days) => applyEventActions(events, optimisticActions, days),
+        mutate,
+      }}
+    >
       {children}
       {isPending ? (
         <span className="sr-only" data-calendar-pending role="status">

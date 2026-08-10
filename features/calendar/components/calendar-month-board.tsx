@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { Plus, Repeat } from 'lucide-react';
-import { useOptimistic, useState, useTransition } from 'react';
+import { useState } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
@@ -10,11 +10,9 @@ import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
-import { applyEventAction, expandOptimisticEvent, mergeEvents } from '../utils/event-optimistic-reducer';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventPopover } from './event-popover';
 import type { Calendar, CalendarEvent } from '../types/calendar';
-import type { EventAction } from '../utils/event-optimistic-reducer';
 import type { ReactNode } from 'react';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -75,19 +73,9 @@ export function CalendarMonthBoard({
   events: CalendarEvent[];
 }) {
   const { hidden } = useCalendarVisibility();
-  const { createdEvents } = useCalendarEvents();
-  const createdEventInstances = createdEvents.flatMap(event => expandOptimisticEvent(event, days));
-  const [optimisticEvents, applyOptimisticEvent] = useOptimistic(
-    mergeEvents(events, createdEventInstances),
-    applyEventAction,
-  );
-  const [isPending, startTransition] = useTransition();
+  const { getEvents } = useCalendarEvents();
   const [selectedEvent, setSelectedEvent] = useState<{ anchorRect: DOMRect; event: CalendarEvent } | null>(null);
-  const visibleEvents = optimisticEvents.filter(event => !hidden.has(event.calendarId));
-
-  function updateOptimistically(action: EventAction) {
-    startTransition(() => applyOptimisticEvent(action));
-  }
+  const visibleEvents = getEvents(events, days).filter(event => !hidden.has(event.calendarId));
 
   return (
     <>
@@ -117,11 +105,6 @@ export function CalendarMonthBoard({
           })}
         </div>
       </Crossfade>
-      {isPending ? (
-        <span className="sr-only" data-calendar-pending role="status">
-          Saving calendar changes
-        </span>
-      ) : null}
       {selectedEvent ? (
         <EventPopover
           anchorRect={selectedEvent.anchorRect}
@@ -129,8 +112,6 @@ export function CalendarMonthBoard({
           event={selectedEvent.event}
           key={selectedEvent.event.id}
           onClose={() => setSelectedEvent(null)}
-          onDeleted={sourceId => updateOptimistically({ sourceId, type: 'delete' })}
-          onUpdated={event => updateOptimistically({ event, type: 'update' })}
         />
       ) : null}
     </>

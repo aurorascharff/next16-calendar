@@ -3,12 +3,11 @@
 import * as Ariakit from '@ariakit/react';
 import { AlignLeft, CalendarDays, Pencil, Repeat2, Trash2, X } from 'lucide-react';
 import { type ReactNode, useActionState, useId, useState, useSyncExternalStore, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { deleteEvent, updateEvent } from '../calendar-actions';
+import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { formatDay } from '../calendar-utils';
 import { colorStyle } from '../utils/colors';
 import { EventFields, formatDuration } from './event-fields';
@@ -19,10 +18,6 @@ type EventPopoverProps = {
   calendar?: Calendar;
   event: CalendarEvent;
   onClose: () => void;
-  onDeleted: (sourceId: string) => void;
-  onUpdated: (
-    event: Pick<CalendarEvent, 'allDay' | 'description' | 'duration' | 'sourceId' | 'start' | 'title'>,
-  ) => void;
 };
 
 type FormValues = {
@@ -52,7 +47,8 @@ function getServerMobileSnapshot() {
   return false;
 }
 
-export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, onUpdated }: EventPopoverProps) {
+export function EventPopover({ anchorRect, calendar, event, onClose }: EventPopoverProps) {
+  const { mutate } = useCalendarEvents();
   const formId = useId();
   const [isDeleting, startDelete] = useTransition();
   const [mode, setMode] = useState<'details' | 'edit'>('details');
@@ -75,33 +71,21 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
         start: String(formData.get('start')),
         title: String(formData.get('title')),
       };
-      const input = {
-        allDay,
-        description: values.description,
-        duration: Number(values.duration),
-        eventId: event.sourceId,
-        start: values.start,
-        title: values.title,
-      };
-
-      if (input.title.trim()) {
-        onUpdated({
+      const saved = await mutate({
+        event: {
           allDay,
-          description: input.description,
-          duration: input.duration,
+          description: values.description,
+          duration: Number(values.duration),
           sourceId: event.sourceId,
-          start: input.start,
-          title: input.title,
-        });
-      }
-
-      const result = await updateEvent(input);
-      if (result.error) {
-        toast.error(result.error);
+          start: values.start,
+          title: values.title,
+        },
+        type: 'update',
+      });
+      if (!saved) {
         return { key: Date.now(), values };
       }
 
-      toast.success('Event updated.');
       return {};
     },
     {},
@@ -110,13 +94,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
   function remove() {
     store.hide();
     startDelete(async () => {
-      onDeleted(event.sourceId);
-      const result = await deleteEvent(event.sourceId);
-      if (result.error) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success('Event removed.');
+      await mutate({ sourceId: event.sourceId, type: 'delete' });
     });
   }
 
