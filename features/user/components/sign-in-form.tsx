@@ -11,9 +11,9 @@ export function SignInForm() {
   return (
     <form action={formAction} className="mt-8 flex flex-col gap-3">
       <label className="block">
-        <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
+        <span className="text-muted mb-1.5 block text-xs font-medium">Demo email</span>
         <Input
-          aria-describedby={state?.error ? 'sign-in-error' : undefined}
+          aria-describedby={state?.error ? 'sign-in-hint sign-in-error' : 'sign-in-hint'}
           aria-invalid={state?.error ? true : undefined}
           autoComplete="email"
           autoFocus
@@ -23,6 +23,9 @@ export function SignInForm() {
           required
           type="email"
         />
+        <span className="text-muted mt-1.5 block text-xs" id="sign-in-hint">
+          Any fake email works.
+        </span>
       </label>
       {state?.error ? (
         <p className="text-danger text-sm" id="sign-in-error" role="alert">
