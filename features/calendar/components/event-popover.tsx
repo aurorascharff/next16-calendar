@@ -101,7 +101,6 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
         return { key: Date.now(), values };
       }
 
-      store.hide();
       toast.success('Event updated.');
       return {};
     },
@@ -109,6 +108,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
   );
 
   function remove() {
+    store.hide();
     startDelete(async () => {
       onDeleted(event.sourceId);
       const result = await deleteEvent(event.sourceId);
@@ -116,7 +116,6 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
         toast.error(result.error);
         return;
       }
-      store.hide();
       toast.success('Event removed.');
     });
   }
@@ -161,12 +160,13 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
           <>
             <EventPopoverHeader busy={busy} event={event} />
             <EventDetails calendar={calendar} event={event} />
-            <EventPopoverFooter>
+            <EventPopoverFooter key="details-actions">
               <Button
                 className="border-danger/35 text-danger hover:border-danger/60 hover:bg-danger/10 hover:text-danger dark:border-danger/40 dark:hover:border-danger/65 dark:hover:bg-danger/10 dark:hover:text-danger max-sm:h-10 max-sm:flex-1 max-sm:text-sm"
                 disabled={busy}
                 onClick={remove}
                 size="sm"
+                type="button"
                 variant="secondary"
               >
                 <Trash2 className="size-4" />
@@ -177,6 +177,7 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
                 disabled={busy}
                 onClick={() => setMode('edit')}
                 size="sm"
+                type="button"
                 variant="secondary"
               >
                 <Pencil className="size-4" />
@@ -193,15 +194,17 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
               formAction={formAction}
               formId={formId}
               onAllDayChange={setAllDay}
+              onSubmit={() => store.hide()}
               state={state}
               values={values}
             />
-            <EventPopoverFooter>
+            <EventPopoverFooter key="edit-actions">
               <Button
                 className="max-sm:h-10 max-sm:flex-1 max-sm:text-sm"
                 disabled={busy}
                 onClick={() => setMode('details')}
                 size="sm"
+                type="button"
                 variant="secondary"
               >
                 Cancel
@@ -286,6 +289,7 @@ function EventEditForm({
   formAction,
   formId,
   onAllDayChange,
+  onSubmit,
   state,
   values,
 }: {
@@ -294,6 +298,7 @@ function EventEditForm({
   formAction: (formData: FormData) => void;
   formId: string;
   onAllDayChange: (allDay: boolean) => void;
+  onSubmit: () => void;
   state: FormState;
   values: FormValues;
 }) {
@@ -304,6 +309,7 @@ function EventEditForm({
       data-calendar-editing
       id={formId}
       key={state.key ?? 'event-edit'}
+      onSubmit={onSubmit}
     >
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto p-4 sm:flex-none sm:overflow-visible">
         <EventFields
