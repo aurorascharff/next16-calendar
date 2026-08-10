@@ -26,19 +26,19 @@ function DayNavigationIcon({ direction }: { direction: 'next' | 'previous' }) {
 }
 
 export function BookingSlots({
-  booked,
+  bookedTime,
   day,
   duration,
+  formId,
   handle,
   slots,
-  title,
 }: {
-  booked?: string;
+  bookedTime?: string;
   day: string;
   duration: number;
+  formId: string;
   handle: string;
   slots: BookingSlot[];
-  title: string;
 }) {
   const [, formAction] = useActionState(async (previousState: BookSlotState, formData: FormData) => {
     const nextState = await bookSlotAction(previousState, formData);
@@ -56,7 +56,6 @@ export function BookingSlots({
   const visibleSlots = slots.filter(slot => slot.reason !== 'calendar');
   const selected = selectedSlot?.day === day ? visibleSlots.find(slot => slot.time === selectedSlot.time) : null;
   const selectedAvailable = selected && !selected.taken ? selected : null;
-  const bookedTime = booked && /^([01]\d|2[0-3]):[0-5]\d$/.test(booked) ? booked : null;
 
   const allTaken = visibleSlots.length === 0 || visibleSlots.every(slot => slot.taken);
 
@@ -119,7 +118,7 @@ export function BookingSlots({
             </div>
           </div>
         ) : (
-          <form action={formAction} className="flex flex-col sm:min-h-0 sm:flex-1">
+          <form action={formAction} className="flex flex-col sm:min-h-0 sm:flex-1" id={formId}>
             <input name="day" type="hidden" value={day} />
             <input name="handle" type="hidden" value={handle} />
             <input name="slot" type="hidden" value={selectedAvailable?.time ?? ''} />
@@ -132,14 +131,10 @@ export function BookingSlots({
                 <span className="text-muted mb-1.5 block text-xs font-medium">Email</span>
                 <input autoComplete="email" name="guestEmail" placeholder="you@example.com" required type="email" />
               </label>
-              <label className="block min-w-0 sm:col-span-2">
-                <span className="text-muted mb-1.5 block text-xs font-medium">Meeting title</span>
-                <input defaultValue={title} name="title" required />
-              </label>
             </div>
             <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
             <DirectionalSlide key={day} name="booking-slots">
-              <div className="shrink-0 overflow-visible py-1 sm:h-[17rem] sm:[scrollbar-gutter:stable] sm:overflow-y-auto sm:overscroll-contain sm:pr-1">
+              <div className="min-h-0 overflow-visible py-1 sm:flex-1 sm:[scrollbar-gutter:stable] sm:overflow-y-auto sm:overscroll-contain sm:pr-1">
                 {allTaken ? (
                   <p className="text-muted border-divider dark:border-divider-dark flex h-full items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
                     No open {duration}-minute slots on this day. Try another date.

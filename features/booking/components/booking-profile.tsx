@@ -6,12 +6,28 @@ import { BookingSlots } from './booking-slots';
 export async function BookingProfile({ booked, date, handle }: { booked?: string; date?: string; handle: string }) {
   const day = await getBookingDay(date);
   const availability = await getBookingAvailability(handle, day);
+  const bookedTime = booked && /^([01]\d|2[0-3]):[0-5]\d$/.test(booked) ? booked : undefined;
+  const formId = 'public-booking-form';
+  const editableTitle = availability.hasCalendar && !bookedTime;
 
   return (
     <>
       <div className="min-w-0">
         <p className="text-muted text-sm">{availability.name}</p>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight">{availability.title}</h1>
+        {editableTitle ? (
+          <label className="mt-1 block">
+            <span className="sr-only">Meeting title</span>
+            <input
+              className="hover:bg-card/60 focus:bg-card/60 dark:hover:bg-card-dark/60 dark:focus:bg-card-dark/60 -mx-2 w-[calc(100%+1rem)] rounded-sm border-0 bg-transparent px-2 py-1 text-xl font-semibold tracking-tight focus:ring-0 dark:bg-transparent"
+              defaultValue={availability.title}
+              form={formId}
+              name="title"
+              required
+            />
+          </label>
+        ) : (
+          <h1 className="mt-1 text-xl font-semibold tracking-tight">{availability.title}</h1>
+        )}
         <p className="text-muted mt-1 text-sm">
           {availability.duration}-minute slots, {availability.startTime}–{availability.endTime}
         </p>
@@ -19,13 +35,13 @@ export async function BookingProfile({ booked, date, handle }: { booked?: string
       <div className="border-divider dark:border-divider-dark col-span-full mt-5 min-h-0 overflow-hidden border-t pt-5 sm:mt-8 sm:pt-6">
         {availability.hasCalendar ? (
           <BookingSlots
+            bookedTime={bookedTime}
             day={availability.day}
             duration={availability.duration}
+            formId={formId}
             handle={availability.handle}
             key={availability.day}
-            booked={booked}
             slots={availability.slots}
-            title={availability.title}
           />
         ) : (
           <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
