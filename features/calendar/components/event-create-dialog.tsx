@@ -148,9 +148,8 @@ export function EventCreateDialog({
         start: allDay ? '00:00' : values.start,
         title: values.title.trim(),
       };
-      const save = create(optimisticEvent, () => createEvent(input));
+      create(optimisticEvent, () => createEvent(input));
       store.hide();
-      await save;
       return;
     }
     const result = await createEvent(input);

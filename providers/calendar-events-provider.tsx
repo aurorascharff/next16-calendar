@@ -1,34 +1,61 @@
 'use client';
 
-import { createContext, useContext, useOptimistic, type ReactNode } from 'react';
+import {
+  createContext,
+  useActionState,
+  useContext,
+  useOptimistic,
+  useTransition,
+  type ReactNode,
+} from 'react';
 import { toast } from 'sonner';
 import type { createEvent } from '@/features/calendar/calendar-actions';
 import type { CalendarEvent } from '@/features/calendar/types/calendar';
+import { applyEventAction } from '@/features/calendar/utils/event-optimistic-reducer';
+import type { EventAction } from '@/features/calendar/utils/event-optimistic-reducer';
+
+type CreateRequest = {
+  event: CalendarEvent;
+  save: () => ReturnType<typeof createEvent>;
+};
 
 type CalendarEventsContextValue = {
   createdEvents: CalendarEvent[];
-  create: (event: CalendarEvent, save: () => ReturnType<typeof createEvent>) => Promise<void>;
+  create: (event: CalendarEvent, save: () => ReturnType<typeof createEvent>) => void;
 };
 
 const CalendarEventsContext = createContext<CalendarEventsContextValue | null>(null);
 
+async function saveCreatedEvent(events: CalendarEvent[], { event, save }: CreateRequest) {
+  const result = await save();
+  if (result.error) {
+    toast.error(result.error);
+    return events;
+  }
+  if (!result.data) {
+    toast.error('Event was saved, but the response was empty.');
+    return events;
+  }
+
+  return applyEventAction(events, {
+    event: { ...event, id: result.data.id, sourceId: result.data.id },
+    type: 'create',
+  });
+}
+
 export function CalendarEventsProvider({ children }: { children: ReactNode }) {
-  const [createdEvents, addCreatedEvent] = useOptimistic<CalendarEvent[], CalendarEvent>([], (events, event) => [
-    event,
-    ...events,
-  ]);
-  const [isPending, setPending] = useOptimistic(false);
+  const [savedEvents, saveEvent, isPending] = useActionState(saveCreatedEvent, [] as CalendarEvent[]);
+  const [createdEvents, applyOptimisticEvent] = useOptimistic<CalendarEvent[], EventAction>(
+    savedEvents,
+    applyEventAction,
+  );
+  const [, startTransition] = useTransition();
 
-  async function create(event: CalendarEvent, save: () => ReturnType<typeof createEvent>) {
-    addCreatedEvent(event);
-    setPending(true);
-
-    const result = await save();
-    if (result.error) {
-      toast.error(result.error);
-    } else if (!result.data) {
-      toast.error('Event was saved, but the response was empty.');
-    }
+  function create(event: CalendarEvent, save: () => ReturnType<typeof createEvent>) {
+    startTransition(() => {
+      applyOptimisticEvent({ event, type: 'create' });
+      saveEvent({ event, save });
+    });
   }
 
   return (

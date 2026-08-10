@@ -31,7 +31,7 @@ export function generateMetadata({ params }: PageProps<'/calendar/[date]'>): Pro
 
 export default function CalendarPage({ params, searchParams }: PageProps<'/calendar/[date]'>) {
   return (
-    <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+    <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
       <CalendarEventsProvider>
         <Suspense fallback={<CalendarHeaderSkeleton />}>
           {Promise.all([params, searchParams]).then(([{ date }, { view }]) => (

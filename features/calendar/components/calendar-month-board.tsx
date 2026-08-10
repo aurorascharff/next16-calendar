@@ -10,7 +10,7 @@ import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
-import { applyEventAction, expandOptimisticEvent } from '../utils/event-optimistic-reducer';
+import { applyEventAction, expandOptimisticEvent, mergeEvents } from '../utils/event-optimistic-reducer';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventPopover } from './event-popover';
 import type { Calendar, CalendarEvent } from '../types/calendar';
@@ -76,8 +76,9 @@ export function CalendarMonthBoard({
 }) {
   const { hidden } = useCalendarVisibility();
   const { createdEvents } = useCalendarEvents();
+  const createdEventInstances = createdEvents.flatMap(event => expandOptimisticEvent(event, days));
   const [optimisticEvents, applyOptimisticEvent] = useOptimistic(
-    [...createdEvents.flatMap(event => expandOptimisticEvent(event, days)), ...events],
+    mergeEvents(events, createdEventInstances),
     applyEventAction,
   );
   const [isPending, startTransition] = useTransition();

@@ -22,7 +22,10 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          <Spinner className="calendar-pending-spinner text-muted size-4" />
+          <span className="calendar-saving-indicator text-muted grid size-5 place-items-center" role="status">
+            <Spinner className="size-4 motion-reduce:animate-none" />
+            <span className="sr-only">Saving calendar changes</span>
+          </span>
           <NewEventButton day={date} />
         </div>
       </header>

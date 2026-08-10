@@ -10,7 +10,7 @@ import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { formatDay, formatDayParts } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { useTodayKey } from '../hooks/use-now';
-import { expandOptimisticEvent } from '../utils/event-optimistic-reducer';
+import { expandOptimisticEvent, mergeEvents } from '../utils/event-optimistic-reducer';
 import { DAY_COLUMN_MIN_WIDTH, GRID_HEIGHT, HOURS, TIME_COLUMN_WIDTH } from '../utils/grid';
 import { CalendarBoardHeader } from './calendar-board-header';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
@@ -29,6 +29,7 @@ export function CalendarBoard({
   events: CalendarEvent[];
 }) {
   const { createdEvents } = useCalendarEvents();
+  const createdEventInstances = createdEvents.flatMap(event => expandOptimisticEvent(event, days));
   const {
     allDayEvents,
     createDraft,
@@ -49,7 +50,7 @@ export function CalendarBoard({
   } = useCalendarBoard({
     calendars,
     days,
-    events: [...createdEvents.flatMap(event => expandOptimisticEvent(event, days)), ...events],
+    events: mergeEvents(events, createdEventInstances),
   });
 
   return (

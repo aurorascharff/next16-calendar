@@ -21,6 +21,11 @@ export function expandOptimisticEvent(event: CalendarEvent, days: string[]) {
     }));
 }
 
+export function mergeEvents(events: CalendarEvent[], additions: CalendarEvent[]) {
+  const addedIds = new Set(additions.map(event => event.id));
+  return [...additions, ...events.filter(event => !addedIds.has(event.id))];
+}
+
 export type EventAction =
   | { event: CalendarEvent; type: 'create' }
   | { day: string; id: string; start: string; type: 'move' }
