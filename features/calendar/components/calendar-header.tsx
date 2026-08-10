@@ -1,14 +1,14 @@
 import { FlowMark } from '@/components/ui/flow-mark';
 import { Spinner } from '@/components/ui/spinner';
 import { formatMonth } from '../calendar-utils';
-import { CalendarControls, CalendarViewShortcuts, DatePicker, ViewToggle } from './calendar-controls';
+import { CalendarControls, CalendarShortcuts, DatePicker, ViewToggle } from './calendar-controls';
 import { NewEventButton } from './new-event-button';
 import type { CalendarView } from '../types/calendar';
 
 export function CalendarHeader({ date, view }: { date: string; view: CalendarView }) {
   return (
     <>
-      <CalendarViewShortcuts date={date} view={view} />
+      <CalendarShortcuts date={date} view={view} />
       <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <div className="flex min-w-0 items-center gap-2.5 sm:w-52">

@@ -5,7 +5,7 @@ import { normalizeDatabaseUrl } from '../lib/database-url';
 
 const demoCalendars = [
   { color: 'blue', key: 'work', name: 'Work' },
-  { color: 'rose', key: 'personal', name: 'Personal' },
+  { color: 'cyan', key: 'personal', name: 'Personal' },
   { color: 'violet', key: 'side-project', name: 'Side project' },
 ] as const;
 

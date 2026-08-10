@@ -164,13 +164,18 @@ export function CalendarBoardFrame({
               >
                 {day ? (
                   <div className="flex min-w-0 items-center gap-1.5">
-                    <span className={cn('text-[11px] font-medium uppercase', isToday ? 'text-accent' : 'text-muted')}>
+                    <span
+                      className={cn(
+                        'text-[11px] font-medium uppercase',
+                        isToday ? 'text-black dark:text-white' : 'text-muted',
+                      )}
+                    >
                       {weekday}
                     </span>
                     <span
                       className={cn(
                         'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums',
-                        isToday && 'bg-accent text-white',
+                        isToday && 'bg-action text-white',
                       )}
                     >
                       {dayNumber}

@@ -34,6 +34,7 @@ export function EventFields({
   allDay,
   busy = false,
   controlHeight,
+  date,
   onAllDayChange,
   titleInvalidMessage,
   values,
@@ -41,6 +42,7 @@ export function EventFields({
   allDay: boolean;
   busy?: boolean;
   controlHeight: string;
+  date?: { onChange: (value: string) => void; value: string };
   onAllDayChange: (allDay: boolean) => void;
   titleInvalidMessage: string;
   values: EventFieldValues;
@@ -62,6 +64,20 @@ export function EventFields({
           required
         />
       </label>
+      {date ? (
+        <label className="block">
+          <span className={fieldLabel}>Date</span>
+          <Input
+            className={controlHeight}
+            disabled={busy}
+            name="day"
+            onInput={event => date.onChange(event.currentTarget.value)}
+            required
+            type="date"
+            value={date.value}
+          />
+        </label>
+      ) : null}
       <label className="flex items-center gap-2 text-sm">
         <Input
           checked={allDay}

@@ -104,7 +104,7 @@ function MiniMonthCalendar({
       <div className="h-[233px]">
         <div className="mb-2 flex items-center justify-between">
           <HoverPrefetchLink
-            className="hover:text-accent text-sm font-semibold transition-colors"
+            className="text-sm font-semibold transition-colors hover:text-black dark:hover:text-white"
             href={calendarHref(dateKey(new Date(Date.UTC(view.year, view.month, 1))), 'month')}
             transitionTypes={['nav-crossfade']}
           >
@@ -150,8 +150,8 @@ function MiniMonthCalendar({
                 <span
                   className={cn(
                     'grid size-7 place-items-center rounded-full',
-                    isToday && 'bg-accent font-semibold text-white',
-                    !isToday && isSelected && 'bg-accent font-semibold text-white',
+                    isToday && 'bg-action font-semibold text-white',
+                    !isToday && isSelected && 'bg-action font-semibold text-white',
                     !isToday && !isSelected && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
                     !isToday && isOutside && 'text-muted/40',
                   )}

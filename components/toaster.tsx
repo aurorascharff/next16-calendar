@@ -8,7 +8,7 @@ export function Toaster() {
   const { resolvedTheme } = useTheme();
   return (
     <ViewTransition name="toaster" default="none">
-      <Sonner position="bottom-right" theme={resolvedTheme === 'light' ? 'light' : 'dark'} />
+      <Sonner position="top-right" theme={resolvedTheme === 'light' ? 'light' : 'dark'} />
     </ViewTransition>
   );
 }

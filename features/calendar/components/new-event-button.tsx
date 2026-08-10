@@ -17,7 +17,7 @@ export function NewEventButton({ day }: { day: string }) {
         <Plus className="size-5 sm:size-4" />
         <span className="hidden sm:inline">New event</span>
       </Button>
-      <EventCreateDialog day={day} store={store} />
+      <EventCreateDialog day={day} key={day} store={store} />
     </>
   );
 }

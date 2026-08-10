@@ -55,7 +55,7 @@ function CalendarPicker({
       <Input name={name} type="hidden" value={value} />
       <Ariakit.ComboboxSelect className="border-divider focus-visible:border-accent focus-visible:ring-accent/25 dark:border-divider-dark flex w-full items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm text-black transition-colors focus-visible:ring-2 focus-visible:outline-none dark:bg-[#1c1c1c] dark:text-white">
         {selected ? (
-          <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={colorStyle(selected.color)} />
+          <span aria-hidden className="cal-color size-2.5 shrink-0 rounded-full" style={colorStyle(selected.color)} />
         ) : null}
         <span className="truncate">{selected?.name ?? 'Select calendar'}</span>
         <ChevronDown aria-hidden className="text-muted ml-auto size-4 shrink-0" />
@@ -71,9 +71,9 @@ function CalendarPicker({
             key={calendar.id}
             value={calendar.id}
           >
-            <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={colorStyle(calendar.color)} />
+            <span aria-hidden className="cal-color size-2.5 shrink-0 rounded-full" style={colorStyle(calendar.color)} />
             <span className="truncate">{calendar.name}</span>
-            {calendar.id === value ? <Check aria-hidden className="text-accent ml-auto size-4 shrink-0" /> : null}
+            {calendar.id === value ? <Check aria-hidden className="text-action ml-auto size-4 shrink-0" /> : null}
           </Ariakit.ComboboxItem>
         ))}
       </Ariakit.ComboboxPopover>
@@ -101,11 +101,13 @@ export function EventCreateDialog({
   defaultDuration?: number;
 }) {
   const { mutate } = useCalendarEvents();
-  const weekday = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
   const calendarOptions = calendars ?? [];
   const selectedCalendarId = defaultCalendarId ?? calendarOptions[0]?.id;
+  const [selectedDay, setSelectedDay] = useState(day);
+  const weekday = WEEKDAY_NAMES[new Date(`${selectedDay}T00:00:00.000Z`).getUTCDay()];
 
   function submitAction(formData: FormData) {
+    const eventDay = String(formData.get('day') ?? selectedDay);
     const repeat = String(formData.get('repeat'));
     const allDay = formData.get('allDay') === 'on';
     const values = {
@@ -117,16 +119,17 @@ export function EventCreateDialog({
       start: String(formData.get('start')),
       title: String(formData.get('title')),
     };
-    const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? weekday : null;
+    const eventWeekday = WEEKDAY_NAMES[new Date(`${eventDay}T00:00:00.000Z`).getUTCDay()];
+    const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? eventWeekday : null;
     if (values.title.trim()) {
-      const tempId = optimisticEventId(day, values);
+      const tempId = optimisticEventId(eventDay, values);
       const calendarId = values.calendarId || selectedCalendarId || '';
       const calendar = calendarOptions.find(option => option.id === calendarId);
       const optimisticEvent: CalendarEvent = {
         allDay,
         calendarId,
         color: (calendar?.color ?? 'blue') as CalendarColor,
-        day,
+        day: eventDay,
         description: values.description.trim() || null,
         duration: allDay ? 24 * 60 : Number(values.duration),
         id: tempId,
@@ -189,7 +192,7 @@ export function EventCreateDialog({
               New event
             </Ariakit.PopoverHeading>
             <Ariakit.PopoverDescription className="text-muted mt-0.5 text-sm">
-              {formatDay(day)}
+              {formatDay(selectedDay)}
             </Ariakit.PopoverDescription>
           </div>
           <IconButton className="-mr-1" label="Close" render={<Ariakit.PopoverDismiss />}>
@@ -206,6 +209,7 @@ export function EventCreateDialog({
             <EventFields
               allDay={allDay}
               controlHeight={controlHeight}
+              date={{ onChange: setSelectedDay, value: selectedDay }}
               onAllDayChange={setAllDay}
               titleInvalidMessage="Add a title before saving the event."
               values={values}
@@ -225,7 +229,9 @@ export function EventCreateDialog({
                 <span className={fieldLabel}>Repeat</span>
                 <Select defaultValue={values.repeat} name="repeat">
                   <option value="">Does not repeat</option>
-                  <option value="weekly">Weekly on {weekdayLabel.format(new Date(`${day}T00:00:00.000Z`))}</option>
+                  <option value="weekly">
+                    Weekly on {weekdayLabel.format(new Date(`${selectedDay}T00:00:00.000Z`))}
+                  </option>
                   <option value="weekday">Every weekday</option>
                 </Select>
               </label>

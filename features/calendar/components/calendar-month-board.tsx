@@ -55,7 +55,7 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
       title={`${event.start} · ${event.title}`}
       type="button"
     >
-      <span className="size-1.5 shrink-0 rounded-full" style={colorStyle(event.color)} />
+      <span className="cal-color size-1.5 shrink-0 rounded-full" style={colorStyle(event.color)} />
       <span className="text-muted hidden shrink-0 tabular-nums sm:inline">{event.start}</span>
       <span className="min-w-0 flex-1 truncate font-medium">{event.title}</span>
       {event.recurring ? <Repeat className="text-muted hidden size-2.5 shrink-0 sm:block" /> : null}
@@ -157,7 +157,7 @@ export function CalendarMonthFrame({ children, date, days }: { children: ReactNo
                 <span
                   className={cn(
                     'grid size-6 place-items-center rounded-full text-xs font-medium tabular-nums',
-                    day === today && 'bg-accent font-semibold text-white',
+                    day === today && 'bg-action font-semibold text-white',
                     outside && day !== today && 'text-muted/45',
                   )}
                 >

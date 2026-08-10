@@ -245,9 +245,9 @@ function NowLine({ minutes }: { minutes: number }) {
       style={{ top: ((display - START_MINUTES) / 60) * HOUR_HEIGHT }}
       suppressHydrationWarning
     >
-      <div className="bg-primary relative h-px">
+      <div className="bg-action relative h-px">
         <span
-          className="bg-primary absolute -top-[3px] -left-1 size-2 rounded-full"
+          className="bg-action absolute -top-[3px] -left-1 size-2 rounded-full"
           style={{ animation: 'now-pulse 2s ease-in-out infinite' }}
         />
       </div>

@@ -17,7 +17,7 @@ type Props = {
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action/40 disabled:cursor-not-allowed disabled:opacity-50';
 
 const sizes: Record<Size, string> = {
   default: 'h-9 px-4 text-sm',
@@ -27,7 +27,7 @@ const sizes: Record<Size, string> = {
 
 const variants: Record<Variant, string> = {
   ghost: 'text-muted hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white',
-  primary: 'bg-accent text-white hover:bg-accent-hover',
+  primary: 'bg-action text-white hover:bg-action-hover',
   secondary:
     'border border-divider bg-white text-black hover:border-gray/40 hover:bg-card dark:border-divider-dark dark:bg-transparent dark:text-white dark:hover:border-gray/30 dark:hover:bg-card-dark',
 };

@@ -10,12 +10,14 @@
   --color-surface-dark: #121212;
   --color-surface: #fafafa;
 
-  --color-primary: #1b50ff;
-  --color-primary-dark: #1340d1;
-  --color-primary-darker: #142f8b;
-  --color-accent: #1b50ff;
-  --color-accent-hover: #1340d1;
-  --color-accent-fade: #214fff22;
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-darker: #1e40af;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-fade: #2563eb22;
+  --color-action: #2563eb;
+  --color-action-hover: #1d4ed8;
   --color-success: #0fa958;
   --color-danger: #e54848;
   --color-warning: #f5a524;
@@ -35,6 +37,14 @@
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+  --color-accent-fade: #3b82f622;
+  --color-action: #3b82f6;
+  --color-action-hover: #2563eb;
+}
 
 @layer base {
   body {
@@ -61,36 +71,60 @@
 
 .cal-chip {
   background-color: var(--cal-lb);
+  background-image: linear-gradient(135deg, var(--cal-lb), color-mix(in oklab, var(--cal-lb) 68%, var(--cal-lb-end)));
   color: var(--cal-lt);
   --tw-ring-color: rgb(0 0 0 / 0.08);
 }
 .dark .cal-chip {
   background-color: var(--cal-db);
+  background-image: linear-gradient(135deg, var(--cal-db), color-mix(in oklab, var(--cal-db) 68%, var(--cal-db-end)));
   color: var(--cal-dt);
   --tw-ring-color: rgb(0 0 0 / 0.16);
 }
 
 .cal-chip-booking {
   background-color: var(--color-surface);
+  background-image: none;
   color: var(--cal-lb);
   --tw-ring-color: var(--cal-lb);
 }
 
 .dark .cal-chip-booking {
   background-color: var(--color-card-dark);
-  color: var(--cal-lt);
+  background-image: none;
+  color: var(--cal-db);
   --tw-ring-color: var(--cal-db);
+}
+
+.cal-color {
+  background-color: var(--cal-color-light);
+  background-image: linear-gradient(
+    135deg,
+    var(--cal-color-light),
+    color-mix(in oklab, var(--cal-color-light) 68%, var(--cal-color-light-end))
+  );
+}
+
+.dark .cal-color {
+  background-color: var(--cal-color-dark);
+  background-image: linear-gradient(
+    135deg,
+    var(--cal-color-dark),
+    color-mix(in oklab, var(--cal-color-dark) 68%, var(--cal-color-dark-end))
+  );
 }
 
 .cal-booking-row {
   background-color: var(--color-surface);
+  background-image: none;
   color: var(--cal-lb);
   box-shadow: inset 0 0 0 1px var(--cal-lb);
 }
 
 .dark .cal-booking-row {
   background-color: var(--color-card-dark);
-  color: var(--cal-lt);
+  background-image: none;
+  color: var(--cal-db);
   box-shadow: inset 0 0 0 1px var(--cal-db);
 }
 
@@ -309,7 +343,7 @@ main:has([data-calendar-pending]) .calendar-saving-indicator {
     z-index: 9999;
     transform: translateY(-100%);
     border-radius: 4px 4px 0 0;
-    background: #4f6ef7;
+    background: var(--color-accent);
     padding: 1px 6px;
     color: white;
     font-family: var(--font-geist-mono), monospace;
@@ -326,7 +360,7 @@ main:has([data-calendar-pending]) .calendar-saving-indicator {
 }
 
 html.boundary-mode :is([data-component], [data-sonner-toast]) {
-  outline: 2px solid #4f6ef7;
+  outline: 2px solid var(--color-accent);
   outline-offset: -2px;
 }
 

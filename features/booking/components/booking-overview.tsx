@@ -14,7 +14,7 @@ export async function BookingLinkDetails() {
 export function BookingLinkCard({ children }: { children: ReactNode }) {
   return (
     <div className="border-divider dark:border-divider-dark dark:bg-card-dark min-h-72 rounded-lg border bg-white p-6">
-      <div className="bg-accent/15 text-accent mb-4 grid size-10 place-items-center rounded-lg">
+      <div className="bg-card text-muted dark:bg-card-dark mb-4 grid size-10 place-items-center rounded-lg">
         <Link2 className="size-5" />
       </div>
       {children}

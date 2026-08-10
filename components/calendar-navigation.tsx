@@ -12,7 +12,7 @@ import type { Route } from 'next';
 import type { ComponentProps } from 'react';
 
 const sidebarLink =
-  'flex min-h-10 w-10 max-w-full items-center justify-center gap-3 rounded-xl px-0 text-sm font-medium text-muted transition-colors lg:w-52 lg:justify-start lg:px-3 not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-accent-fade aria-[current=page]:font-semibold aria-[current=page]:text-accent aria-[current=page]:[&_svg]:stroke-[2.5]';
+  'flex min-h-10 w-10 max-w-full items-center justify-center gap-3 rounded-xl px-0 text-sm font-medium text-muted transition-colors lg:w-52 lg:justify-start lg:px-3 not-aria-[current=page]:hover:bg-card not-aria-[current=page]:hover:text-black dark:not-aria-[current=page]:hover:bg-card-dark dark:not-aria-[current=page]:hover:text-white aria-[current=page]:bg-card aria-[current=page]:font-semibold aria-[current=page]:text-black aria-[current=page]:[&_svg]:stroke-[2.5] dark:aria-[current=page]:bg-white/10 dark:aria-[current=page]:text-white';
 const REPO_URL = 'https://github.com/aurorascharff/next16-calendar';
 
 type CalendarLinkProps = Omit<ComponentProps<typeof Link>, 'href'> & { href?: Route };

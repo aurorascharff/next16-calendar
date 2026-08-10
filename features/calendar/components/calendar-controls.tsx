@@ -3,14 +3,14 @@
 import * as Ariakit from '@ariakit/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useOptimistic, useState, useTransition } from 'react';
+import { useOptimistic, useState, useTransition } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { calendarHref, dateKey, shiftMonth, shiftWeek } from '../calendar-utils';
+import { useCalendarShortcuts } from '../hooks/use-calendar-shortcuts';
 import { useTodayKey } from '../hooks/use-now';
 import type { CalendarView } from '../types/calendar';
 
@@ -57,7 +57,12 @@ export function CalendarControls({
     <Boundary label="CalendarControls" asChild>
       <div className="flex items-center gap-1">
         {today ? (
-          <Button className="h-8 px-3" render={<Link href={calendarHref(today, view)} prefetch />} variant="ghost">
+          <Button
+            aria-keyshortcuts="T"
+            className="h-8 px-3"
+            render={<Link href={calendarHref(today, view)} prefetch />}
+            variant="ghost"
+          >
             Today
           </Button>
         ) : (
@@ -67,12 +72,14 @@ export function CalendarControls({
         )}
         <div className="flex items-center">
           <IconButton
+            aria-keyshortcuts="ArrowLeft"
             label={`Previous ${period}`}
             render={<Link href={calendarHref(previous, view)} prefetch transitionTypes={['nav-back']} />}
           >
             <ChevronLeft className="size-4.5" />
           </IconButton>
           <IconButton
+            aria-keyshortcuts="ArrowRight"
             label={`Next ${period}`}
             render={<Link href={calendarHref(next, view)} prefetch transitionTypes={['nav-forward']} />}
           >
@@ -85,49 +92,8 @@ export function CalendarControls({
   );
 }
 
-export function CalendarViewShortcuts({ date, view }: { date: string; view: CalendarView }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (
-        event.defaultPrevented ||
-        event.repeat ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.altKey ||
-        event.isComposing
-      ) {
-        return;
-      }
-      const target = event.target;
-      if (
-        document.querySelector('[data-calendar-editing]') ||
-        (target instanceof HTMLElement &&
-          (target.isContentEditable ||
-            target.closest(
-              'input, textarea, select, [contenteditable="true"], [role="dialog"], [role="menu"], [role="listbox"]',
-            )))
-      ) {
-        return;
-      }
-
-      const key = event.key.toLowerCase();
-      const nextView = key === 'w' ? 'week' : key === 'm' ? 'month' : null;
-      if (!nextView || nextView === view) return;
-
-      event.preventDefault();
-      const focusedElement = document.activeElement;
-      if (focusedElement instanceof HTMLElement && focusedElement.closest('[data-calendar-view-toggle]')) {
-        focusedElement.blur();
-      }
-      router.push(calendarHref(date, nextView));
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [date, router, view]);
-
+export function CalendarShortcuts({ date, view }: { date: string; view: CalendarView }) {
+  useCalendarShortcuts({ date, view });
   return null;
 }
 
@@ -243,7 +209,7 @@ function DatePickerCalendar({
           <ChevronLeft className="size-4" />
         </IconButton>
         <HoverPrefetchLink
-          className="hover:text-accent text-sm font-semibold transition-colors"
+          className="text-sm font-semibold transition-colors hover:text-black dark:hover:text-white"
           href={calendarHref(dateKey(new Date(Date.UTC(visibleMonth.year, visibleMonth.month, 1))), 'month')}
           onNavigate={onPick}
         >
@@ -268,8 +234,8 @@ function DatePickerCalendar({
             <HoverPrefetchLink
               className={cn(
                 'relative grid size-8 place-items-center rounded-md text-sm tabular-nums',
-                isSelected ? 'bg-accent font-semibold text-white' : 'hover:bg-card dark:hover:bg-card-dark',
-                !isSelected && isToday && 'text-accent font-semibold',
+                isSelected ? 'bg-action font-semibold text-white' : 'hover:bg-card dark:hover:bg-card-dark',
+                !isSelected && isToday && 'font-semibold text-black dark:text-white',
                 !isSelected && isOutside && 'text-muted/50',
               )}
               href={calendarHref(key, calendarView)}

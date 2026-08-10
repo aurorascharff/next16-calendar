@@ -223,7 +223,7 @@ function EventDetails({ calendar, event }: { calendar?: Calendar; event: Calenda
             {event.allDay ? 'All day' : `${event.start} · ${formatDuration(event.duration)}`}
           </p>
         </div>
-        <span className="mt-1 size-2.5 rounded-full" style={colorStyle(event.color)} />
+        <span className="cal-color mt-1 size-2.5 rounded-full" style={colorStyle(event.color)} />
         <p>{calendar?.name ?? 'Calendar'}</p>
         {event.recurring ? (
           <>

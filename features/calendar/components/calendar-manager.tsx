@@ -59,7 +59,10 @@ export function CalendarManager({ calendars, expanded = false }: { calendars: Ca
                 type="button"
               >
                 <span
-                  className={cn('size-2.5 shrink-0 rounded-full transition-opacity', isHidden && 'opacity-25')}
+                  className={cn(
+                    'cal-color size-2.5 shrink-0 rounded-full transition-opacity',
+                    isHidden && 'opacity-25',
+                  )}
                   style={colorStyle(calendar.color)}
                 />
                 <span
@@ -211,8 +214,8 @@ function CalendarFormDialog({
                 aria-label={option}
                 aria-pressed={color === option}
                 className={cn(
-                  'ring-offset-surface dark:ring-offset-surface-dark size-7 rounded-full ring-2 ring-offset-2 transition',
-                  color === option ? 'ring-accent' : 'ring-transparent',
+                  'cal-color ring-offset-surface dark:ring-offset-surface-dark size-7 rounded-full ring-2 ring-offset-2 transition',
+                  color === option ? 'ring-action' : 'ring-transparent',
                 )}
                 key={option}
                 onClick={() => setColor(option)}
