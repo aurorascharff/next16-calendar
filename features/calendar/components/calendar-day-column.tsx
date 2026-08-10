@@ -62,6 +62,7 @@ export function CalendarEventLayer({
             onMoveMove={interaction.move.onPointerMove}
             onMoveUp={interaction.move.onPointerUp}
             onMoveCancel={interaction.move.onPointerCancel}
+            onResizeLostPointerCapture={interaction.resizeHandlers.onLostPointerCapture}
             onResizeCancel={interaction.resizeHandlers.onPointerCancel}
             onResizeDown={pointerEvent => interaction.resizeHandlers.onPointerDown(event, pointerEvent)}
             onResizeMove={interaction.resizeHandlers.onPointerMove}
@@ -150,6 +151,7 @@ function EventChip({
   onMoveMove,
   onMoveUp,
   onMoveCancel,
+  onResizeLostPointerCapture,
   onResizeCancel,
   onResizeDown,
   onResizeMove,
@@ -168,6 +170,7 @@ function EventChip({
   onMoveMove: PointerHandler;
   onMoveUp: PointerHandler;
   onMoveCancel: PointerHandler;
+  onResizeLostPointerCapture: PointerHandler;
   onResizeCancel: PointerHandler;
   onResizeDown: PointerHandler;
   onResizeMove: PointerHandler;
@@ -219,6 +222,7 @@ function EventChip({
         data-event-chip
         data-resize-handle
         onClick={event => event.stopPropagation()}
+        onLostPointerCapture={onResizeLostPointerCapture}
         onPointerCancel={onResizeCancel}
         onPointerDown={onResizeDown}
         onPointerMove={onResizeMove}

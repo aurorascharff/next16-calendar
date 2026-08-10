@@ -52,6 +52,7 @@ export type CalendarBoardInteractions = {
   onEventSelect: (event: CalendarEvent, anchorRect: DOMRect) => void;
   resize: { endMin: number; sourceId: string; startMin: number } | null;
   resizeHandlers: {
+    onLostPointerCapture: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerCancel: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerDown: (event: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerMove: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
@@ -194,6 +195,7 @@ export function useCalendarBoard({
   }
 
   function handleResizeDown(event: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) {
+    if (pointerEvent.button !== 0) return;
     pointerEvent.stopPropagation();
     pointerEvent.preventDefault();
     const column = (pointerEvent.currentTarget as HTMLElement).closest('[data-day-column]');
@@ -218,6 +220,7 @@ export function useCalendarBoard({
   function handleResizeMove(pointerEvent: React.PointerEvent<HTMLElement>) {
     const active = resizeRef.current;
     if (!active || active.pointerId !== pointerEvent.pointerId) return;
+    pointerEvent.stopPropagation();
     const next = targetResizeFromPointer(active, pointerEvent);
     resizeRef.current = next;
     setResize(next);
@@ -226,6 +229,7 @@ export function useCalendarBoard({
   function handleResizeUp(pointerEvent: React.PointerEvent<HTMLElement>) {
     const active = resizeRef.current;
     if (!active || active.pointerId !== pointerEvent.pointerId) return;
+    pointerEvent.stopPropagation();
     const target = targetResizeFromPointer(active, pointerEvent);
     resizeRef.current = null;
     try {
@@ -318,6 +322,7 @@ export function useCalendarBoard({
     onEventSelect: handleEventSelect,
     resize,
     resizeHandlers: {
+      onLostPointerCapture: handleResizeCancel,
       onPointerCancel: handleResizeCancel,
       onPointerDown: handleResizeDown,
       onPointerMove: handleResizeMove,

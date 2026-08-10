@@ -58,7 +58,8 @@ test.describe('Calendar', () => {
 
   test('releasing a resize handle commits the final duration', async ({ page }) => {
     await page.goto('/calendar/2026-08-10');
-    const event = page.getByTitle('Focus time · 08:30').first();
+    const event = page.getByTitle('Release planning · 11:00');
+    await expect(event).toHaveCount(1);
     await expect(event).toBeVisible();
 
     const initialBounds = await event.boundingBox();
