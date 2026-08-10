@@ -23,9 +23,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="mt-6 flex min-h-0 w-full flex-1 flex-col">
               <div className="mb-2 flex items-center justify-center px-0 lg:justify-between lg:px-3">
-                <p className="text-muted hidden text-xs font-semibold tracking-wide uppercase lg:block">
-                  Calendars
-                </p>
+                <p className="text-muted hidden text-xs font-semibold tracking-wide uppercase lg:block">Calendars</p>
                 <NewCalendarButton />
               </div>
               <div className="relative min-h-0 flex-1 overflow-hidden">

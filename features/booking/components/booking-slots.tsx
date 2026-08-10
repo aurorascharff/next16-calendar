@@ -42,8 +42,7 @@ function BookingConfirmation({
         <FlowMark animated className="mx-auto size-12" />
         <h2 className="mt-4 text-lg font-semibold">You&apos;re booked</h2>
         <p className="text-muted mt-2 text-sm">
-          {formatDayLong(day)} at{' '}
-          <span className="font-medium text-black tabular-nums dark:text-white">{time}</span>
+          {formatDayLong(day)} at <span className="font-medium text-black tabular-nums dark:text-white">{time}</span>
         </p>
         <p className="text-muted mt-1 text-sm">{duration} minutes. A confirmation is on its way.</p>
         <Button className="mt-6" render={<Link href={dayHref(handle, day)} />} variant="secondary">

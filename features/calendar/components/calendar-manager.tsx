@@ -54,12 +54,7 @@ export function CalendarManager({ calendars }: { calendars: Calendar[] }) {
                   className={cn('size-2.5 shrink-0 rounded-full transition-opacity', isHidden && 'opacity-25')}
                   style={colorStyle(calendar.color)}
                 />
-                <span
-                  className={cn(
-                    'text-muted hidden truncate lg:inline',
-                    isHidden && 'line-through opacity-60',
-                  )}
-                >
+                <span className={cn('text-muted hidden truncate lg:inline', isHidden && 'line-through opacity-60')}>
                   {calendar.name}
                 </span>
               </button>
