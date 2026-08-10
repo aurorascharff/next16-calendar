@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  createContext,
-  startTransition,
-  useActionState,
-  useContext,
-  useEffect,
-  useOptimistic,
-  type ReactNode,
-} from 'react';
+import { createContext, startTransition, useActionState, useContext, useOptimistic, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { calendarEventsReducer } from '@/features/calendar/calendar-actions';
 import type { CalendarEvent } from '@/features/calendar/types/calendar';
@@ -18,6 +10,7 @@ import {
   initialEventMutationState,
 } from '@/features/calendar/utils/event-optimistic-reducer';
 import type { EventAction } from '@/features/calendar/utils/event-optimistic-reducer';
+import type { EventMutationState } from '@/features/calendar/utils/event-optimistic-reducer';
 
 type CalendarEventsContextValue = {
   getEvents: (events: CalendarEvent[], days: string[]) => CalendarEvent[];
@@ -27,8 +20,18 @@ type CalendarEventsContextValue = {
 
 const CalendarEventsContext = createContext<CalendarEventsContextValue | null>(null);
 
+async function reduceCalendarEvents(state: EventMutationState, action: EventAction) {
+  const next = await calendarEventsReducer(state, action);
+  if (next.notification?.type === 'error') {
+    toast.error(next.notification.message);
+  } else if (next.notification) {
+    toast.success(next.notification.message);
+  }
+  return next;
+}
+
 export function CalendarEventsProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch, isPending] = useActionState(calendarEventsReducer, initialEventMutationState);
+  const [state, dispatch, isPending] = useActionState(reduceCalendarEvents, initialEventMutationState);
   const [optimisticState, applyOptimisticAction] = useOptimistic(state, applyOptimisticEventAction);
 
   function mutate(action: EventAction) {
@@ -37,15 +40,6 @@ export function CalendarEventsProvider({ children }: { children: ReactNode }) {
       dispatch(action);
     });
   }
-
-  useEffect(() => {
-    if (!state.notification) return;
-    if (state.notification.type === 'error') {
-      toast.error(state.notification.message);
-    } else {
-      toast.success(state.notification.message);
-    }
-  }, [state.notification]);
 
   return (
     <CalendarEventsContext.Provider
