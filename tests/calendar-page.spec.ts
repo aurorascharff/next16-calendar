@@ -64,6 +64,7 @@ test.describe('Calendar', () => {
 
     const initialBounds = await event.boundingBox();
     const resizeHandle = event.locator('[data-resize-handle]');
+    await resizeHandle.hover();
     const handleBounds = await resizeHandle.boundingBox();
     expect(initialBounds).not.toBeNull();
     expect(handleBounds).not.toBeNull();
