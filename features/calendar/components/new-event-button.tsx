@@ -11,7 +11,7 @@ export function NewEventButton({ day }: { day: string }) {
   return (
     <>
       <Button
-        className="size-11 rounded-full p-0 sm:h-auto sm:w-auto sm:rounded-md sm:px-4 sm:py-2"
+        className="size-11 p-0 sm:h-9 sm:w-auto sm:px-4"
         render={<Ariakit.PopoverDisclosure aria-label="New event" store={store} />}
       >
         <Plus className="size-5 sm:size-4" />

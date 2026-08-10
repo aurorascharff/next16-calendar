@@ -17,17 +17,17 @@ type Props = {
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-md font-semibold whitespace-nowrap transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100';
+  'inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-50';
 
 const sizes: Record<Size, string> = {
-  default: 'px-4 py-2 text-sm',
+  default: 'h-9 px-4 text-sm',
   icon: 'size-9',
-  sm: 'px-3 py-1.5 text-xs',
+  sm: 'h-8 px-3 text-xs',
 };
 
 const variants: Record<Variant, string> = {
   ghost: 'text-muted hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white',
-  primary: 'bg-accent text-white shadow-sm shadow-black/10 hover:bg-accent-hover dark:shadow-black/30',
+  primary: 'bg-accent text-white hover:bg-accent-hover',
   secondary:
     'border border-divider bg-white text-black hover:border-gray/40 hover:bg-card dark:border-divider-dark dark:bg-transparent dark:text-white dark:hover:border-gray/30 dark:hover:bg-card-dark',
 };

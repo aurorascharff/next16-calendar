@@ -180,7 +180,7 @@ export function CalendarBoardFrame({
                     <span
                       className={cn(
                         'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-base font-semibold tabular-nums',
-                        isToday && 'bg-accent text-white',
+                        isToday && 'bg-accent/15 text-accent ring-accent/25 ring-1',
                       )}
                     >
                       {dayNumber}

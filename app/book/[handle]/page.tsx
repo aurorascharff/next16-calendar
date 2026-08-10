@@ -2,6 +2,7 @@ import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
+import ErrorBoundary from '@/components/ui/error-boundary';
 import { FlowMark } from '@/components/ui/flow-mark';
 import { getPublicBookingMetadata } from '@/features/booking/booking-queries';
 import { BookingProfile, BookingProfileSkeleton } from '@/features/booking/components/booking-profile';
@@ -32,17 +33,19 @@ export default function BookingPage({ params, searchParams }: PageProps<'/book/[
           <FlowMark animated className="size-11 shrink-0 sm:size-12" />
         </div>
         <div className="grid grid-rows-[auto_auto] sm:min-h-0 sm:flex-1 sm:grid-rows-[auto_minmax(0,1fr)]">
-          <Suspense fallback={<BookingProfileSkeleton />}>
-            <Crossfade>
-              {Promise.all([params, searchParams]).then(([{ handle }, { booked, date }]) => (
-                <BookingProfile
-                  booked={typeof booked === 'string' ? booked : undefined}
-                  date={typeof date === 'string' ? date : undefined}
-                  handle={handle}
-                />
-              ))}
-            </Crossfade>
-          </Suspense>
+          <ErrorBoundary title="Booking page unavailable">
+            <Suspense fallback={<BookingProfileSkeleton />}>
+              <Crossfade>
+                {Promise.all([params, searchParams]).then(([{ handle }, { booked, date }]) => (
+                  <BookingProfile
+                    booked={typeof booked === 'string' ? booked : undefined}
+                    date={typeof date === 'string' ? date : undefined}
+                    handle={handle}
+                  />
+                ))}
+              </Crossfade>
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </section>
     </main>

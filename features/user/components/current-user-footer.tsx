@@ -10,7 +10,7 @@ export async function CurrentUserFooter() {
 
   return (
     <div className="flex flex-col items-center gap-1 px-0 py-3 lg:flex-row lg:px-3">
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-zinc-200 text-sm font-semibold text-zinc-700 uppercase dark:bg-zinc-700 dark:text-zinc-100">
+      <span className="bg-accent/15 text-accent ring-accent/20 grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold uppercase ring-1">
         {user.name.charAt(0)}
       </span>
       <form action={signOut}>

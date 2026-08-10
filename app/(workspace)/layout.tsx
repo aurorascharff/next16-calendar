@@ -1,6 +1,7 @@
 import { Suspense, ViewTransition } from 'react';
 import { CalendarSidebarBrand, WorkspaceNavigationLinks } from '@/components/calendar-navigation';
 import { Crossfade } from '@/components/ui/crossfade';
+import ErrorBoundary from '@/components/ui/error-boundary';
 import { CalendarList } from '@/features/calendar/components/calendar-list';
 import { CalendarManagerSkeleton, NewCalendarButton } from '@/features/calendar/components/calendar-manager';
 import { CalendarVisibilityProvider } from '@/features/calendar/components/calendar-visibility';
@@ -17,9 +18,11 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             <CalendarSidebarBrand />
             <WorkspaceNavigationLinks />
             <div className="mt-6 hidden px-1 lg:block">
-              <Suspense fallback={<MiniMonthSkeleton />}>
-                <MiniMonth />
-              </Suspense>
+              <ErrorBoundary compact title="Mini calendar unavailable">
+                <Suspense fallback={<MiniMonthSkeleton />}>
+                  <MiniMonth />
+                </Suspense>
+              </ErrorBoundary>
             </div>
             <div className="mt-6 flex min-h-0 w-full flex-1 flex-col">
               <div className="mb-2 flex items-center justify-center px-0 lg:justify-between lg:px-3">
@@ -28,11 +31,13 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="relative min-h-0 flex-1 overflow-hidden">
                 <div className="h-full [scrollbar-gutter:stable] overflow-y-auto overscroll-contain pb-6">
-                  <Suspense fallback={<CalendarManagerSkeleton />}>
-                    <Crossfade>
-                      <CalendarList />
-                    </Crossfade>
-                  </Suspense>
+                  <ErrorBoundary compact title="Calendars unavailable">
+                    <Suspense fallback={<CalendarManagerSkeleton />}>
+                      <Crossfade>
+                        <CalendarList />
+                      </Crossfade>
+                    </Suspense>
+                  </ErrorBoundary>
                 </div>
                 <div
                   aria-hidden

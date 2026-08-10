@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import ErrorBoundary from '@/components/ui/error-boundary';
 import { formatMonth } from '@/features/calendar/calendar-utils';
 import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header';
 import {
@@ -35,28 +36,30 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
           <CalendarHeader date={date} view={toView(view)} />
         ))}
       </Suspense>
-      <Suspense fallback={<CalendarViewFallback />}>
-        {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
-          const calendarView = toView(view);
-          return calendarView === 'month' ? (
-            <CalendarMonthScroll date={date}>
-              <CalendarMonthSurface date={date}>
-                <Suspense fallback={<CalendarMonthEventsFallback />}>
-                  <CalendarMonth date={date} />
-                </Suspense>
-              </CalendarMonthSurface>
-            </CalendarMonthScroll>
-          ) : (
-            <CalendarWeekScroll date={date}>
-              <CalendarWeekFrame date={date}>
-                <Suspense fallback={<CalendarWeekEventsFallback />}>
-                  <CalendarWeek date={date} />
-                </Suspense>
-              </CalendarWeekFrame>
-            </CalendarWeekScroll>
-          );
-        })}
-      </Suspense>
+      <ErrorBoundary title="Calendar unavailable">
+        <Suspense fallback={<CalendarViewFallback />}>
+          {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
+            const calendarView = toView(view);
+            return calendarView === 'month' ? (
+              <CalendarMonthScroll date={date}>
+                <CalendarMonthSurface date={date}>
+                  <Suspense fallback={<CalendarMonthEventsFallback />}>
+                    <CalendarMonth date={date} />
+                  </Suspense>
+                </CalendarMonthSurface>
+              </CalendarMonthScroll>
+            ) : (
+              <CalendarWeekScroll date={date}>
+                <CalendarWeekFrame date={date}>
+                  <Suspense fallback={<CalendarWeekEventsFallback />}>
+                    <CalendarWeek date={date} />
+                  </Suspense>
+                </CalendarWeekFrame>
+              </CalendarWeekScroll>
+            );
+          })}
+        </Suspense>
+      </ErrorBoundary>
     </main>
   );
 }

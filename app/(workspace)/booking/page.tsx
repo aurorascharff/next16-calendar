@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
+import ErrorBoundary from '@/components/ui/error-boundary';
 import {
   BookingLinkCard,
   BookingLinkDetails,
@@ -24,18 +25,22 @@ export default function BookingPage() {
       </header>
       <section className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6">
         <BookingLinkCard>
-          <Suspense fallback={<BookingSectionSkeleton />}>
-            <Crossfade>
-              <BookingLinkDetails />
-            </Crossfade>
-          </Suspense>
+          <ErrorBoundary title="Booking link unavailable">
+            <Suspense fallback={<BookingSectionSkeleton />}>
+              <Crossfade>
+                <BookingLinkDetails />
+              </Crossfade>
+            </Suspense>
+          </ErrorBoundary>
         </BookingLinkCard>
         <BookingSettingsCard>
-          <Suspense fallback={<BookingSectionSkeleton />}>
-            <Crossfade>
-              <BookingSettings />
-            </Crossfade>
-          </Suspense>
+          <ErrorBoundary title="Settings unavailable">
+            <Suspense fallback={<BookingSectionSkeleton />}>
+              <Crossfade>
+                <BookingSettings />
+              </Crossfade>
+            </Suspense>
+          </ErrorBoundary>
         </BookingSettingsCard>
       </section>
     </main>

@@ -150,7 +150,7 @@ function MiniMonthCalendar({
                 <span
                   className={cn(
                     'grid size-7 place-items-center rounded-md',
-                    isToday && 'bg-accent font-semibold text-white',
+                    isToday && 'bg-accent/15 text-accent ring-accent/25 font-semibold ring-1',
                     !isToday && isSelected && 'ring-accent text-accent ring-1 ring-inset',
                     !isToday && !isSelected && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
                     !isToday && isOutside && 'text-muted/40',

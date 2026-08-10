@@ -163,15 +163,22 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
             <EventDetails calendar={calendar} event={event} />
             <EventPopoverFooter>
               <Button
-                className="border-danger/35 text-danger hover:border-danger/60 hover:bg-danger/10 hover:text-danger dark:border-danger/40 dark:hover:border-danger/65 dark:hover:bg-danger/10 dark:hover:text-danger max-sm:flex-1"
+                className="border-danger/35 text-danger hover:border-danger/60 hover:bg-danger/10 hover:text-danger dark:border-danger/40 dark:hover:border-danger/65 dark:hover:bg-danger/10 dark:hover:text-danger max-sm:h-10 max-sm:flex-1 max-sm:text-sm"
                 disabled={busy}
                 onClick={remove}
+                size="sm"
                 variant="secondary"
               >
                 <Trash2 className="size-4" />
                 Delete
               </Button>
-              <Button className="max-sm:flex-1" disabled={busy} onClick={() => setMode('edit')} variant="secondary">
+              <Button
+                className="max-sm:h-10 max-sm:flex-1 max-sm:text-sm"
+                disabled={busy}
+                onClick={() => setMode('edit')}
+                size="sm"
+                variant="secondary"
+              >
                 <Pencil className="size-4" />
                 Edit
               </Button>
@@ -190,10 +197,22 @@ export function EventPopover({ anchorRect, calendar, event, onClose, onDeleted, 
               values={values}
             />
             <EventPopoverFooter>
-              <Button className="max-sm:flex-1" disabled={busy} onClick={() => setMode('details')} variant="secondary">
+              <Button
+                className="max-sm:h-10 max-sm:flex-1 max-sm:text-sm"
+                disabled={busy}
+                onClick={() => setMode('details')}
+                size="sm"
+                variant="secondary"
+              >
                 Cancel
               </Button>
-              <Button className="max-sm:flex-1" disabled={busy} form={formId} type="submit">
+              <Button
+                className="max-sm:h-10 max-sm:flex-1 max-sm:text-sm"
+                disabled={busy}
+                form={formId}
+                size="sm"
+                type="submit"
+              >
                 Save changes
               </Button>
             </EventPopoverFooter>

@@ -41,7 +41,7 @@ type BookingMatch = {
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const DEMO_CALENDAR_COLORS: Record<string, CalendarColor> = {
-  Personal: 'pink',
+  Personal: 'rose',
   'Side project': 'violet',
   Work: 'blue',
 };

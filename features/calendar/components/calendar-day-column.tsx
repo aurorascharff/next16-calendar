@@ -233,7 +233,7 @@ function NowLine({ minutes }: { minutes: number }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-x-0 z-30"
+      className="pointer-events-none absolute inset-x-0 z-20"
       style={{ top: ((display - START_MINUTES) / 60) * HOUR_HEIGHT }}
       suppressHydrationWarning
     >
