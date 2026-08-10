@@ -8,6 +8,7 @@ import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { IconButton } from '@/components/ui/icon-button';
+import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { calendarHref, dateKey, shiftMonth, shiftWeek } from '../calendar-utils';
 import { useCalendarShortcuts } from '../hooks/use-calendar-shortcuts';
@@ -112,34 +113,39 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
 
   return (
     <Boundary label="ViewToggle" asChild>
-      <div
-        className="border-divider dark:border-divider-dark flex items-center rounded-md border p-0.5"
-        data-calendar-view-toggle
-      >
-        <Link
-          aria-keyshortcuts="W"
-          aria-current={optimisticView === 'week' ? 'page' : undefined}
-          className={cn(item, optimisticView === 'week' ? active : inactive)}
-          href={calendarHref(date, 'week')}
-          onNavigate={() => markView('week')}
-          prefetch
-          transitionTypes={['nav-crossfade']}
+      <div className="flex items-center gap-1.5">
+        <div
+          className="border-divider dark:border-divider-dark flex items-center rounded-md border p-0.5"
+          data-calendar-view-toggle
         >
-          <span className="sm:hidden">W</span>
-          <span className="hidden sm:inline">Week</span>
-        </Link>
-        <Link
-          aria-keyshortcuts="M"
-          aria-current={optimisticView === 'month' ? 'page' : undefined}
-          className={cn(item, optimisticView === 'month' ? active : inactive)}
-          href={calendarHref(date, 'month')}
-          onNavigate={() => markView('month')}
-          prefetch
-          transitionTypes={['nav-crossfade']}
-        >
-          <span className="sm:hidden">M</span>
-          <span className="hidden sm:inline">Month</span>
-        </Link>
+          <Link
+            aria-keyshortcuts="W"
+            aria-current={optimisticView === 'week' ? 'page' : undefined}
+            className={cn(item, optimisticView === 'week' ? active : inactive)}
+            href={calendarHref(date, 'week')}
+            onNavigate={() => markView('week')}
+            prefetch
+            transitionTypes={['nav-crossfade']}
+          >
+            <span className="sm:hidden">W</span>
+            <span className="hidden sm:inline">Week</span>
+          </Link>
+          <Link
+            aria-keyshortcuts="M"
+            aria-current={optimisticView === 'month' ? 'page' : undefined}
+            className={cn(item, optimisticView === 'month' ? active : inactive)}
+            href={calendarHref(date, 'month')}
+            onNavigate={() => markView('month')}
+            prefetch
+            transitionTypes={['nav-crossfade']}
+          >
+            <span className="sm:hidden">M</span>
+            <span className="hidden sm:inline">Month</span>
+          </Link>
+        </div>
+        <span className="calendar-saving-indicator text-muted grid size-5 place-items-center" aria-hidden>
+          <Spinner className="size-4 motion-reduce:animate-none" />
+        </span>
       </div>
     </Boundary>
   );

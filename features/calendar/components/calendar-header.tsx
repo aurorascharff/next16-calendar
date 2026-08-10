@@ -1,6 +1,5 @@
 import { MobileCalendarSidebarTrigger } from '@/components/mobile-calendar-sidebar';
 import { FlowMark } from '@/components/ui/flow-mark';
-import { Spinner } from '@/components/ui/spinner';
 import { formatMonth } from '../calendar-utils';
 import { CalendarControls, CalendarShortcuts, DatePicker, ViewToggle } from './calendar-controls';
 import { NewEventButton } from './new-event-button';
@@ -21,12 +20,6 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
             <CalendarControls date={date} view={view} />
             <ViewToggle date={date} view={view} />
           </div>
-        </div>
-        <div className="flex shrink-0 items-center">
-          <span className="calendar-saving-indicator text-muted grid size-5 place-items-center" role="status">
-            <Spinner className="size-4 motion-reduce:animate-none" />
-            <span className="sr-only">Saving calendar changes</span>
-          </span>
         </div>
       </header>
       <div className="border-divider dark:border-divider-dark flex items-center justify-between gap-2 border-b px-4 py-2 sm:hidden">
