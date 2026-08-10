@@ -82,6 +82,57 @@ test.describe('Calendar', () => {
     await expect(page.getByText('Create your own calendar to make changes.')).toBeVisible();
   });
 
+  test('clicking a resize handle without changing its duration does not save', async ({ page }) => {
+    await page.goto('/calendar/2026-08-10');
+    const event = page.getByTitle('Release planning · 11:00');
+    await expect(event).toHaveCount(1);
+    await expect(event).toBeVisible();
+
+    const resizeHandle = event.locator('[data-resize-handle]');
+    await resizeHandle.hover();
+    const actionRequest = page
+      .waitForRequest(request => request.method() === 'POST' && Boolean(request.headers()['next-action']), {
+        timeout: 750,
+      })
+      .then(
+        () => true,
+        () => false,
+      );
+
+    await page.mouse.down();
+    await page.mouse.up();
+
+    expect(await actionRequest).toBe(false);
+  });
+
+  test('dragging within the same snapped event position does not save', async ({ page }) => {
+    await page.goto('/calendar/2026-08-10');
+    const event = page.getByTitle('Release planning · 11:00');
+    await expect(event).toHaveCount(1);
+    await expect(event).toBeVisible();
+
+    const bounds = await event.boundingBox();
+    expect(bounds).not.toBeNull();
+    if (!bounds) return;
+
+    const actionRequest = page
+      .waitForRequest(request => request.method() === 'POST' && Boolean(request.headers()['next-action']), {
+        timeout: 750,
+      })
+      .then(
+        () => true,
+        () => false,
+      );
+    const x = bounds.x + bounds.width / 2;
+    const y = bounds.y + bounds.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 5, y);
+    await page.mouse.up();
+
+    expect(await actionRequest).toBe(false);
+  });
+
   test('client navigation marks the calendar active immediately', async ({ page }) => {
     await page.goto('/booking');
     await expect(page.getByRole('heading', { name: 'Booking link', level: 1 })).toBeVisible();

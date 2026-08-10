@@ -8,6 +8,31 @@ function matchesRecurrence(recurrence: string | null | undefined, day: string) {
   return recurrence === 'weekday' ? weekday >= 1 && weekday <= 5 : recurrence === WEEKDAY_NAMES[weekday];
 }
 
+function moveRecurringEvent(events: CalendarEvent[], action: Extract<EventAction, { type: 'move' }>, days: string[]) {
+  const event = events.find(candidate => candidate.id === action.id);
+  if (!event?.recurrence) return applyEventAction(events, action);
+
+  if (event.recurrence === 'weekday') {
+    return events.map(candidate =>
+      candidate.sourceId === action.sourceId ? { ...candidate, start: action.start } : candidate,
+    );
+  }
+
+  const recurrence = WEEKDAY_NAMES[new Date(`${action.day}T00:00:00.000Z`).getUTCDay()];
+  const occurrences = days
+    .filter(day => matchesRecurrence(recurrence, day))
+    .map(day => ({
+      ...event,
+      day,
+      id: `${action.sourceId}:${day}`,
+      recurrence,
+      recurring: true,
+      start: action.start,
+    }));
+
+  return [...occurrences, ...events.filter(candidate => candidate.sourceId !== action.sourceId)];
+}
+
 export function expandOptimisticEvent(event: CalendarEvent, days: string[]) {
   if (!event.recurrence) return [event];
 
@@ -67,6 +92,7 @@ export function applyEventAction(events: CalendarEvent[], action: EventAction) {
 
 export function applyEventActions(events: CalendarEvent[], actions: EventAction[], days: string[]) {
   return actions.reduce((current, action) => {
+    if (action.type === 'move') return moveRecurringEvent(current, action, days);
     if (action.type !== 'create') return applyEventAction(current, action);
 
     return expandOptimisticEvent(action.event, days).reduce(

@@ -21,17 +21,19 @@ import { useNow } from './use-now';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 
 type MoveOrigin = {
+  day: string;
   duration: number;
   grabOffsetMin: number;
   id: string;
   moved: boolean;
   sourceId: string;
+  start: string;
   x0: number;
   y0: number;
 };
 
 type ResizeTarget = { endMin: number; sourceId: string; startMin: number };
-type ResizeOrigin = ResizeTarget & { pointerId: number };
+type ResizeOrigin = ResizeTarget & { initialDuration: number; pointerId: number };
 
 export type SelectedEvent = { anchorRect?: DOMRect | null; event: CalendarEvent };
 export type CalendarBoardInteractions = {
@@ -135,11 +137,13 @@ export function useCalendarBoard({
     pointerEvent.stopPropagation();
     pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
     moveRef.current = {
+      day: calendarEvent.day,
       duration: calendarEvent.duration,
       grabOffsetMin: pointToMinutes(pointerEvent.clientY) - eventStartMinutes(calendarEvent.start),
       id: calendarEvent.id,
       moved: false,
       sourceId: calendarEvent.sourceId,
+      start: calendarEvent.start,
       x0: pointerEvent.clientX,
       y0: pointerEvent.clientY,
     };
@@ -184,6 +188,7 @@ export function useCalendarBoard({
     }, 120);
     const start = minutesToTime(target.startMin);
     const { day, id } = target;
+    if (day === origin.day && start === origin.start) return;
     const sourceId = origin.sourceId;
     void mutate({ day, id, sourceId, start, type: 'move' });
   }
@@ -204,6 +209,7 @@ export function useCalendarBoard({
     const startMin = eventStartMinutes(event.start);
     const next = {
       endMin: startMin + event.duration,
+      initialDuration: event.duration,
       pointerId: pointerEvent.pointerId,
       sourceId: event.sourceId,
       startMin,
@@ -237,6 +243,7 @@ export function useCalendarBoard({
     } catch {}
     setResize(null);
     const duration = target.endMin - target.startMin;
+    if (duration === target.initialDuration) return;
     const sourceId = target.sourceId;
     void mutate({ duration, sourceId, type: 'resize' });
   }
