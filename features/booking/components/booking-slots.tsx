@@ -42,7 +42,7 @@ function BookingConfirmation({
         <p className="text-muted mt-1 text-sm">
           Your {duration}-minute meeting is booked. A confirmation is on its way.
         </p>
-        <Button className="mt-6" render={<Link href={dayHref(handle, day)} />} variant="secondary">
+        <Button className="mt-6" render={<Link href={dayHref(handle, day)} prefetch />} variant="secondary">
           Book another
         </Button>
       </div>

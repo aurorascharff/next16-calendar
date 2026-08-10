@@ -2,7 +2,7 @@ import { instant } from '@next/playwright';
 import { expect, test } from '@playwright/test';
 import { signIn } from './helpers';
 
-test.describe('Booking settings', () => {
+test.describe('Booking page (/booking)', () => {
   test.beforeEach(async ({ page }) => {
     await signIn(page);
   });
@@ -13,12 +13,12 @@ test.describe('Booking settings', () => {
       async () => {
         await page.goto('/booking');
         await expect(page.getByRole('heading', { name: 'Booking link', level: 1 })).toBeVisible();
-        await expect(page.getByText('No booking link yet')).toHaveCount(0);
+        await expect(page.getByRole('button', { name: 'Save settings' })).toHaveCount(0);
       },
       { baseURL },
     );
 
-    await expect(page.getByRole('heading', { name: 'No booking link yet' }).filter({ visible: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Save settings' })).toBeVisible();
   });
 
   test('client navigation reveals the page immediately', async ({ page }) => {
@@ -26,13 +26,16 @@ test.describe('Booking settings', () => {
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
 
     await instant(page, async () => {
-      await page.getByRole('link', { name: 'Booking link' }).click();
+      await page.getByRole('link', { name: 'Booking link', exact: true }).click();
       await page.waitForURL(url => url.pathname === '/booking');
-      await expect(page.getByRole('link', { name: 'Booking link' })).toHaveAttribute('aria-current', 'page');
+      await expect(page.getByRole('link', { name: 'Booking link', exact: true })).toHaveAttribute(
+        'aria-current',
+        'page',
+      );
       await expect(page.getByRole('heading', { name: 'Booking link', level: 1 })).toBeVisible();
-      await expect(page.getByRole('heading', { name: 'No booking link yet' }).filter({ visible: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Save settings' })).toBeVisible();
     });
 
-    await expect(page.getByRole('heading', { name: 'No booking link yet' }).filter({ visible: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Save settings' })).toBeVisible();
   });
 });
