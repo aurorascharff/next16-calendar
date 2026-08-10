@@ -10,7 +10,6 @@ type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'default' | 'sm' | 'icon';
 
 type Props = {
-  boundaryLabel?: string;
   children: ReactNode;
   variant?: Variant;
   size?: Size;
@@ -46,7 +45,6 @@ export function buttonClasses({
 }
 
 export function Button({
-  boundaryLabel = 'Button',
   children,
   variant = 'primary',
   size = 'default',
@@ -70,14 +68,14 @@ export function Button({
   if (render) {
     const renderClassName = render.props?.className;
     return (
-      <Boundary label={boundaryLabel} asChild>
+      <Boundary label="Button" asChild>
         {cloneElement(render, { className: cn(classes, renderClassName), ...props }, content)}
       </Boundary>
     );
   }
 
   return (
-    <Boundary label={boundaryLabel} asChild>
+    <Boundary label="Button" asChild>
       <button className={classes} disabled={isDisabled} type={type} {...props}>
         {content}
       </button>
