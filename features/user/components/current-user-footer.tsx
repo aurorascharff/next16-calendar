@@ -1,6 +1,5 @@
-import { LogOut } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
-import { IconButton } from '@/components/ui/icon-button';
+import { LogOutButton } from '@/features/user/components/log-out-button';
 import { signOut } from '@/features/user/user-actions';
 import { getCurrentUser } from '@/features/user/user-queries';
 
@@ -20,9 +19,7 @@ export async function CurrentUserFooter({ expanded = false }: { expanded?: boole
         {user.name.charAt(0)}
       </span>
       <form action={signOut}>
-        <IconButton label="Log out" size="sm" type="submit">
-          <LogOut className="size-4" />
-        </IconButton>
+        <LogOutButton />
       </form>
       <div className={expanded ? 'ml-auto block' : 'ml-auto hidden lg:block'}>
         <ThemeToggle />

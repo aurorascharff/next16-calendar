@@ -95,6 +95,7 @@ export function useCalendarBoard({
       }
     },
   });
+  const createOpen = createStore.useState('open');
   const now = useNow();
   const todayKey = now ? dateKey(now) : null;
   const nowMinutes = now ? now.getHours() * 60 + now.getMinutes() : 0;
@@ -273,7 +274,7 @@ export function useCalendarBoard({
     },
     dragMove,
     getSelection(day: string) {
-      if (createSel?.day !== day) return null;
+      if (!createOpen || createSel?.day !== day) return null;
       return {
         hi: Math.max(createSel.aMin, createSel.bMin),
         lo: Math.min(createSel.aMin, createSel.bMin),
