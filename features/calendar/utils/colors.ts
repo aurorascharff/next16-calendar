@@ -21,7 +21,7 @@ const VARIANTS: Record<CalendarColor, Variants> = {
   green: { darkBg: '#376f58', darkText: '#ffffff', lightBg: '#318d67', lightText: '#ffffff' },
   indigo: { darkBg: '#574e91', darkText: '#ffffff', lightBg: '#695bb2', lightText: '#ffffff' },
   magenta: { darkBg: '#8b426f', darkText: '#ffffff', lightBg: '#b44991', lightText: '#ffffff' },
-  orange: { darkBg: '#925037', darkText: '#ffffff', lightBg: '#c86539', lightText: '#ffffff' },
+  orange: { darkBg: '#88463f', darkText: '#ffffff', lightBg: '#c45f4f', lightText: '#ffffff' },
   pink: { darkBg: '#934766', darkText: '#ffffff', lightBg: '#c74d86', lightText: '#ffffff' },
   rose: { darkBg: '#8f3f5c', darkText: '#ffffff', lightBg: '#cc4f72', lightText: '#ffffff' },
   sky: { darkBg: '#456b80', darkText: '#ffffff', lightBg: '#467f9f', lightText: '#ffffff' },
