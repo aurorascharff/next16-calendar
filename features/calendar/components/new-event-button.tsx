@@ -11,7 +11,8 @@ export function NewEventButton({ day }: { day: string }) {
   return (
     <>
       <Button
-        className="fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 size-12 p-0 shadow-lg transition-[transform,background-color,box-shadow] hover:-translate-y-0.5 hover:shadow-xl sm:right-6 sm:bottom-6 sm:h-10 sm:w-auto sm:px-4"
+        boundaryLabel="NewEventButton"
+        className="fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 size-12 p-0 shadow-lg transition-[background-color,box-shadow] hover:shadow-xl sm:right-6 sm:bottom-6 sm:h-10 sm:w-auto sm:px-4"
         render={<Ariakit.PopoverDisclosure aria-label="New event" store={store} />}
       >
         <Plus className="size-5 sm:size-4" />

@@ -341,8 +341,7 @@ main:has([data-calendar-pending]) .calendar-saving-indicator {
     top: 0;
     left: 0.5rem;
     z-index: 9999;
-    transform: translateY(-100%);
-    border-radius: 4px 4px 0 0;
+    border-radius: 0 0 4px 4px;
     background: var(--color-accent);
     padding: 1px 6px;
     color: white;
@@ -352,6 +351,16 @@ main:has([data-calendar-pending]) .calendar-saving-indicator {
     line-height: 1.4;
     white-space: nowrap;
     pointer-events: none;
+  }
+
+  html.boundary-mode [data-component] [data-component]::before {
+    display: none;
+  }
+
+  html.boundary-mode [data-component='NewEventButton']::before {
+    top: 0;
+    transform: translateY(-100%);
+    border-radius: 4px 4px 0 0;
   }
 
   html.boundary-mode [data-sonner-toast]::before {
