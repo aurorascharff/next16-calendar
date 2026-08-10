@@ -40,6 +40,14 @@ export function formatDay(value: string) {
   return dayFormatter.format(dateFromKey(value));
 }
 
+export function formatDayParts(value: string) {
+  const parts = dayFormatter.formatToParts(dateFromKey(value));
+  return {
+    day: parts.find(part => part.type === 'day')?.value ?? '',
+    weekday: parts.find(part => part.type === 'weekday')?.value ?? '',
+  };
+}
+
 export function formatMonth(value: string) {
   return monthFormatter.format(dateFromKey(value));
 }

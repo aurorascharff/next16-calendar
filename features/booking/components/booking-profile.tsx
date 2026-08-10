@@ -17,7 +17,10 @@ export async function BookingProfile({ booked, date, handle }: { booked?: string
       {editableTitle ? (
         <BookingTitle defaultValue={availability.title} formId={formId} />
       ) : (
-        <h1 className="mt-1 flex h-12 items-center truncate pr-10 text-base font-semibold tracking-tight sm:text-xl" title={availability.title}>
+        <h1
+          className="mt-1 flex h-12 items-center truncate pr-10 text-base font-semibold tracking-tight sm:text-xl"
+          title={availability.title}
+        >
           {availability.title}
         </h1>
       )}

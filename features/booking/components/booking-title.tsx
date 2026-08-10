@@ -42,7 +42,10 @@ export function BookingTitle({ defaultValue, formId }: { defaultValue: string; f
             variant="title"
           />
         ) : (
-          <h1 className="flex h-12 min-w-0 items-center truncate pr-10 text-base font-semibold tracking-tight sm:text-xl" title={title}>
+          <h1
+            className="flex h-12 min-w-0 items-center truncate pr-10 text-base font-semibold tracking-tight sm:text-xl"
+            title={title}
+          >
             {title}
           </h1>
         )}

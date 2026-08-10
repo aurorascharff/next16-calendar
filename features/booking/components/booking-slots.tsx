@@ -130,7 +130,7 @@ export function BookingSlots({
           {children}
           {!bookedTime ? (
             <BookingAction
-              className="mt-6 hidden md:grid md:mt-auto"
+              className="mt-6 hidden md:mt-auto md:grid"
               duration={duration}
               formId={formId}
               selected={selectedAvailable}

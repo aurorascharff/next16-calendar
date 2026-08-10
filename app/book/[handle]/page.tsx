@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<'/book/[handle]'>):
 export default function BookingPage({ params, searchParams }: PageProps<'/book/[handle]'>) {
   return (
     <main className="bg-surface dark:bg-surface-dark grid min-h-svh items-start justify-items-center overflow-x-hidden px-3 py-3 sm:h-svh sm:min-h-0 sm:overflow-hidden sm:px-4 sm:py-8">
-      <section className="border-divider bg-white dark:border-divider-dark dark:bg-card-dark flex w-full max-w-4xl flex-col rounded-lg border p-4 sm:p-6 md:h-[min(38rem,calc(100svh-4rem))] md:overflow-hidden">
+      <section className="border-divider dark:border-divider-dark dark:bg-card-dark flex w-full max-w-4xl flex-col rounded-lg border bg-white p-4 sm:p-6 md:h-[min(38rem,calc(100svh-4rem))] md:overflow-hidden">
         <div className="mb-5 flex items-center justify-between gap-4">
           <Link className="text-muted hover:text-accent inline-flex items-center gap-1.5 text-sm font-medium" href="/">
             <ChevronLeft className="size-4" />

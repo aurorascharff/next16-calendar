@@ -3,25 +3,20 @@
 import * as Ariakit from '@ariakit/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
-import { IconButton } from '@/components/ui/icon-button';
 import { Crossfade } from '@/components/ui/crossfade';
+import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { formatDay } from '../calendar-utils';
+import { formatDay, formatDayParts } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { useTodayKey } from '../hooks/use-now';
 import { expandOptimisticEvent } from '../utils/event-optimistic-reducer';
-import {
-  DAY_COLUMN_MIN_WIDTH,
-  GRID_HEIGHT,
-  HOURS,
-  TIME_COLUMN_WIDTH,
-} from '../utils/grid';
+import { DAY_COLUMN_MIN_WIDTH, GRID_HEIGHT, HOURS, TIME_COLUMN_WIDTH } from '../utils/grid';
 import { CalendarBoardHeader } from './calendar-board-header';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventPopover } from './event-popover';
-import type { ReactNode } from 'react';
 import type { Calendar, CalendarEvent } from '../types/calendar';
+import type { ReactNode } from 'react';
 
 export function CalendarBoard({
   calendars,
@@ -157,8 +152,7 @@ export function CalendarBoardFrame({
   });
   const todayKey = useTodayKey();
   const gridTemplate = `${TIME_COLUMN_WIDTH}px repeat(${dayKeys.length}, minmax(${DAY_COLUMN_MIN_WIDTH}px, 1fr))`;
-  const minWidth =
-    dayKeys.length > 1 ? TIME_COLUMN_WIDTH + dayKeys.length * DAY_COLUMN_MIN_WIDTH : undefined;
+  const minWidth = dayKeys.length > 1 ? TIME_COLUMN_WIDTH + dayKeys.length * DAY_COLUMN_MIN_WIDTH : undefined;
   return (
     <div className="relative grid [grid-template-rows:auto_auto_auto] select-none">
       <div className="sticky top-0 z-30 col-start-1 row-start-1" style={{ minWidth }}>
@@ -168,7 +162,7 @@ export function CalendarBoardFrame({
         >
           <div className="border-divider dark:border-divider-dark border-r" />
           {dayKeys.map((day, index) => {
-            const [weekday, dayNumber] = day ? formatDay(day).split(' ') : ['', ''];
+            const { day: dayNumber, weekday } = day ? formatDayParts(day) : { day: '', weekday: '' };
             const isToday = day === todayKey;
             return (
               <div

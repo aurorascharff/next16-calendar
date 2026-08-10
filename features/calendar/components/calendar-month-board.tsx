@@ -131,15 +131,7 @@ export function CalendarMonthBoard({
   );
 }
 
-export function CalendarMonthFrame({
-  children,
-  date,
-  days,
-}: {
-  children: ReactNode;
-  date: string;
-  days: string[];
-}) {
+export function CalendarMonthFrame({ children, date, days }: { children: ReactNode; date: string; days: string[] }) {
   const [createDraft, setCreateDraft] = useState<{ anchorRect: DOMRect; day: string } | null>(null);
   const createStore = Ariakit.usePopoverStore({
     placement: 'bottom-start',
@@ -151,7 +143,7 @@ export function CalendarMonthFrame({
   const month = date.slice(0, 7);
 
   return (
-    <div className="relative grid min-h-full min-w-[760px] select-none [grid-template-rows:auto_auto]">
+    <div className="relative grid min-h-full min-w-[760px] [grid-template-rows:auto_auto] select-none">
       <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark sticky top-0 z-20 col-start-1 row-start-1 grid grid-cols-7 border-b">
         {WEEKDAY_LABELS.map(label => (
           <div
