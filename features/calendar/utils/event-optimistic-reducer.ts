@@ -31,6 +31,23 @@ export type EventAction =
       type: 'update';
     };
 
+export type EventMutationState = {
+  actions: EventAction[];
+  notification: { message: string; type: 'error' | 'success' } | null;
+};
+
+export const initialEventMutationState: EventMutationState = {
+  actions: [],
+  notification: null,
+};
+
+export function applyOptimisticEventAction(state: EventMutationState, action: EventAction): EventMutationState {
+  return {
+    actions: [...state.actions, action],
+    notification: null,
+  };
+}
+
 export function applyEventAction(events: CalendarEvent[], action: EventAction) {
   switch (action.type) {
     case 'create':

@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { AlignLeft, CalendarDays, Pencil, Repeat2, Trash2, X } from 'lucide-react';
-import { type ReactNode, useActionState, useId, useState, useSyncExternalStore, useTransition } from 'react';
+import { type ReactNode, useId, useState, useSyncExternalStore } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
@@ -28,8 +28,6 @@ type FormValues = {
   title: string;
 };
 
-type FormState = { key?: number; values?: FormValues };
-
 const controlHeight = 'h-10';
 const mobileMedia = '(max-width: 639px)';
 
@@ -48,9 +46,8 @@ function getServerMobileSnapshot() {
 }
 
 export function EventPopover({ anchorRect, calendar, event, onClose }: EventPopoverProps) {
-  const { mutate } = useCalendarEvents();
+  const { isPending, mutate } = useCalendarEvents();
   const formId = useId();
-  const [isDeleting, startDelete] = useTransition();
   const [mode, setMode] = useState<'details' | 'edit'>('details');
   const isMobile = useSyncExternalStore(subscribeToMobile, getMobileSnapshot, getServerMobileSnapshot);
   const store = Ariakit.usePopoverStore({
@@ -61,45 +58,28 @@ export function EventPopover({ anchorRect, calendar, event, onClose }: EventPopo
     },
   });
 
-  const [state, formAction, isSaving] = useActionState(
-    async (_prev: FormState, formData: FormData): Promise<FormState> => {
-      const allDay = formData.get('allDay') === 'on';
-      const values = {
+  function formAction(formData: FormData) {
+    const allDay = formData.get('allDay') === 'on';
+    mutate({
+      event: {
         allDay,
         description: String(formData.get('description') ?? ''),
-        duration: String(formData.get('duration')),
+        duration: Number(formData.get('duration')),
+        sourceId: event.sourceId,
         start: String(formData.get('start')),
         title: String(formData.get('title')),
-      };
-      const saved = await mutate({
-        event: {
-          allDay,
-          description: values.description,
-          duration: Number(values.duration),
-          sourceId: event.sourceId,
-          start: values.start,
-          title: values.title,
-        },
-        type: 'update',
-      });
-      if (!saved) {
-        return { key: Date.now(), values };
-      }
-
-      return {};
-    },
-    {},
-  );
-
-  function remove() {
-    store.hide();
-    startDelete(async () => {
-      await mutate({ sourceId: event.sourceId, type: 'delete' });
+      },
+      type: 'update',
     });
   }
 
-  const busy = isSaving || isDeleting;
-  const values = state.values ?? {
+  function remove() {
+    store.hide();
+    mutate({ sourceId: event.sourceId, type: 'delete' });
+  }
+
+  const busy = isPending;
+  const values: FormValues = {
     allDay: event.allDay,
     description: event.description ?? '',
     duration: String(event.duration),
@@ -173,7 +153,6 @@ export function EventPopover({ anchorRect, calendar, event, onClose }: EventPopo
               formId={formId}
               onAllDayChange={setAllDay}
               onSubmit={() => store.hide()}
-              state={state}
               values={values}
             />
             <EventPopoverFooter key="edit-actions">
@@ -268,7 +247,6 @@ function EventEditForm({
   formId,
   onAllDayChange,
   onSubmit,
-  state,
   values,
 }: {
   allDay: boolean;
@@ -277,7 +255,6 @@ function EventEditForm({
   formId: string;
   onAllDayChange: (allDay: boolean) => void;
   onSubmit: () => void;
-  state: FormState;
   values: FormValues;
 }) {
   return (
@@ -286,7 +263,6 @@ function EventEditForm({
       className="flex min-h-0 flex-1 flex-col overflow-hidden sm:flex-none"
       data-calendar-editing
       id={formId}
-      key={state.key ?? 'event-edit'}
       onSubmit={onSubmit}
     >
       <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto p-4 sm:flex-none sm:overflow-visible">
