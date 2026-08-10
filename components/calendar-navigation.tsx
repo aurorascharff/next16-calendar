@@ -30,15 +30,17 @@ export function CalendarSidebarBrand({ expanded = false }: { expanded?: boolean 
           <span className="text-muted block truncate text-xs">Shape your day</span>
         </span>
       </CalendarHomeLink>
-      <IconButton
-        className={expanded ? 'mr-8' : 'hidden lg:inline-flex'}
-        external
-        href={REPO_URL}
-        label="View source on GitHub"
-        size="sm"
-      >
-        <GitHubIcon className="size-4" />
-      </IconButton>
+      {!expanded ? (
+        <IconButton
+          className="hidden lg:inline-flex"
+          external
+          href={REPO_URL}
+          label="View source on GitHub"
+          size="sm"
+        >
+          <GitHubIcon className="size-4" />
+        </IconButton>
+      ) : null}
     </div>
   );
 }
