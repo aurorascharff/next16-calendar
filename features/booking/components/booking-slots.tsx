@@ -139,13 +139,13 @@ export function BookingSlots({
             </div>
             <p className="text-muted mb-2 text-xs font-semibold tracking-wide uppercase">Choose a time</p>
             <DirectionalSlide key={day} name="booking-slots">
-              <div className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain py-1 pr-1">
+              <div className="h-[13.625rem] shrink-0 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain py-1 pr-1 sm:h-[17rem]">
                 {allTaken ? (
-                  <p className="text-muted border-divider dark:border-divider-dark flex min-h-40 items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm sm:h-full sm:min-h-0">
+                  <p className="text-muted border-divider dark:border-divider-dark flex h-full items-center justify-center rounded-md border border-dashed px-4 py-8 text-center text-sm">
                     No open {duration}-minute slots on this day. Try another date.
                   </p>
                 ) : (
-                  <div className="grid gap-2 p-px sm:grid-cols-2">
+                  <div className="grid auto-rows-[2.875rem] gap-2 p-px sm:grid-cols-2">
                     {visibleSlots.map(slot =>
                       slot.taken ? (
                         <div

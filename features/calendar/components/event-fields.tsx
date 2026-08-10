@@ -102,7 +102,6 @@ export function EventFields({
           {allDay ? <input name="duration" type="hidden" value={values.duration} /> : null}
         </label>
       </div>
-      {allDay ? <p className="text-muted -mt-1 text-xs">This event will fill the all-day row.</p> : null}
       <label className="block">
         <span className={fieldLabel}>Description</span>
         <textarea

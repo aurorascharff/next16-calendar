@@ -1,11 +1,21 @@
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
+import { Suspense } from 'react';
+import { SplashScreen } from '@/components/ui/splash-screen';
 import { dateKey } from '@/features/calendar/calendar-utils';
 import type { Route } from 'next';
 
-export const instant = false;
+export default function HomePage() {
+  return (
+    <main className="flex min-w-0 flex-1">
+      <Suspense fallback={<SplashScreen label="Opening calendar" />}>
+        <TodayRedirect />
+      </Suspense>
+    </main>
+  );
+}
 
-export default async function HomePage() {
+async function TodayRedirect() {
   await connection();
-  redirect(`/calendar/${dateKey(new Date())}` as Route);
+  return redirect(`/calendar/${dateKey(new Date())}` as Route);
 }
