@@ -27,8 +27,9 @@ function ToggleButton({ active, className, icon, label, ...props }: ToggleButton
       className={cn(
         'flex h-8 items-center gap-1.5 px-2.5 text-xs font-medium transition-colors',
         'focus-visible:bg-accent/10 dark:focus-visible:bg-accent/20 focus-visible:outline-none',
-        active ? 'text-black dark:text-white' : 'text-muted',
+        active ? 'text-accent' : 'text-muted',
         !props.disabled && 'hover:text-black dark:hover:text-white',
+        props.disabled && 'cursor-default',
         className,
       )}
     >
@@ -200,7 +201,7 @@ function DemoGuideDialog({
         <div className="mt-6 flex flex-col gap-4">
           {rows.map(({ Icon, name, on, text }) => (
             <div key={name} className="flex gap-3">
-              <Icon className={cn('mt-0.5 size-4.5 shrink-0', on ? 'text-black dark:text-white' : 'text-muted')} />
+              <Icon className={cn('mt-0.5 size-4.5 shrink-0', on ? 'text-accent' : 'text-muted')} />
               <div>
                 <p className="text-sm font-semibold">{name}</p>
                 <p className="text-muted mt-1 text-sm leading-relaxed">{text}</p>
