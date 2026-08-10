@@ -45,7 +45,7 @@ export function MiniMonth() {
     <MiniMonthCalendar
       calendarView={calendarView}
       initialKey={initialKey}
-      key={initialKey}
+      key={`${initialKey}:${calendarView}`}
       selected={selected}
       today={today}
     />
