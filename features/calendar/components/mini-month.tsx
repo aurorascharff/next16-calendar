@@ -54,11 +54,11 @@ export function MiniMonth() {
 
 export function MiniMonthSkeleton() {
   return (
-    <div aria-hidden className="h-[232px]">
+    <div aria-hidden className="h-[233px]">
       <div className="mb-2 flex h-7 items-center">
         <span className="bg-divider/55 dark:bg-divider-dark/70 h-3 w-20 rounded-full" />
       </div>
-      <div className="mb-1 h-3" />
+      <div className="mb-1 h-[15px]" />
       <div className="grid grid-cols-7 gap-y-0.5">
         {Array.from({ length: 42 }, (_, index) => (
           <span className="grid h-7 place-items-center" key={index}>
@@ -101,7 +101,7 @@ function MiniMonthCalendar({
 
   return (
     <Boundary label="MiniMonth" asChild>
-      <div>
+      <div className="h-[233px]">
         <div className="mb-2 flex items-center justify-between">
           <HoverPrefetchLink
             className="hover:text-accent text-sm font-semibold transition-colors"
