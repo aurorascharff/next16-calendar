@@ -274,7 +274,7 @@ export function useCalendarBoard({
     },
     dragMove,
     getSelection(day: string) {
-      if (!createOpen || createSel?.day !== day) return null;
+      if ((!createOpen && !createRef.current) || createSel?.day !== day) return null;
       return {
         hi: Math.max(createSel.aMin, createSel.bMin),
         lo: Math.min(createSel.aMin, createSel.bMin),
