@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
-import { type ReactNode, useActionState, useState, useTransition } from 'react';
+import { type ReactNode, useActionState, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
@@ -170,6 +170,7 @@ function CalendarFormDialog({
   store: Ariakit.DialogStore;
 }) {
   const [color, setColor] = useState<CalendarColor>(calendar?.color ?? colors[0] ?? 'indigo');
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const [state, formAction, isPending] = useActionState(
     async (_prev: { key?: number; values?: { name: string } }, formData: FormData) => {
@@ -191,11 +192,16 @@ function CalendarFormDialog({
   const name = state.values?.name ?? calendar?.name ?? '';
 
   return (
-    <Dialog busy={isPending} store={store} title={calendar ? 'Edit calendar' : 'New calendar'}>
+    <Dialog
+      busy={isPending}
+      initialFocus={nameInputRef}
+      store={store}
+      title={calendar ? 'Edit calendar' : 'New calendar'}
+    >
       <form action={formAction} className="mt-4 space-y-4" key={state.key ?? calendar?.id ?? 'new-calendar'}>
         <label className="block">
           <span className="text-muted mb-1.5 block text-xs font-medium">Name</span>
-          <Input autoFocus defaultValue={name} name="name" placeholder="e.g. Side project" required />
+          <Input defaultValue={name} name="name" placeholder="e.g. Side project" ref={nameInputRef} required />
         </label>
         <div>
           <span className="text-muted mb-1.5 block text-xs font-medium">Color</span>

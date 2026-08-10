@@ -9,12 +9,14 @@ type Props = {
   description?: string;
   children: React.ReactNode;
   busy?: boolean;
+  initialFocus?: Ariakit.DialogProps['initialFocus'];
 };
 
-export function Dialog({ store, title, description, children, busy = false }: Props) {
+export function Dialog({ store, title, description, children, busy = false, initialFocus }: Props) {
   return (
     <Ariakit.Dialog
       store={store}
+      initialFocus={initialFocus}
       unmountOnHide
       hideOnInteractOutside={!busy}
       hideOnEscape={!busy}
