@@ -105,6 +105,7 @@ export function DayColumn({
         isToday && 'bg-card/40 dark:bg-card-dark/40',
       )}
       data-day-column
+      onLostPointerCapture={interaction.create.onLostPointerCapture}
       onPointerCancel={interaction.create.onPointerCancel}
       onPointerDown={event => interaction.create.onPointerDown(day, event)}
       onPointerMove={event => interaction.create.onPointerMove(day, event)}

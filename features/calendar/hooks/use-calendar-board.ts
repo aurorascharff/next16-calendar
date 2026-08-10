@@ -38,6 +38,7 @@ type ResizeOrigin = ResizeTarget & { initialDuration: number; pointerId: number 
 export type SelectedEvent = { anchorRect?: DOMRect | null; event: CalendarEvent };
 export type CalendarBoardInteractions = {
   create: {
+    onLostPointerCapture: (event: React.PointerEvent<HTMLDivElement>) => void;
     onPointerCancel: (event: React.PointerEvent<HTMLDivElement>) => void;
     onPointerDown: (day: string, event: React.PointerEvent<HTMLDivElement>) => void;
     onPointerMove: (day: string, event: React.PointerEvent<HTMLDivElement>) => void;
@@ -307,6 +308,7 @@ export function useCalendarBoard({
 
   const interactions: CalendarBoardInteractions = {
     create: {
+      onLostPointerCapture: handleCreateCancel,
       onPointerCancel: handleCreateCancel,
       onPointerDown: handleCreateDown,
       onPointerMove: handleCreateMove,
