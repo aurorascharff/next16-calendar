@@ -17,6 +17,7 @@ export function SignInForm() {
           aria-invalid={state?.error ? true : undefined}
           autoComplete="email"
           autoFocus
+          defaultValue="demo@example.com"
           name="email"
           placeholder="you@example.com"
           required
