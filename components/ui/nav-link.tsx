@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
-import { usePrefetchDefault } from '@/components/demo/use-prefetch-default';
 import { Boundary } from '@/components/internal/boundary';
 import type { Route } from 'next';
 
@@ -53,11 +52,8 @@ function NavLinkShell<T extends string>({
   className,
   children,
   isActive,
-  prefetch: explicitPrefetch,
   ...rest
 }: Props<T> & { isActive: boolean }) {
-  const defaultPrefetch = usePrefetchDefault();
-  const prefetch = explicitPrefetch ?? defaultPrefetch;
   const target = (match ?? href.toString()).split('?')[0].split('#')[0];
 
   return (
@@ -68,7 +64,6 @@ function NavLinkShell<T extends string>({
       data-navlink-exact={exact || undefined}
       data-navlink-href={target}
       suppressHydrationWarning
-      prefetch={prefetch}
       {...rest}
     >
       {resolve(children, { isActive })}

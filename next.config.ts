@@ -2,10 +2,13 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  partialPrefetching: true,
+  // partialPrefecthing: true,
   reactCompiler: true,
   typedRoutes: true,
   experimental: {
+    instantInsights: {
+      validationLevel: 'manual-warning',
+    },
     inlineCss: true,
     useOffline: true,
   },

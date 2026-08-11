@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useOptimistic, useState, useTransition } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
-import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { calendarHref, dateKey, shiftMonth, shiftWeek } from '../calendar-utils';
@@ -60,7 +59,7 @@ export function CalendarControls({
           <Button
             aria-keyshortcuts="T"
             className="h-8 px-3"
-            render={<Link href={calendarHref(today, view)} prefetch transitionTypes={['nav-crossfade']} />}
+            render={<Link href={calendarHref(today, view)} transitionTypes={['nav-crossfade']} />}
             variant="ghost"
           >
             Today
@@ -74,14 +73,14 @@ export function CalendarControls({
           <IconButton
             aria-keyshortcuts="ArrowLeft"
             label={`Previous ${period}`}
-            render={<Link href={calendarHref(previous, view)} prefetch transitionTypes={['nav-back']} />}
+            render={<Link href={calendarHref(previous, view)} transitionTypes={['nav-back']} />}
           >
             <ChevronLeft className="size-4.5" />
           </IconButton>
           <IconButton
             aria-keyshortcuts="ArrowRight"
             label={`Next ${period}`}
-            render={<Link href={calendarHref(next, view)} prefetch transitionTypes={['nav-forward']} />}
+            render={<Link href={calendarHref(next, view)} transitionTypes={['nav-forward']} />}
           >
             <ChevronRight className="size-4.5" />
           </IconButton>
@@ -122,7 +121,6 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
           className={cn(item, optimisticView === 'week' ? active : inactive)}
           href={calendarHref(date, 'week')}
           onNavigate={() => markView('week')}
-          prefetch
           transitionTypes={['nav-crossfade']}
         >
           <span className="sm:hidden">W</span>
@@ -134,7 +132,6 @@ export function ViewToggle({ date, view }: { date: string; view: CalendarView })
           className={cn(item, optimisticView === 'month' ? active : inactive)}
           href={calendarHref(date, 'month')}
           onNavigate={() => markView('month')}
-          prefetch
           transitionTypes={['nav-crossfade']}
         >
           <span className="sm:hidden">M</span>
@@ -208,13 +205,13 @@ function DatePickerCalendar({
         <IconButton label="Previous month" onClick={() => changeVisibleMonth(-1)} size="sm">
           <ChevronLeft className="size-4" />
         </IconButton>
-        <HoverPrefetchLink
+        <Link
           className="text-sm font-semibold transition-colors hover:text-black dark:hover:text-white"
           href={calendarHref(dateKey(new Date(Date.UTC(visibleMonth.year, visibleMonth.month, 1))), 'month')}
           onNavigate={onPick}
         >
           {monthLabel.format(new Date(Date.UTC(visibleMonth.year, visibleMonth.month, 1)))}
-        </HoverPrefetchLink>
+        </Link>
         <IconButton label="Next month" onClick={() => changeVisibleMonth(1)} size="sm">
           <ChevronRight className="size-4" />
         </IconButton>
@@ -231,7 +228,7 @@ function DatePickerCalendar({
           const isToday = key === todayKey;
           const isOutside = day.getUTCMonth() !== visibleMonth.month;
           return (
-            <HoverPrefetchLink
+            <Link
               className={cn(
                 'relative grid size-8 place-items-center rounded-md text-sm tabular-nums',
                 isSelected ? 'bg-action font-semibold text-white' : 'hover:bg-card dark:hover:bg-card-dark',
@@ -243,7 +240,7 @@ function DatePickerCalendar({
               onNavigate={onPick}
             >
               {day.getUTCDate()}
-            </HoverPrefetchLink>
+            </Link>
           );
         })}
       </div>

@@ -38,10 +38,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-body:has([data-login-splash]) .demo-toggles {
-  display: none !important;
-}
-
 .dark {
   --color-accent: #3b82f6;
   --color-accent-hover: #2563eb;
@@ -302,7 +298,6 @@ body:has([data-login-splash]) .demo-toggles {
 
 ::view-transition-group(sidebar),
 ::view-transition-group(new-event-button),
-::view-transition-group(demo-toolbar),
 ::view-transition-group(theme-toggle),
 ::view-transition-group(toaster),
 ::view-transition-group(dialog),
@@ -319,8 +314,6 @@ body:has([data-login-splash]) .demo-toggles {
 ::view-transition-new(sidebar),
 ::view-transition-old(new-event-button),
 ::view-transition-new(new-event-button),
-::view-transition-old(demo-toolbar),
-::view-transition-new(demo-toolbar),
 ::view-transition-old(theme-toggle),
 ::view-transition-new(theme-toggle),
 ::view-transition-old(toaster),

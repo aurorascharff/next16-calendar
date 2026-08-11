@@ -1,6 +1,5 @@
 import 'server-only';
 
-import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { DEMO_DELAYS, isSlowEnabled } from '@/components/demo/demo-slow';
 import { verifyAuth } from '@/features/user/user-queries';
@@ -61,10 +60,6 @@ export function getCalendarDate(date: string) {
 }
 
 async function getCalendarsForUser(userId: string, slow: boolean): Promise<Calendar[]> {
-  'use cache';
-  cacheLife('hours');
-  cacheTag(calendarCache.calendarsTag);
-
   await delay(DEMO_DELAYS.calendarList, slow);
   const rows = await prisma.calendar.findMany({
     orderBy: [{ isDemo: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }],
@@ -83,7 +78,7 @@ export async function getCalendarWeek(date: string): Promise<CalendarRange> {
 
   const { id: userId } = await verifyAuth();
   const days = getWeekDays(date);
-  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), calendarCache.weekTag(days[0]), true);
+  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), true);
 }
 
 export async function getCalendarMonth(date: string): Promise<CalendarRange> {
@@ -91,21 +86,16 @@ export async function getCalendarMonth(date: string): Promise<CalendarRange> {
 
   const { id: userId } = await verifyAuth();
   const days = getMonthDays(date);
-  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), `calendar-month:${date.slice(0, 7)}`);
+  return getCalendarRangeForUser(days, userId, await isSlowEnabled());
 }
 
 async function getCalendarRangeForUser(
   days: string[],
   userId: string,
   slow: boolean,
-  rangeTag: string,
   includeFollowingDay = false,
 ): Promise<CalendarRange> {
-  'use cache';
   const start = days[0];
-
-  cacheLife('hours');
-  cacheTag(calendarCache.tag, rangeTag);
 
   await delay(DEMO_DELAYS.calendarEvents, slow);
   const eventDays = includeFollowingDay ? [...days, shiftDay(days.at(-1)!, 1)] : days;

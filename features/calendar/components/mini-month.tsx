@@ -1,10 +1,10 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useOptimistic, useState, useTransition } from 'react';
 import { Boundary } from '@/components/internal/boundary';
-import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { calendarHref, dateKey, getWeekDays } from '../calendar-utils';
@@ -103,13 +103,13 @@ function MiniMonthCalendar({
     <Boundary label="MiniMonth" asChild>
       <div className="h-[233px]">
         <div className="mb-2 flex items-center justify-between">
-          <HoverPrefetchLink
+          <Link
             className="text-sm font-semibold transition-colors hover:text-black dark:hover:text-white"
             href={calendarHref(dateKey(new Date(Date.UTC(view.year, view.month, 1))), 'month')}
             transitionTypes={['nav-crossfade']}
           >
             {monthLabel.format(new Date(Date.UTC(view.year, view.month, 1)))}
-          </HoverPrefetchLink>
+          </Link>
           <div className="flex items-center gap-0.5">
             <IconButton label="Previous month" onClick={() => shiftMonth(-1)} size="sm">
               <ChevronLeft className="size-4" />
@@ -132,7 +132,7 @@ function MiniMonthCalendar({
             const isSelected = calendarView === 'month' && key === optimisticSelected;
             const isOutside = day.getUTCMonth() !== view.month;
             return (
-              <HoverPrefetchLink
+              <Link
                 className={cn(
                   'relative grid h-7 w-full place-items-center text-xs tabular-nums',
                   inWeek && 'bg-divider/70 dark:bg-divider-dark/80',
@@ -158,7 +158,7 @@ function MiniMonthCalendar({
                 >
                   {day.getUTCDate()}
                 </span>
-              </HoverPrefetchLink>
+              </Link>
             );
           })}
         </div>

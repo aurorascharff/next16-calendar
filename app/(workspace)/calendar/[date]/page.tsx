@@ -10,12 +10,7 @@ import {
   CalendarMonthSurface,
 } from '@/features/calendar/components/calendar-month';
 import { CalendarViewFallback } from '@/features/calendar/components/calendar-scroll-section';
-import {
-  CalendarWeek,
-  CalendarWeekEventsFallback,
-  CalendarWeekFrame,
-  CalendarWeekScroll,
-} from '@/features/calendar/components/calendar-week';
+import { CalendarWeek, CalendarWeekFrame, CalendarWeekScroll } from '@/features/calendar/components/calendar-week';
 import type { CalendarView } from '@/features/calendar/types/calendar';
 import { CalendarEventsProvider } from '@/providers/calendar-events-provider';
 import type { Metadata } from 'next';
@@ -43,6 +38,7 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
           <Suspense fallback={<CalendarViewFallback />}>
             {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
               const calendarView = toView(view);
+
               return calendarView === 'month' ? (
                 <CalendarMonthScroll date={date}>
                   <CalendarMonthSurface date={date}>
@@ -54,9 +50,7 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
               ) : (
                 <CalendarWeekScroll date={date}>
                   <CalendarWeekFrame date={date}>
-                    <Suspense fallback={<CalendarWeekEventsFallback />}>
-                      <CalendarWeek date={date} />
-                    </Suspense>
+                    <CalendarWeek date={date} />
                   </CalendarWeekFrame>
                 </CalendarWeekScroll>
               );

@@ -4,8 +4,7 @@ import { updateTag } from 'next/cache';
 import { bookingCache } from '@/features/booking/booking-queries';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
-import { calendarCache } from './calendar-queries';
-import { getWeekDays, isDateKey } from './calendar-utils';
+import { isDateKey } from './calendar-utils';
 import { isCalendarColor } from './utils/colors';
 import type { EventAction, EventMutationState } from './utils/event-optimistic-reducer';
 
@@ -43,16 +42,11 @@ async function findEvent(id: string) {
   return prisma.calendarEvent.findUnique({ where: { id } });
 }
 
-function invalidateWeek(day: Date | string, handle: string) {
-  const key = typeof day === 'string' ? day : day.toISOString().slice(0, 10);
-  updateTag(calendarCache.tag);
-  updateTag(calendarCache.weekTag(getWeekDays(key)[0]));
+function invalidateWeek(_day: Date | string, handle: string) {
   updateTag(bookingCache.tag(handle));
 }
 
 function invalidateCalendars(handle: string) {
-  updateTag(calendarCache.calendarsTag);
-  updateTag(calendarCache.tag);
   updateTag(bookingCache.tag(handle));
 }
 
