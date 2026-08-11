@@ -39,7 +39,11 @@ export function CalendarScrollSection({ children, scrollKey }: { children: React
   }, [scrollKey]);
 
   return (
-    <section className="min-h-0 flex-1 overflow-auto [overflow-anchor:none]" data-calendar-scroll ref={setScrollRef}>
+    <section
+      className="min-h-0 flex-1 overflow-auto overscroll-contain [overflow-anchor:none]"
+      data-calendar-scroll
+      ref={setScrollRef}
+    >
       {children}
     </section>
   );

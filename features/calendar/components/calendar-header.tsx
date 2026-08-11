@@ -9,7 +9,7 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
   return (
     <>
       <CalendarShortcuts date={date} view={view} />
-      <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 sm:px-6">
+      <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 pt-[env(safe-area-inset-top)] sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <div className="flex min-w-0 items-center gap-2.5 sm:w-52">
             <MobileCalendarSidebarTrigger className="-ml-1.5 shrink-0" />
@@ -35,7 +35,7 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
 export function CalendarHeaderSkeleton() {
   return (
     <>
-      <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 sm:px-6">
+      <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 pt-[env(safe-area-inset-top)] sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <MobileCalendarSidebarTrigger className="-ml-1.5 shrink-0" />
           <span className="bg-card dark:bg-card-dark h-5 w-28 rounded-md sm:w-40" />

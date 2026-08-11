@@ -31,7 +31,7 @@ export function CalendarMonthScroll({ children, date }: { children: ReactNode; d
   return (
     <DirectionalSlide key={date ? `month:${date.slice(0, 7)}` : 'loading:month'} name="calendar-board">
       <CalendarBoardViewport>
-        <section className="min-h-0 flex-1 overflow-auto [overflow-anchor:none]">{children}</section>
+        <section className="min-h-0 flex-1 overflow-auto overscroll-contain [overflow-anchor:none]">{children}</section>
       </CalendarBoardViewport>
     </DirectionalSlide>
   );

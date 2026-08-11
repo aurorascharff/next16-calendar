@@ -12,7 +12,13 @@ import { Toaster } from '@/components/toaster';
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
-export const viewport: Viewport = { viewportFit: 'cover' };
+export const viewport: Viewport = {
+  themeColor: [
+    { color: '#fafafa', media: '(prefers-color-scheme: light)' },
+    { color: '#121212', media: '(prefers-color-scheme: dark)' },
+  ],
+  viewportFit: 'cover',
+};
 
 const description =
   'A Next.js 16.3 calendar demonstrating Instant Navigations with Cache Components and View Transitions.';

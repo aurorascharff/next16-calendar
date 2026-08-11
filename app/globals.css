@@ -71,6 +71,27 @@ body:has([data-login-splash]) .demo-toggles {
   button {
     cursor: pointer;
   }
+
+  :where(a, button, summary, [role='button']) {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  :where(button, summary, [role='button']) {
+    user-select: none;
+  }
+}
+
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 1rem !important;
+  }
+
+  :where(a, button, summary, [role='button']):active {
+    opacity: 0.78;
+  }
 }
 
 .cal-chip {

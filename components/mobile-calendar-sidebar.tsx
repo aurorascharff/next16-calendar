@@ -15,7 +15,7 @@ export function MobileCalendarSidebar({ children, sidebar }: { children: ReactNo
       {children}
       <Ariakit.Dialog
         backdrop={<div className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px] md:hidden" />}
-        className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-3rem))] flex-col border-r p-4 shadow-2xl outline-none md:hidden"
+        className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-3rem))] flex-col border-r pt-[max(1rem,env(safe-area-inset-top))] pr-4 pb-[max(1rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] shadow-2xl outline-none md:hidden"
         hideOnInteractOutside
         onClick={event => {
           if ((event.target as HTMLElement).closest('a[href]')) store.hide();
@@ -26,7 +26,7 @@ export function MobileCalendarSidebar({ children, sidebar }: { children: ReactNo
         <Ariakit.DialogHeading className="sr-only">Flow navigation</Ariakit.DialogHeading>
         <Ariakit.DialogDismiss
           aria-label="Close navigation"
-          className="text-muted hover:bg-card focus-visible:ring-accent dark:hover:bg-card-dark absolute top-3 right-3 grid size-9 place-items-center rounded-md hover:text-black focus-visible:ring-2 focus-visible:outline-none dark:hover:text-white"
+          className="text-muted hover:bg-card focus-visible:ring-accent dark:hover:bg-card-dark absolute top-[max(0.75rem,env(safe-area-inset-top))] right-3 grid size-9 place-items-center rounded-md hover:text-black focus-visible:ring-2 focus-visible:outline-none dark:hover:text-white"
         >
           <X className="size-5" />
         </Ariakit.DialogDismiss>

@@ -170,9 +170,10 @@ export function useCalendarBoard({
   function handleMoveDown(calendarEvent: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) {
     if (pointerEvent.button !== 0) return;
     if ((pointerEvent.target as HTMLElement).closest('[data-resize-handle]')) return;
+    const touch = pointerEvent.pointerType === 'touch';
+    if (touch && !(pointerEvent.target as HTMLElement).closest('[data-drag-handle]')) return;
     pointerEvent.stopPropagation();
     const target = pointerEvent.currentTarget;
-    const touch = pointerEvent.pointerType === 'touch';
     const origin: MoveOrigin = {
       active: !touch,
       day: calendarEvent.day,
