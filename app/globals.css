@@ -38,6 +38,10 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+body:has([data-login-splash]) .demo-toggles {
+  display: none !important;
+}
+
 .dark {
   --color-accent: #3b82f6;
   --color-accent-hover: #2563eb;

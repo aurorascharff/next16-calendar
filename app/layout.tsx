@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <BoundaryProvider>
             {children}
-            <div className="fixed top-3 right-4 z-50 hidden items-start sm:flex">
+            <div className="demo-toggles fixed top-3 right-4 z-50 hidden items-start sm:flex">
               <Suspense fallback={null}>
                 <DemoToolbar />
               </Suspense>
