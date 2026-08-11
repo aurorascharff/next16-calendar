@@ -6,8 +6,10 @@ import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { dateKey } from '../calendar-utils';
 import {
+  calendarDayFromGridDay,
   END_MINUTES,
   eventStartMinutes,
+  gridDayFromCalendarDay,
   HOUR_HEIGHT,
   minutesToTime,
   nearestDuration,
@@ -164,7 +166,9 @@ export function useCalendarBoard({
   }
 
   function effectiveDay(event: CalendarEvent) {
-    return dragMove?.id === event.id ? dragMove.day : event.day;
+    if (event.allDay) return event.day;
+    if (dragMove?.id === event.id) return gridDayFromCalendarDay(dragMove.day, dragMove.startMin);
+    return gridDayFromCalendarDay(event.day, eventStartMinutes(event.start));
   }
 
   function handleMoveDown(calendarEvent: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) {
@@ -210,11 +214,11 @@ export function useCalendarBoard({
   }
 
   function targetMoveFromPointer(origin: MoveOrigin, pointerEvent: React.PointerEvent<HTMLElement>) {
-    const day = days[pointToDayIndex(pointerEvent.clientX)];
+    const gridDay = days[pointToDayIndex(pointerEvent.clientX)];
     const raw = pointToMinutes(pointerEvent.clientY) - origin.grabOffsetMin;
     const snapped = Math.round(raw / SNAP_MINUTES) * SNAP_MINUTES;
     const startMin = Math.max(START_MINUTES, Math.min(END_MINUTES - origin.duration, snapped));
-    return { day, id: origin.id, startMin };
+    return { day: calendarDayFromGridDay(gridDay, startMin), id: origin.id, startMin };
   }
 
   function handleMoveMove(pointerEvent: React.PointerEvent<HTMLElement>) {
@@ -361,7 +365,7 @@ export function useCalendarBoard({
       setCreateSel({ aMin: startMin, bMin: startMin + duration, day });
       setCreateDraft({
         anchorRect: new DOMRect(pending.x0, pending.y0, 0, 0),
-        day,
+        day: calendarDayFromGridDay(day, startMin),
         duration,
         start: minutesToTime(startMin),
       });
@@ -404,7 +408,7 @@ export function useCalendarBoard({
     setCreateSel({ aMin: startMin, bMin: startMin + duration, day });
     setCreateDraft({
       anchorRect: new DOMRect(event.clientX, event.clientY, 0, 0),
-      day,
+      day: calendarDayFromGridDay(day, startMin),
       duration,
       start: minutesToTime(startMin),
     });

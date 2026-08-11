@@ -1,4 +1,4 @@
-import { timeToMinutes } from '../calendar-utils';
+import { shiftDay, timeToMinutes } from '../calendar-utils';
 import type { CalendarEvent } from '../types/calendar';
 
 export const HOUR_HEIGHT = 72;
@@ -23,6 +23,14 @@ export function displayMinutes(minutes: number) {
 
 export function eventStartMinutes(start: string) {
   return displayMinutes(timeToMinutes(start));
+}
+
+export function gridDayFromCalendarDay(day: string, startMinutes: number) {
+  return startMinutes >= 24 * 60 ? shiftDay(day, -1) : day;
+}
+
+export function calendarDayFromGridDay(day: string, startMinutes: number) {
+  return startMinutes >= 24 * 60 ? shiftDay(day, 1) : day;
 }
 
 export function packDay(events: CalendarEvent[]): Map<string, Placement> {

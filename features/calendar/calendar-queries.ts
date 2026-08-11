@@ -6,7 +6,7 @@ import { DEMO_DELAYS, isSlowEnabled } from '@/components/demo/demo-slow';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { delay } from '@/lib/utils';
-import { dateKey, getMonthDays, getWeekDays, isDateKey } from './calendar-utils';
+import { dateKey, getMonthDays, getWeekDays, isDateKey, shiftDay } from './calendar-utils';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarRange } from './types/calendar';
 
 export const calendarCache = {
@@ -78,7 +78,7 @@ export async function getCalendarWeek(date: string): Promise<CalendarRange> {
 
   const { id: userId } = await verifyAuth();
   const days = getWeekDays(date);
-  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), calendarCache.weekTag(days[0]));
+  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), calendarCache.weekTag(days[0]), true);
 }
 
 export async function getCalendarMonth(date: string): Promise<CalendarRange> {
@@ -94,6 +94,7 @@ async function getCalendarRangeForUser(
   userId: string,
   slow: boolean,
   rangeTag: string,
+  includeFollowingDay = false,
 ): Promise<CalendarRange> {
   'use cache';
   const start = days[0];
@@ -102,7 +103,8 @@ async function getCalendarRangeForUser(
   cacheTag(calendarCache.tag, rangeTag);
 
   await delay(DEMO_DELAYS.calendarEvents, slow);
-  const rangeEnd = new Date(`${days.at(-1)}T00:00:00.000Z`);
+  const eventDays = includeFollowingDay ? [...days, shiftDay(days.at(-1)!, 1)] : days;
+  const rangeEnd = new Date(`${eventDays.at(-1)}T00:00:00.000Z`);
   rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
   const [rows, bookingRows] = await Promise.all([
     prisma.calendarEvent.findMany({
@@ -125,7 +127,7 @@ async function getCalendarRangeForUser(
 
   return {
     days,
-    events: rows.flatMap(event => expandEvent(event, days, bookingMatches)),
+    events: rows.flatMap(event => expandEvent(event, eventDays, bookingMatches)),
     start,
   };
 }

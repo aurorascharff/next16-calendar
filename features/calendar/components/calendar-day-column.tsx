@@ -120,10 +120,7 @@ export function DayColumn({
       {renderGrid
         ? HOURS.map(hour => (
             <div
-              className={cn(
-                'border-divider/60 dark:border-divider-dark/60 h-[72px] border-b',
-                hour === 0 && 'border-t',
-              )}
+              className={cn('border-divider/60 dark:border-divider-dark/60 h-[72px]', hour !== 23 && 'border-b')}
               key={hour}
             />
           ))

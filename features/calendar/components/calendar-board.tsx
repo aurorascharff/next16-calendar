@@ -7,10 +7,10 @@ import { Crossfade } from '@/components/ui/crossfade';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { useCalendarEvents } from '@/providers/calendar-events-provider';
-import { formatDay, formatDayParts } from '../calendar-utils';
+import { formatDay, formatDayParts, shiftDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { useTodayKey } from '../hooks/use-now';
-import { GRID_HEIGHT, HOURS } from '../utils/grid';
+import { GRID_HEIGHT, HOURS, START_MINUTES } from '../utils/grid';
 import { CalendarBoardHeader } from './calendar-board-header';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
 import { EventCreateDialog } from './event-create-dialog';
@@ -28,6 +28,7 @@ export function CalendarBoard({
   events: CalendarEvent[];
 }) {
   const { getEvents } = useCalendarEvents();
+  const eventDays = [...days, shiftDay(days.at(-1)!, 1)];
   const {
     allDayEvents,
     createDraft,
@@ -46,8 +47,10 @@ export function CalendarBoard({
   } = useCalendarBoard({
     calendars,
     days,
-    events: getEvents(events, days),
+    events: getEvents(events, eventDays),
   });
+
+  const currentGridDay = todayKey && nowMinutes < START_MINUTES ? shiftDay(todayKey, -1) : todayKey;
 
   return (
     <>
@@ -69,7 +72,7 @@ export function CalendarBoard({
         >
           <div />
           {days.map(day => {
-            const isToday = day === todayKey;
+            const isToday = day === currentGridDay;
             return (
               <DayColumn
                 day={day}
@@ -77,7 +80,7 @@ export function CalendarBoard({
                 isToday={isToday}
                 key={day}
                 nowMinutes={nowMinutes}
-                renderGrid={false}
+                renderGrid={isToday}
                 showNow={isToday}
               />
             );
@@ -235,21 +238,36 @@ export function CalendarBoardFrame({
             </div>
           ))}
         </div>
-        {dayKeys.map((_, dayIndex) => (
+        {dayKeys.map((day, dayIndex) => (
           <div
             className="border-divider dark:border-divider-dark relative border-r"
             key={dayIndex}
             style={{ height: GRID_HEIGHT }}
           >
-            {HOURS.map(hour => (
-              <div
-                className={cn(
-                  'border-divider/60 dark:border-divider-dark/60 h-[72px] border-b',
-                  hour === 0 && 'border-t',
-                )}
-                key={hour}
-              />
-            ))}
+            {HOURS.map(hour => {
+              const nextDay = day && hour === 0 ? shiftDay(day, 1) : null;
+              const nextDayParts = nextDay ? formatDayParts(nextDay) : null;
+
+              return (
+                <div
+                  className={cn(
+                    'border-divider/60 dark:border-divider-dark/60 relative h-[72px] border-b',
+                    hour === 0 && 'border-t-action/35 dark:border-t-action/40 border-t',
+                  )}
+                  key={hour}
+                >
+                  {nextDayParts ? (
+                    <span
+                      aria-label={`Next day, ${formatDay(nextDay!)}`}
+                      className="border-action/35 bg-surface text-action dark:border-action/40 dark:bg-surface-dark absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border px-1.5 py-0.5 text-[9px] leading-none font-semibold whitespace-nowrap uppercase sm:px-2 sm:text-[10px]"
+                    >
+                      <span className="hidden sm:inline">{nextDayParts.weekday} </span>
+                      {nextDayParts.day}
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
