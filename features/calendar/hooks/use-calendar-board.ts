@@ -177,7 +177,7 @@ export function useCalendarBoard({
     const touch = pointerEvent.pointerType === 'touch';
     if (touch && !(pointerEvent.target as HTMLElement).closest('[data-drag-handle]')) return;
     pointerEvent.stopPropagation();
-    const target = pointerEvent.currentTarget;
+    const captureTarget = gridRef.current ?? pointerEvent.currentTarget;
     const origin: MoveOrigin = {
       active: !touch,
       day: calendarEvent.day,
@@ -194,7 +194,7 @@ export function useCalendarBoard({
     moveRef.current = origin;
 
     if (!touch) {
-      target.setPointerCapture(pointerEvent.pointerId);
+      captureTarget.setPointerCapture(pointerEvent.pointerId);
       return;
     }
 
@@ -204,7 +204,7 @@ export function useCalendarBoard({
       if (!pending || pending.pointerId !== pointerEvent.pointerId) return;
       pending.active = true;
       try {
-        target.setPointerCapture(pointerEvent.pointerId);
+        captureTarget.setPointerCapture(pointerEvent.pointerId);
       } catch {}
       const drag = { day: pending.day, id: pending.id, startMin: eventStartMinutes(pending.start) };
       dragMoveRef.current = drag;

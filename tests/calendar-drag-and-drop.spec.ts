@@ -73,6 +73,49 @@ test.describe('Calendar drag and resize', () => {
     expect(await actionRequest).toBe(false);
   });
 
+  test('dragging an event into another day keeps the preview active until release', async ({ page }) => {
+    const event = page.getByTitle('Release planning · 11:00');
+    const eventBounds = await event.boundingBox();
+    expect(eventBounds).not.toBeNull();
+    if (!eventBounds) return;
+
+    const dayColumns = page.locator('[data-day-column]');
+    const eventCenterX = eventBounds.x + eventBounds.width / 2;
+    const columnBounds = await Promise.all(
+      Array.from({ length: 7 }, (_, index) => dayColumns.nth(index).boundingBox()),
+    );
+    const originIndex = columnBounds.findIndex(
+      bounds => bounds && eventCenterX >= bounds.x && eventCenterX <= bounds.x + bounds.width,
+    );
+    expect(originIndex).toBeGreaterThanOrEqual(0);
+
+    const targetIndex = originIndex === 6 ? 5 : originIndex + 1;
+    const targetBounds = columnBounds[targetIndex];
+    expect(targetBounds).not.toBeNull();
+    if (!targetBounds) return;
+
+    const targetX = targetBounds.x + targetBounds.width / 2;
+    const targetY = eventBounds.y + eventBounds.height / 2;
+    await page.mouse.move(eventCenterX, targetY);
+    await page.mouse.down();
+    await page.mouse.move(targetX, targetY, { steps: 6 });
+
+    await expect
+      .poll(async () => {
+        const movedBounds = await event.boundingBox();
+        if (!movedBounds) return false;
+        const movedCenterX = movedBounds.x + movedBounds.width / 2;
+        return movedCenterX >= targetBounds.x && movedCenterX <= targetBounds.x + targetBounds.width;
+      })
+      .toBe(true);
+
+    const actionRequest = page.waitForRequest(
+      request => request.method() === 'POST' && Boolean(request.headers()['next-action']),
+    );
+    await page.mouse.up();
+    await actionRequest;
+  });
+
   test('dragging within the same snapped event position does not save', async ({ page }) => {
     const event = page.getByTitle('Release planning · 11:00');
     await expect(event).toHaveCount(1);
