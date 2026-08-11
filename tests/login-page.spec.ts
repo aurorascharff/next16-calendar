@@ -7,7 +7,7 @@ test.describe('Login page (/login)', () => {
       page,
       async () => {
         await page.goto('/login');
-        await expect(page.getByText('Flow')).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Flow' })).toBeVisible();
         await expect(page.getByLabel('Email')).toBeVisible();
         await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible();
       },

@@ -23,10 +23,10 @@ export default function LoginPage() {
         <LoginCalendarPreview />
         <div className="bg-surface/55 dark:bg-surface-dark/65 absolute inset-0 z-10 backdrop-blur-[4px]" />
         <section className="border-divider bg-surface/95 dark:border-divider-dark dark:bg-surface-dark/95 relative z-20 w-full max-w-sm rounded-2xl border p-6 shadow-2xl backdrop-blur-xl sm:p-8">
-          <div className="flex items-center justify-center gap-2 text-2xl font-bold tracking-tight">
+          <h1 className="flex items-center justify-center gap-2 text-2xl font-bold tracking-tight">
             <FlowMark animated className="size-8 shrink-0" />
             <span>Flow</span>
-          </div>
+          </h1>
           <SignInForm />
         </section>
       </main>
