@@ -18,12 +18,12 @@ export const metadata: Metadata = {
 export default function BookingPage() {
   return (
     <main className="min-w-0 flex-1 overflow-auto">
-      <header className="border-divider dark:border-divider-dark flex min-h-18 items-center justify-between gap-4 border-b px-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <MobileCalendarSidebarTrigger />
-          <div>
-            <p className="text-muted text-xs font-medium">Availability</p>
-            <h1 className="mt-0.5 text-lg font-semibold">Booking link</h1>
+      <header className="border-divider dark:border-divider-dark flex min-h-18 items-start border-b px-4 py-3 sm:items-center sm:px-6">
+        <div className="flex min-w-0 items-start gap-2">
+          <MobileCalendarSidebarTrigger className="-ml-1.5 shrink-0" />
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-semibold tracking-tight">Booking link</h1>
+            <p className="text-muted mt-0.5 text-sm">Availability</p>
           </div>
         </div>
       </header>

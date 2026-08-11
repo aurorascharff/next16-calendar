@@ -20,6 +20,12 @@ const description =
 export const metadata: Metadata = {
   applicationName: 'Flow',
   description,
+  formatDetection: {
+    address: false,
+    date: false,
+    email: false,
+    telephone: false,
+  },
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_BASE_URL ??
       (process.env.VERCEL_PROJECT_PRODUCTION_URL

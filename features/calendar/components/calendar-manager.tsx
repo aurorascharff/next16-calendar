@@ -198,10 +198,15 @@ function CalendarFormDialog({
     <Dialog
       busy={isPending}
       initialFocus={nameInputRef}
+      mobileFullscreen
       store={store}
       title={calendar ? 'Edit calendar' : 'New calendar'}
     >
-      <form action={formAction} className="mt-4 space-y-4" key={state.key ?? calendar?.id ?? 'new-calendar'}>
+      <form
+        action={formAction}
+        className="mt-6 flex min-h-0 flex-1 flex-col gap-5 sm:mt-4 sm:block sm:space-y-4"
+        key={state.key ?? calendar?.id ?? 'new-calendar'}
+      >
         <label className="block">
           <span className="text-muted mb-1.5 block text-xs font-medium">Name</span>
           <Input defaultValue={name} name="name" placeholder="e.g. Side project" ref={nameInputRef} required />
@@ -225,7 +230,7 @@ function CalendarFormDialog({
             ))}
           </div>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+        <div className="mt-auto grid grid-cols-2 gap-2 pt-6 sm:mt-6 sm:flex sm:justify-end sm:pt-0">
           <Button className="h-11 sm:h-9" render={<Ariakit.DialogDismiss disabled={isPending} />} variant="ghost">
             Cancel
           </Button>

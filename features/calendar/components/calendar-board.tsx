@@ -157,13 +157,13 @@ export function CalendarBoardFrame({
             return (
               <div
                 className={cn(
-                  'border-divider dark:border-divider-dark h-10 border-r px-0.5 py-1 sm:px-3 sm:py-1.5',
+                  'border-divider dark:border-divider-dark h-12 border-r px-0.5 py-1.5 sm:h-10 sm:px-3',
                   isToday && 'bg-action/[0.07] dark:bg-action/10',
                 )}
                 key={index}
               >
                 {day ? (
-                  <div className="flex min-w-0 flex-col items-center justify-center gap-0 sm:flex-row sm:justify-start sm:gap-1.5">
+                  <div className="flex min-w-0 flex-col items-center justify-center gap-0.5 sm:flex-row sm:justify-start sm:gap-1.5">
                     <span
                       className={cn(
                         'text-[9px] leading-none font-medium uppercase sm:text-[11px] sm:leading-normal',
