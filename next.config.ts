@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  // partialPrefecthing: true,
+  // partialPrefetching: true,
   reactCompiler: true,
   typedRoutes: true,
   experimental: {
