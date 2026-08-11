@@ -193,10 +193,7 @@ export function useCalendarBoard({
     };
     moveRef.current = origin;
 
-    if (!touch) {
-      captureTarget.setPointerCapture(pointerEvent.pointerId);
-      return;
-    }
+    if (!touch) return;
 
     clearMoveHold();
     moveHoldRef.current = window.setTimeout(() => {
@@ -237,6 +234,9 @@ export function useCalendarBoard({
     if (!origin.moved) {
       if (Math.abs(pointerEvent.clientX - origin.x0) < 4 && Math.abs(pointerEvent.clientY - origin.y0) < 4) return;
       origin.moved = true;
+      try {
+        gridRef.current?.setPointerCapture(pointerEvent.pointerId);
+      } catch {}
     }
     const target = targetMoveFromPointer(origin, pointerEvent);
     dragMoveRef.current = target;

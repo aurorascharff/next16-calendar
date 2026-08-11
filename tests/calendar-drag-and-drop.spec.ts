@@ -8,6 +8,20 @@ test.describe('Calendar drag and resize', () => {
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
   });
 
+  test('clicking an event opens its details', async ({ page }) => {
+    await page.getByTitle('Release planning · 11:00').click();
+
+    await expect(page.getByRole('heading', { name: 'Release planning' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit' })).toBeVisible();
+  });
+
+  test('opening an all-day event focuses the title', async ({ page }) => {
+    await page.getByRole('button', { name: 'Add all-day event on Mon 10 Aug' }).click();
+
+    const dialog = page.getByRole('dialog', { name: 'New event' });
+    await expect(dialog.getByRole('textbox', { name: 'Title' })).toBeFocused();
+  });
+
   test('dragging an empty time range shows its preview before pointer release', async ({ page }) => {
     const dayColumn = page.locator('[data-day-column]').nth(2);
     const bounds = await dayColumn.boundingBox();
