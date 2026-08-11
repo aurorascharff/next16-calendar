@@ -7,7 +7,7 @@ test.describe('Calendar page (/calendar/[date])', () => {
     await signIn(page);
   });
 
-  test('initial load exposes the calendar shell immediately', async ({ baseURL, page }) => {
+  test('initial load exposes the calendar loading view immediately', async ({ baseURL, page }) => {
     await instant(
       page,
       async () => {
@@ -20,6 +20,21 @@ test.describe('Calendar page (/calendar/[date])', () => {
 
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
   });
+
+  // Target after adopting Partial Prefetching: the destination calendar UI is
+  // available before dynamic work continues.
+  /*
+  test('next week is available during an instant navigation', async ({ page }) => {
+    await page.goto('/calendar/2026-08-10');
+    await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
+
+    await instant(page, async () => {
+      await page.getByRole('link', { name: 'Next week' }).click();
+      await page.waitForURL('/calendar/2026-08-17');
+      await expect(page.getByText('17 Aug 2026', { exact: true })).toBeVisible();
+    });
+  });
+  */
 
   test('switching to month keeps the navigation instant', async ({ page }) => {
     await page.goto('/calendar/2026-08-10');
