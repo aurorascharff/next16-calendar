@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import ErrorBoundary from '@/components/ui/error-boundary';
+import { getCalendarDate } from '@/features/calendar/calendar-queries';
 import { formatMonth } from '@/features/calendar/calendar-utils';
 import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header';
 import {
@@ -25,7 +26,7 @@ function toView(view: string | string[] | undefined): CalendarView {
 
 export function generateMetadata({ params }: PageProps<'/calendar/[date]'>): Promise<Metadata> {
   return params.then(({ date }) => ({
-    title: formatMonth(date),
+    title: formatMonth(getCalendarDate(date)),
   }));
 }
 

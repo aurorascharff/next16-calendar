@@ -1,4 +1,5 @@
 import { MobileCalendarSidebarTrigger } from '@/components/mobile-calendar-sidebar';
+import { getCalendarDate } from '../calendar-queries';
 import { formatMonth } from '../calendar-utils';
 import { CalendarControls, CalendarShortcuts, DatePicker, ViewToggle } from './calendar-controls';
 import { CalendarSavingIndicator } from './calendar-saving-indicator';
@@ -6,6 +7,8 @@ import { NewEventButton } from './new-event-button';
 import type { CalendarView } from '../types/calendar';
 
 export function CalendarHeader({ date, view }: { date: string; view: CalendarView }) {
+  getCalendarDate(date);
+
   return (
     <>
       <CalendarShortcuts date={date} view={view} />

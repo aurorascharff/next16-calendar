@@ -55,6 +55,11 @@ export async function getCalendars(): Promise<Calendar[]> {
   return getCalendarsForUser(userId, await isSlowEnabled());
 }
 
+export function getCalendarDate(date: string) {
+  if (!isDateKey(date)) notFound();
+  return date;
+}
+
 async function getCalendarsForUser(userId: string, slow: boolean): Promise<Calendar[]> {
   'use cache';
   cacheLife('hours');
