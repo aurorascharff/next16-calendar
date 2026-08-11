@@ -20,8 +20,8 @@ export function Input({ className, type, variant = 'default', ...props }: Props)
     <input
       className={cn(
         variants[type === 'hidden' ? 'unstyled' : variant],
-        type === 'time' &&
-          'block max-w-full min-w-0 appearance-none overflow-hidden [&::-webkit-date-and-time-value]:min-h-[1em] [&::-webkit-date-and-time-value]:text-left',
+        (type === 'date' || type === 'time') &&
+          'block max-w-full min-w-0 appearance-none overflow-hidden text-base sm:text-sm [&::-webkit-date-and-time-value]:min-h-[1em] [&::-webkit-date-and-time-value]:text-left',
         className,
       )}
       type={type}

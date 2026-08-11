@@ -158,7 +158,7 @@ export function CalendarBoardFrame({
               <div
                 className={cn(
                   'border-divider dark:border-divider-dark h-10 border-r px-0.5 py-1 sm:px-3 sm:py-1.5',
-                  isToday && 'bg-action/10 ring-action/20 ring-1 ring-inset dark:bg-action/15',
+                  isToday && 'bg-action/[0.07] dark:bg-action/10',
                 )}
                 key={index}
               >

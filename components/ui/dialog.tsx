@@ -26,7 +26,7 @@ export function Dialog({ store, title, description, children, busy = false, init
           style={{ viewTransitionName: 'dialog-backdrop' }}
         />
       }
-      className="border-divider dark:border-divider-dark bg-surface dark:bg-surface-dark fixed bottom-0 left-1/2 z-50 flex w-full max-w-md -translate-x-1/2 flex-col rounded-t-2xl border p-5 shadow-2xl outline-none sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:rounded-2xl"
+      className="border-divider dark:border-divider-dark bg-surface dark:bg-surface-dark fixed right-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 z-50 flex max-h-[calc(100dvh-1.5rem)] w-auto flex-col rounded-2xl border p-5 shadow-2xl outline-none sm:top-1/2 sm:right-auto sm:bottom-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2"
       style={{ viewTransitionName: 'dialog' }}
     >
       <div className="flex items-start justify-between gap-4">
@@ -38,7 +38,7 @@ export function Dialog({ store, title, description, children, busy = false, init
         </div>
         <Ariakit.DialogDismiss
           aria-label="Close"
-          className="text-muted hover:bg-card dark:hover:bg-card-dark -mr-1 rounded-md p-1 transition-colors hover:text-black dark:hover:text-white"
+          className="text-muted hover:bg-card dark:hover:bg-card-dark -mt-1 -mr-1 grid size-9 shrink-0 place-items-center rounded-md transition-colors hover:text-black dark:hover:text-white"
           disabled={busy}
         >
           <X className="size-4" />

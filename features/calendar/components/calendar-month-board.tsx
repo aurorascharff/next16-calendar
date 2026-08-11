@@ -152,7 +152,7 @@ export function CalendarMonthFrame({ children, date, days }: { children: ReactNo
             <div
               className={cn(
                 'group border-divider dark:border-divider-dark relative overflow-hidden border-r border-b p-1 sm:p-1.5',
-                day === today && 'bg-action/[0.07] ring-action/15 ring-1 ring-inset dark:bg-action/10',
+                day === today && 'bg-action/[0.07] dark:bg-action/10',
                 outside && day !== today && 'bg-card/25 dark:bg-card-dark/20',
               )}
               key={day}

@@ -1,4 +1,4 @@
-import { isPrefetchEnabled } from './demo-actions';
+import { isPrefetchEnabled } from './demo-queries';
 import { isSlowEnabled } from './demo-slow';
 import { DemoToolbarClient } from './demo-toolbar-client';
 

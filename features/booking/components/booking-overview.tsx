@@ -1,12 +1,12 @@
 import { Link2 } from 'lucide-react';
 import { type ReactNode } from 'react';
 import { NewCalendarButton } from '@/features/calendar/components/calendar-manager';
-import { getMyBookingOverview } from '../booking-queries';
+import { getMyBookingProfile, getMyBookingSettings } from '../booking-queries';
 import { BookingLink } from './booking-link';
 import { BookingSettingsForm } from './booking-settings-form';
 
 export async function BookingLinkDetails() {
-  const { profile } = await getMyBookingOverview();
+  const profile = await getMyBookingProfile();
 
   return <BookingLinkDetailsContent profile={profile} />;
 }
@@ -30,11 +30,7 @@ export function BookingSettingsCard({ children }: { children: ReactNode }) {
   );
 }
 
-function BookingLinkDetailsContent({
-  profile,
-}: {
-  profile: Awaited<ReturnType<typeof getMyBookingOverview>>['profile'];
-}) {
+function BookingLinkDetailsContent({ profile }: { profile: Awaited<ReturnType<typeof getMyBookingProfile>> }) {
   const acceptingMeetings = Boolean(profile?.active && profile.hasCalendar);
 
   return (
@@ -72,7 +68,7 @@ function BookingLinkDetailsContent({
 }
 
 export async function BookingSettings() {
-  const { settings } = await getMyBookingOverview();
+  const settings = await getMyBookingSettings();
 
   return <BookingSettingsForm settings={settings} />;
 }

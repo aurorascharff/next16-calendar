@@ -107,7 +107,7 @@ export function DayColumn({
       className={cn(
         'relative [-webkit-touch-callout:none]',
         renderGrid && 'border-divider dark:border-divider-dark border-r',
-        isToday && 'bg-action/[0.055] ring-action/15 ring-1 ring-inset dark:bg-action/[0.085]',
+        isToday && 'bg-action/[0.07] dark:bg-action/10',
       )}
       data-day-column
       onLostPointerCapture={interaction.create.onLostPointerCapture}

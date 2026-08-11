@@ -65,7 +65,7 @@ export function EventFields({
         />
       </label>
       {date ? (
-        <label className="block">
+        <label className="block min-w-0 overflow-hidden">
           <span className={fieldLabel}>Date</span>
           <Input
             className={controlHeight}

@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { isSlowEnabled } from '@/components/demo/demo-slow';
+import { DEMO_DELAYS, isSlowEnabled } from '@/components/demo/demo-slow';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { delay } from '@/lib/utils';
@@ -52,14 +52,15 @@ function calendarColor(calendar: { color: string; isDemo: boolean; name: string 
 
 export async function getCalendars(): Promise<Calendar[]> {
   const { id: userId } = await verifyAuth();
-  return getCalendarsForUser(userId);
+  return getCalendarsForUser(userId, await isSlowEnabled());
 }
 
-async function getCalendarsForUser(userId: string): Promise<Calendar[]> {
+async function getCalendarsForUser(userId: string, slow: boolean): Promise<Calendar[]> {
   'use cache';
   cacheLife('hours');
   cacheTag(calendarCache.calendarsTag);
 
+  await delay(DEMO_DELAYS.calendarList, slow);
   const rows = await prisma.calendar.findMany({
     orderBy: [{ isDemo: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }],
     where: { OR: [{ userId }, { userId: null }] },
@@ -100,7 +101,7 @@ async function getCalendarRangeForUser(
   cacheLife('hours');
   cacheTag(calendarCache.tag, rangeTag);
 
-  await delay(650, slow);
+  await delay(DEMO_DELAYS.calendarEvents, slow);
   const rangeEnd = new Date(`${days.at(-1)}T00:00:00.000Z`);
   rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
   const [rows, bookingRows] = await Promise.all([

@@ -276,6 +276,7 @@
 }
 
 ::view-transition-group(sidebar),
+::view-transition-group(new-event-button),
 ::view-transition-group(demo-toolbar),
 ::view-transition-group(theme-toggle),
 ::view-transition-group(toaster),
@@ -291,6 +292,8 @@
 
 ::view-transition-old(sidebar),
 ::view-transition-new(sidebar),
+::view-transition-old(new-event-button),
+::view-transition-new(new-event-button),
 ::view-transition-old(demo-toolbar),
 ::view-transition-new(demo-toolbar),
 ::view-transition-old(theme-toggle),

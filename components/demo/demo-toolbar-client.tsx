@@ -25,16 +25,15 @@ function ToggleButton({ active, className, icon, label, ...props }: ToggleButton
       {...props}
       type={props.type ?? 'button'}
       className={cn(
-        'flex h-8 items-center gap-1.5 px-2.5 text-xs font-medium transition-colors',
+        'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors',
         'focus-visible:bg-accent/10 dark:focus-visible:bg-accent/20 focus-visible:outline-none',
-        active ? 'text-accent' : 'text-muted',
-        !props.disabled && 'hover:text-black dark:hover:text-white',
+        active ? 'text-accent' : 'text-gray',
         props.disabled && 'cursor-default',
         className,
       )}
     >
       {icon}
-      <span className="hidden xl:inline">{label}</span>
+      <span className="hidden lg:inline">{label}</span>
     </button>
   );
 }

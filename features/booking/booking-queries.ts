@@ -2,11 +2,12 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { cache } from 'react';
+import { DEMO_DELAYS, isSlowEnabled } from '@/components/demo/demo-slow';
 import { calendarCache } from '@/features/calendar/calendar-queries';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
+import { delay } from '@/lib/utils';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
@@ -44,10 +45,15 @@ export async function getPublicBookingMetadata(handle: string) {
 }
 
 export async function getBookingAvailability(handle: string, date: string) {
+  return getBookingAvailabilityCached(handle, date, await isSlowEnabled());
+}
+
+async function getBookingAvailabilityCached(handle: string, date: string, slow: boolean) {
   'use cache';
   cacheLife({ stale: 30 });
   cacheTag(bookingCache.tag(handle));
 
+  await delay(DEMO_DELAYS.bookingAvailability, slow);
   const bookingPage = await prisma.bookingPage.findUnique({
     include: { user: { select: { id: true, name: true } } },
     where: { handle },
@@ -115,11 +121,17 @@ export async function getBookingAvailability(handle: string, date: string) {
   };
 }
 
-export async function getMyBookingProfile(handle: string) {
+export async function getMyBookingProfile() {
+  const user = await verifyAuth();
+  return getMyBookingProfileForUser(user.handle, await isSlowEnabled());
+}
+
+async function getMyBookingProfileForUser(handle: string, slow: boolean) {
   'use cache';
   cacheLife('hours');
   cacheTag(bookingCache.tag(handle), calendarCache.calendarsTag);
 
+  await delay(DEMO_DELAYS.bookingProfile, slow);
   const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
   if (!bookingPage) return null;
 
@@ -157,11 +169,17 @@ async function getWritableCalendars(userId: string) {
   });
 }
 
-async function getMyBookingSettingsForUser(userId: string, handle: string) {
+export async function getMyBookingSettings() {
+  const user = await verifyAuth();
+  return getMyBookingSettingsForUser(user.id, user.handle, await isSlowEnabled());
+}
+
+async function getMyBookingSettingsForUser(userId: string, handle: string, slow: boolean) {
   'use cache';
   cacheLife('hours');
   cacheTag(bookingCache.tag(handle), calendarCache.calendarsTag);
 
+  await delay(DEMO_DELAYS.bookingSettings, slow);
   const calendars = await getWritableCalendars(userId);
   const bookingPage = await prisma.bookingPage.findFirst({ where: { handle, userId } });
   if (!bookingPage) {
@@ -188,12 +206,3 @@ async function getMyBookingSettingsForUser(userId: string, handle: string) {
     title: bookingPage.title,
   };
 }
-
-export const getMyBookingOverview = cache(async function getMyBookingOverview() {
-  const user = await verifyAuth();
-  const [profile, settings] = await Promise.all([
-    getMyBookingProfile(user.handle),
-    getMyBookingSettingsForUser(user.id, user.handle),
-  ]);
-  return { profile, settings };
-});

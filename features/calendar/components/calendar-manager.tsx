@@ -208,13 +208,13 @@ function CalendarFormDialog({
         </label>
         <div>
           <span className="text-muted mb-1.5 block text-xs font-medium">Color</span>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-4 gap-3 sm:flex sm:flex-wrap sm:gap-2">
             {colors.map(option => (
               <button
                 aria-label={option}
                 aria-pressed={color === option}
                 className={cn(
-                  'cal-color ring-offset-surface dark:ring-offset-surface-dark size-7 rounded-full ring-2 ring-offset-2 transition',
+                  'cal-color ring-offset-surface dark:ring-offset-surface-dark size-9 justify-self-center rounded-full ring-2 ring-offset-2 transition sm:size-7',
                   color === option ? 'ring-action' : 'ring-transparent',
                 )}
                 key={option}
@@ -225,11 +225,13 @@ function CalendarFormDialog({
             ))}
           </div>
         </div>
-        <div className="mt-6 flex justify-end gap-2">
-          <Button render={<Ariakit.DialogDismiss disabled={isPending} />} variant="ghost">
+        <div className="mt-6 grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+          <Button className="h-11 sm:h-9" render={<Ariakit.DialogDismiss disabled={isPending} />} variant="ghost">
             Cancel
           </Button>
-          <Button type="submit">{calendar ? 'Save' : 'Create'}</Button>
+          <Button className="h-11 sm:h-9" type="submit">
+            {calendar ? 'Save' : 'Create'}
+          </Button>
         </div>
       </form>
     </Dialog>
