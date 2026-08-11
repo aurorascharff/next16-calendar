@@ -24,6 +24,7 @@ function ToggleButton({ active, className, icon, label, ...props }: ToggleButton
     <button
       {...props}
       type={props.type ?? 'button'}
+      title={label}
       className={cn(
         'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors',
         'focus-visible:bg-accent/10 dark:focus-visible:bg-accent/20 focus-visible:outline-none',
@@ -33,7 +34,7 @@ function ToggleButton({ active, className, icon, label, ...props }: ToggleButton
       )}
     >
       {icon}
-      <span className="hidden lg:inline">{label}</span>
+      <span className="hidden xl:inline">{label}</span>
     </button>
   );
 }
@@ -129,6 +130,7 @@ export function DemoToolbarClient({
       <Ariakit.DialogDisclosure
         store={guide}
         aria-label="How this demo works"
+        title="How this demo works"
         className="text-muted focus-visible:bg-accent/10 dark:focus-visible:bg-accent/20 flex h-8 items-center px-2.5 transition-colors hover:text-black focus-visible:outline-none dark:hover:text-white"
       >
         <CircleHelp className="size-3.5" />
