@@ -66,7 +66,7 @@ function CalendarAllDayRow({
           <div
             className={cn(
               'border-divider dark:border-divider-dark flex min-w-0 flex-col gap-0.5 border-r p-1',
-              day === todayKey && 'bg-card dark:bg-card-dark',
+              day === todayKey && 'bg-action/[0.07] ring-action/15 ring-1 ring-inset dark:bg-action/10',
             )}
             key={day}
           >
@@ -128,7 +128,7 @@ function AllDayEventButton({
 }) {
   return (
     <button
-      className="cal-chip focus-visible:ring-accent flex h-6 w-full min-w-0 flex-none items-center gap-1 rounded-[5px] px-2 text-left text-xs leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none"
+      className="cal-chip focus-visible:ring-accent flex h-6 w-full min-w-0 flex-none items-center gap-1 rounded-[5px] px-1 text-left text-[10px] leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none sm:px-2 sm:text-xs"
       onClick={click => {
         if (preventToggle) {
           click.preventDefault();

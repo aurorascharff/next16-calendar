@@ -63,6 +63,7 @@ export function CalendarEventLayer({
             key={event.id}
             left={`calc(${place.col * widthPct}% + 2px)`}
             onMoveDown={pointerEvent => interaction.move.onPointerDown(event, pointerEvent)}
+            onMoveLostPointerCapture={interaction.move.onLostPointerCapture}
             onMoveMove={interaction.move.onPointerMove}
             onMoveUp={interaction.move.onPointerUp}
             onMoveCancel={interaction.move.onPointerCancel}
@@ -104,9 +105,9 @@ export function DayColumn({
   return (
     <div
       className={cn(
-        'relative',
+        'relative [-webkit-touch-callout:none]',
         renderGrid && 'border-divider dark:border-divider-dark border-r',
-        isToday && 'bg-card/40 dark:bg-card-dark/40',
+        isToday && 'bg-action/[0.055] ring-action/15 ring-1 ring-inset dark:bg-action/[0.085]',
       )}
       data-day-column
       onLostPointerCapture={interaction.create.onLostPointerCapture}
@@ -131,7 +132,7 @@ export function DayColumn({
       {selection ? (
         <div
           aria-hidden
-          className="cal-chip pointer-events-none absolute right-0.5 left-0.5 z-30 flex flex-col overflow-hidden rounded-[5px] px-2 py-1 ring-1 ring-inset"
+          className="cal-chip pointer-events-none absolute right-0.5 left-0.5 z-30 flex flex-col overflow-hidden rounded-[5px] px-1 py-1 ring-1 ring-inset sm:px-2"
           style={{
             ...chipStyle(interaction.selectionColor),
             height: eventHeight(Math.max(SNAP_MINUTES, selection.hi - selection.lo)),
@@ -153,6 +154,7 @@ function EventChip({
   isResizing,
   left,
   onMoveDown,
+  onMoveLostPointerCapture,
   onMoveMove,
   onMoveUp,
   onMoveCancel,
@@ -172,6 +174,7 @@ function EventChip({
   isResizing: boolean;
   left: string;
   onMoveDown: PointerHandler;
+  onMoveLostPointerCapture: PointerHandler;
   onMoveMove: PointerHandler;
   onMoveUp: PointerHandler;
   onMoveCancel: PointerHandler;
@@ -190,13 +193,14 @@ function EventChip({
   return (
     <button
       className={cn(
-        'cal-chip group focus-visible:ring-accent pointer-events-auto absolute flex touch-none flex-col overflow-hidden rounded-[5px] px-2 py-1 text-left ring-1 transition-shadow ring-inset focus-visible:ring-2 focus-visible:outline-none',
+        'cal-chip group focus-visible:ring-accent pointer-events-auto absolute flex touch-none flex-col overflow-hidden rounded-[5px] px-1 py-1 text-left ring-1 transition-shadow [-webkit-touch-callout:none] ring-inset focus-visible:ring-2 focus-visible:outline-none sm:px-2',
         event.isBooking && 'cal-chip-booking',
         isDragging || isResizing ? 'z-30 cursor-grabbing shadow-lg' : 'z-10 cursor-grab hover:z-20 hover:shadow-md',
       )}
       data-booking={event.isBooking || undefined}
       data-event-chip
       onClick={event => onSelect(event.currentTarget.getBoundingClientRect())}
+      onLostPointerCapture={onMoveLostPointerCapture}
       onPointerCancel={onMoveCancel}
       onPointerDown={onMoveDown}
       onPointerMove={onMoveMove}
@@ -208,7 +212,7 @@ function EventChip({
       <span className="flex items-start gap-1.5">
         <span
           className={cn(
-            'min-w-0 flex-1 overflow-hidden text-xs leading-tight font-semibold',
+            'min-w-0 flex-1 overflow-hidden text-[10px] leading-tight font-semibold sm:text-xs',
             titleLines === 1 ? 'truncate' : 'break-words whitespace-normal',
           )}
           style={
@@ -219,11 +223,13 @@ function EventChip({
         >
           {event.title}
         </span>
-        {event.recurring ? <Repeat className="mt-px size-3 shrink-0 opacity-50" /> : null}
+        {event.recurring ? <Repeat className="mt-px hidden size-3 shrink-0 opacity-50 sm:block" /> : null}
       </span>
-      {timeLabel ? <span className="mt-0.5 text-[11px] tabular-nums opacity-70">{timeLabel}</span> : null}
+      {timeLabel ? (
+        <span className="mt-0.5 hidden text-[11px] tabular-nums opacity-70 sm:block">{timeLabel}</span>
+      ) : null}
       <span
-        className="absolute inset-x-0 bottom-0 z-10 flex h-2.5 cursor-ns-resize touch-none items-end justify-center pb-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+        className="absolute inset-x-0 bottom-0 z-10 hidden h-2.5 cursor-ns-resize touch-none items-end justify-center pb-0.5 opacity-0 transition-opacity group-hover:opacity-100 sm:flex"
         data-event-chip
         data-resize-handle
         onClick={event => event.stopPropagation()}

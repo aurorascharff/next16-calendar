@@ -2,12 +2,14 @@
 
 import * as Ariakit from '@ariakit/react';
 import { Plus, Repeat } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
 import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
+import { calendarHref, formatDay } from '../calendar-utils';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
 import { EventCreateDialog } from './event-create-dialog';
@@ -30,7 +32,7 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
     return (
       <button
         className={cn(
-          'cal-chip focus-visible:ring-accent pointer-events-auto flex h-6 w-full min-w-0 items-center gap-1 rounded-[5px] px-2 text-left text-xs leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none',
+          'cal-chip focus-visible:ring-accent pointer-events-auto flex h-5 w-full min-w-0 items-center gap-0.5 rounded-[5px] px-1 text-left text-[10px] leading-none font-semibold ring-1 ring-inset focus-visible:ring-2 focus-visible:outline-none sm:h-6 sm:gap-1 sm:px-2 sm:text-xs',
           event.isBooking && 'cal-chip-booking',
         )}
         onClick={clickEvent => onSelect(clickEvent.currentTarget.getBoundingClientRect())}
@@ -47,7 +49,7 @@ function MonthEvent({ event, onSelect }: { event: CalendarEvent; onSelect: (rect
   return (
     <button
       className={cn(
-        'hover:bg-card dark:hover:bg-card-dark focus-visible:ring-accent pointer-events-auto flex h-6 w-full min-w-0 items-center gap-1 rounded px-1.5 text-left text-xs focus-visible:ring-2 focus-visible:outline-none',
+        'hover:bg-card dark:hover:bg-card-dark focus-visible:ring-accent pointer-events-auto flex h-5 w-full min-w-0 items-center gap-0.5 rounded px-0.5 text-left text-[10px] focus-visible:ring-2 focus-visible:outline-none sm:h-6 sm:gap-1 sm:px-1.5 sm:text-xs',
         event.isBooking && 'cal-booking-row',
       )}
       onClick={clickEvent => onSelect(clickEvent.currentTarget.getBoundingClientRect())}
@@ -80,15 +82,15 @@ export function CalendarMonthBoard({
   return (
     <>
       <Crossfade>
-        <div className="pointer-events-none col-start-1 row-start-2 grid auto-rows-[11rem] grid-cols-7">
+        <div className="pointer-events-none relative z-10 col-start-1 row-start-2 grid auto-rows-[9rem] grid-cols-7 sm:auto-rows-[11rem]">
           {days.map(day => {
             const dayEvents = sortEvents(visibleEvents.filter(event => event.day === day));
             const hasOverflow = dayEvents.length > MAX_EVENT_ROWS;
             const visible = dayEvents.slice(0, hasOverflow ? MAX_EVENT_ROWS - 1 : MAX_EVENT_ROWS);
             const remaining = dayEvents.length - visible.length;
             return (
-              <div className="min-w-0 overflow-hidden px-1.5 pt-9 pb-1.5" key={day}>
-                <div className="space-y-1">
+              <div className="min-w-0 overflow-hidden px-0.5 pt-9 pb-1 sm:px-1.5 sm:pb-1.5" key={day}>
+                <div className="space-y-0.5 sm:space-y-1">
                   {visible.map(event => (
                     <MonthEvent
                       event={event}
@@ -97,7 +99,9 @@ export function CalendarMonthBoard({
                     />
                   ))}
                   {remaining > 0 ? (
-                    <span className="text-muted block h-6 px-1.5 text-xs leading-6 font-medium">+{remaining} more</span>
+                    <span className="text-muted block h-5 px-0.5 text-[10px] leading-5 font-medium sm:h-6 sm:px-1.5 sm:text-xs sm:leading-6">
+                      +{remaining} more
+                    </span>
                   ) : null}
                 </div>
               </div>
@@ -130,7 +134,7 @@ export function CalendarMonthFrame({ children, date, days }: { children: ReactNo
   const month = date.slice(0, 7);
 
   return (
-    <div className="relative grid min-h-full min-w-[760px] [grid-template-rows:auto_auto] select-none">
+    <div className="relative grid min-h-full min-w-0 [grid-template-rows:auto_auto] select-none sm:min-w-[760px]">
       <div className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark sticky top-0 z-20 col-start-1 row-start-1 grid grid-cols-7 border-b">
         {WEEKDAY_LABELS.map(label => (
           <div
@@ -141,19 +145,26 @@ export function CalendarMonthFrame({ children, date, days }: { children: ReactNo
           </div>
         ))}
       </div>
-      <div className="col-start-1 row-start-2 grid auto-rows-[11rem] grid-cols-7">
+      <div className="col-start-1 row-start-2 grid auto-rows-[9rem] grid-cols-7 sm:auto-rows-[11rem]">
         {days.map(day => {
           const outside = !day.startsWith(month);
           return (
             <div
               className={cn(
-                'group border-divider dark:border-divider-dark overflow-hidden border-r border-b p-1.5',
-                day === today && 'bg-card/45 dark:bg-card-dark/45',
-                outside && 'bg-card/25 dark:bg-card-dark/20',
+                'group border-divider dark:border-divider-dark relative overflow-hidden border-r border-b p-1 sm:p-1.5',
+                day === today && 'bg-action/[0.07] ring-action/15 ring-1 ring-inset dark:bg-action/10',
+                outside && day !== today && 'bg-card/25 dark:bg-card-dark/20',
               )}
               key={day}
             >
-              <div className="mb-0.5 flex h-7 items-center justify-between pl-1">
+              <Link
+                aria-label={`View week of ${formatDay(day)}`}
+                className="focus-visible:ring-accent absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+                href={calendarHref(day, 'week')}
+                prefetch
+                transitionTypes={['nav-crossfade']}
+              />
+              <div className="pointer-events-none relative z-10 mb-0.5 flex h-7 items-center justify-between pl-1">
                 <span
                   className={cn(
                     'grid size-6 place-items-center rounded-full text-xs font-medium tabular-nums',
@@ -164,7 +175,7 @@ export function CalendarMonthFrame({ children, date, days }: { children: ReactNo
                   {Number(day.slice(-2))}
                 </span>
                 <IconButton
-                  className="hidden sm:inline-flex sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  className="pointer-events-auto hidden sm:inline-flex sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                   label={`Add event on ${day}`}
                   onClick={event => {
                     setCreateDraft({ anchorRect: event.currentTarget.getBoundingClientRect(), day });

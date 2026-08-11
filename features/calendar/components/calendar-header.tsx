@@ -13,7 +13,10 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
       <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <div className="flex min-w-0 items-center gap-2.5 sm:w-52">
-            <FlowMark className="size-8 shrink-0 sm:hidden" />
+            <div className="flex shrink-0 items-center gap-1 sm:hidden">
+              <MobileCalendarSidebarTrigger />
+              <FlowMark className="size-8" />
+            </div>
             <h1 className="hidden truncate text-lg font-semibold tracking-tight sm:block">{formatMonth(date)}</h1>
             <DatePicker date={date} label="month" view={view} />
             <CalendarSavingIndicator />
@@ -24,11 +27,8 @@ export function CalendarHeader({ date, view }: { date: string; view: CalendarVie
           </div>
         </div>
       </header>
-      <div className="border-divider dark:border-divider-dark flex items-center justify-between gap-2 border-b px-4 py-2 sm:hidden">
-        <div className="flex items-center gap-1">
-          <MobileCalendarSidebarTrigger />
-          <CalendarControls date={date} showDatePicker={false} view={view} />
-        </div>
+      <div className="border-divider dark:border-divider-dark flex items-center justify-between gap-2 border-b px-4 py-3 sm:hidden">
+        <CalendarControls date={date} showDatePicker={false} view={view} />
         <ViewToggle date={date} view={view} />
       </div>
       <NewEventButton day={date} />
@@ -41,15 +41,15 @@ export function CalendarHeaderSkeleton() {
     <>
       <header className="border-divider dark:border-divider-dark flex min-h-14 items-center justify-between border-b px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-          <span className="bg-card dark:bg-card-dark size-8 rounded-md sm:hidden" />
+          <div className="flex shrink-0 items-center gap-1 sm:hidden">
+            <MobileCalendarSidebarTrigger />
+            <span className="bg-card dark:bg-card-dark size-8 rounded-md" />
+          </div>
           <span className="bg-card dark:bg-card-dark h-5 w-28 rounded-md sm:w-40" />
         </div>
       </header>
-      <div className="border-divider dark:border-divider-dark flex items-center justify-between border-b px-4 py-2 sm:hidden">
-        <div className="flex items-center gap-1">
-          <MobileCalendarSidebarTrigger />
-          <span className="bg-card dark:bg-card-dark block h-8 w-36 rounded-md" />
-        </div>
+      <div className="border-divider dark:border-divider-dark flex items-center justify-between border-b px-4 py-3 sm:hidden">
+        <span className="bg-card dark:bg-card-dark block h-8 w-36 rounded-md" />
         <span className="bg-card dark:bg-card-dark block h-8 w-20 rounded-md" />
       </div>
     </>

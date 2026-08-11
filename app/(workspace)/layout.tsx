@@ -28,7 +28,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
 function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
   return (
     <>
-      <CalendarSidebarBrand expanded={expanded} />
+      {expanded ? <div aria-hidden className="h-12 shrink-0" /> : <CalendarSidebarBrand />}
       <WorkspaceNavigationLinks expanded={expanded} />
       <div className={expanded ? 'mt-6 px-1' : 'mt-6 hidden px-1 lg:block'}>
         <ErrorBoundary compact title="Mini calendar unavailable">
