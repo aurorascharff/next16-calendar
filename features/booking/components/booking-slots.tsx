@@ -154,7 +154,6 @@ export function BookingSlots({
                       <Link
                         href={dayHref(handle, previousDay)}
                         onNavigate={() => navigateDay(previousDay)}
-                        prefetch
                         transitionTypes={['nav-back']}
                       />
                     }
@@ -170,7 +169,6 @@ export function BookingSlots({
                       <Link
                         href={dayHref(handle, nextDay)}
                         onNavigate={() => navigateDay(nextDay)}
-                        prefetch
                         transitionTypes={['nav-forward']}
                       />
                     }

@@ -161,7 +161,6 @@ export function CalendarMonthFrame({ children, date, days }: { children: ReactNo
                 aria-label={`View week of ${formatDay(day)}`}
                 className="focus-visible:ring-accent absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                 href={calendarHref(day, 'week')}
-                prefetch
                 transitionTypes={['nav-crossfade']}
               />
               <div className="pointer-events-none relative z-10 mb-0.5 flex h-7 items-center justify-between pl-1">

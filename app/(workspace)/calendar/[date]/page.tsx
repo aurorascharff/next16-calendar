@@ -9,7 +9,6 @@ import {
   CalendarMonthScroll,
   CalendarMonthSurface,
 } from '@/features/calendar/components/calendar-month';
-import { CalendarViewFallback } from '@/features/calendar/components/calendar-scroll-section';
 import { CalendarWeek, CalendarWeekFrame, CalendarWeekScroll } from '@/features/calendar/components/calendar-week';
 import type { CalendarView } from '@/features/calendar/types/calendar';
 import { CalendarEventsProvider } from '@/providers/calendar-events-provider';
@@ -35,27 +34,25 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
           ))}
         </Suspense>
         <ErrorBoundary title="Calendar unavailable">
-          <Suspense fallback={<CalendarViewFallback />}>
-            {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
-              const calendarView = toView(view);
+          {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
+            const calendarView = toView(view);
 
-              return calendarView === 'month' ? (
-                <CalendarMonthScroll date={date}>
-                  <CalendarMonthSurface date={date}>
-                    <Suspense fallback={<CalendarMonthEventsFallback />}>
-                      <CalendarMonth date={date} />
-                    </Suspense>
-                  </CalendarMonthSurface>
-                </CalendarMonthScroll>
-              ) : (
-                <CalendarWeekScroll date={date}>
-                  <CalendarWeekFrame date={date}>
-                    <CalendarWeek date={date} />
-                  </CalendarWeekFrame>
-                </CalendarWeekScroll>
-              );
-            })}
-          </Suspense>
+            return calendarView === 'month' ? (
+              <CalendarMonthScroll date={date}>
+                <CalendarMonthSurface date={date}>
+                  <Suspense fallback={<CalendarMonthEventsFallback />}>
+                    <CalendarMonth date={date} />
+                  </Suspense>
+                </CalendarMonthSurface>
+              </CalendarMonthScroll>
+            ) : (
+              <CalendarWeekScroll date={date}>
+                <CalendarWeekFrame date={date}>
+                  <CalendarWeek date={date} />
+                </CalendarWeekFrame>
+              </CalendarWeekScroll>
+            );
+          })}
         </ErrorBoundary>
       </CalendarEventsProvider>
     </main>
