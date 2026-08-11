@@ -189,11 +189,13 @@ function EventChip({
   width: string;
 }) {
   const titleLines = titleLineCount(height, Boolean(timeLabel));
+  const showTouchDragHandle = event.duration > 30;
 
   return (
     <button
       className={cn(
-        'cal-chip group focus-visible:ring-accent pointer-events-auto absolute flex touch-auto flex-col overflow-hidden rounded-[5px] px-1 pt-1 pb-5 text-left ring-1 transition-shadow [-webkit-touch-callout:none] ring-inset focus-visible:ring-2 focus-visible:outline-none sm:px-2 [@media(pointer:fine)]:touch-none [@media(pointer:fine)]:pb-1',
+        'cal-chip group focus-visible:ring-accent pointer-events-auto absolute flex touch-auto flex-col overflow-hidden rounded-[5px] px-1 py-1 text-left ring-1 transition-shadow [-webkit-touch-callout:none] ring-inset focus-visible:ring-2 focus-visible:outline-none sm:px-2 [@media(pointer:fine)]:touch-none',
+        showTouchDragHandle && 'pb-5 [@media(pointer:fine)]:pb-1',
         event.isBooking && 'cal-chip-booking',
         isDragging || isResizing ? 'z-30 cursor-grabbing shadow-lg' : 'z-10 cursor-grab hover:z-20 hover:shadow-md',
       )}
@@ -228,13 +230,15 @@ function EventChip({
       {timeLabel ? (
         <span className="mt-0.5 hidden text-[11px] tabular-nums opacity-70 sm:block">{timeLabel}</span>
       ) : null}
-      <span
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 hidden h-5 touch-none items-center justify-center opacity-55 [@media(pointer:coarse)]:flex"
-        data-drag-handle
-      >
-        <GripHorizontal className="size-3.5" />
-      </span>
+      {showTouchDragHandle ? (
+        <span
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 hidden h-5 touch-none items-center justify-center opacity-55 [@media(pointer:coarse)]:flex"
+          data-drag-handle
+        >
+          <GripHorizontal className="size-3.5" />
+        </span>
+      ) : null}
       <span
         className="absolute inset-x-0 bottom-0 z-10 hidden h-2.5 cursor-ns-resize touch-none items-end justify-center pb-0.5 opacity-0 transition-opacity group-hover:opacity-100 [@media(pointer:fine)]:flex"
         data-event-chip
