@@ -12,7 +12,7 @@ A calendar and booking-link workspace that demonstrates [Instant Navigations](ht
 
 ---
 
-The architecture follows the [Next.js App Architecture](https://github.com/aurorascharff/nextjs-app-architeture-skill) skill and the [Component Architecture for React Server Components](https://aurorascharff.no/posts/component-architecture-for-react-server-components/) blog post.
+The architecture follows the [Next.js App Architecture](https://github.com/aurorascharff/nextjs-app-architecture-skill) skill and the [Component Architecture for React Server Components](https://aurorascharff.no/posts/component-architecture-for-react-server-components/) blog post.
 
 ## Features
 
