@@ -256,14 +256,14 @@ export function CalendarBoardFrame({
                 <div
                   className={cn(
                     'border-divider/60 dark:border-divider-dark/60 relative h-[72px] border-b',
-                    hour === 0 && 'border-t-action/35 dark:border-t-action/40 border-t',
+                    hour === 0 && 'border-divider dark:border-divider-dark border-t',
                   )}
                   key={hour}
                 >
                   {nextDayParts ? (
                     <span
                       aria-label={`Next day, ${formatDay(nextDay!)}`}
-                      className="border-action/35 bg-surface text-action dark:border-action/40 dark:bg-surface-dark absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border px-1.5 py-0.5 text-[9px] leading-none font-semibold whitespace-nowrap uppercase sm:px-2 sm:text-[10px]"
+                      className="border-divider bg-surface text-muted dark:border-divider-dark dark:bg-surface-dark absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border px-1.5 py-0.5 text-[9px] leading-none font-semibold whitespace-nowrap uppercase sm:px-2 sm:text-[10px]"
                     >
                       <span className="hidden sm:inline">{nextDayParts.weekday} </span>
                       {nextDayParts.day}
