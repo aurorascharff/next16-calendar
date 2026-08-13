@@ -1,6 +1,6 @@
 'use client';
 
-import { GripHorizontal, Repeat } from 'lucide-react';
+import { Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { chipStyle } from '../utils/colors';
 import {
@@ -63,6 +63,9 @@ export function CalendarEventLayer({
             key={event.id}
             left={`calc(${place.col * widthPct}% + 2px)`}
             onMoveDown={pointerEvent => interaction.move.onPointerDown(event, pointerEvent)}
+            onMoveMove={interaction.move.onPointerMove}
+            onMoveUp={interaction.move.onPointerUp}
+            onMoveCancel={interaction.move.onPointerCancel}
             onResizeLostPointerCapture={interaction.resizeHandlers.onLostPointerCapture}
             onResizeCancel={interaction.resizeHandlers.onPointerCancel}
             onResizeDown={pointerEvent => interaction.resizeHandlers.onPointerDown(event, pointerEvent)}
@@ -147,6 +150,9 @@ function EventChip({
   isResizing,
   left,
   onMoveDown,
+  onMoveMove,
+  onMoveUp,
+  onMoveCancel,
   onResizeLostPointerCapture,
   onResizeCancel,
   onResizeDown,
@@ -163,6 +169,9 @@ function EventChip({
   isResizing: boolean;
   left: string;
   onMoveDown: PointerHandler;
+  onMoveMove: PointerHandler;
+  onMoveUp: PointerHandler;
+  onMoveCancel: PointerHandler;
   onResizeLostPointerCapture: PointerHandler;
   onResizeCancel: PointerHandler;
   onResizeDown: PointerHandler;
@@ -174,20 +183,21 @@ function EventChip({
   width: string;
 }) {
   const titleLines = titleLineCount(height, Boolean(timeLabel));
-  const showTouchDragHandle = event.duration > 30;
 
   return (
     <button
       className={cn(
-        'cal-chip group focus-visible:ring-accent pointer-events-auto absolute flex touch-auto flex-col overflow-hidden rounded-[5px] px-1 py-1 text-left ring-1 transition-shadow [-webkit-touch-callout:none] ring-inset focus-visible:ring-2 focus-visible:outline-none sm:px-2 [@media(pointer:fine)]:touch-none',
-        showTouchDragHandle && 'pb-5 [@media(pointer:fine)]:pb-1',
+        'cal-chip group focus-visible:ring-accent pointer-events-auto absolute flex touch-none flex-col overflow-hidden rounded-[5px] px-1 py-1 text-left ring-1 transition-shadow [-webkit-touch-callout:none] ring-inset focus-visible:ring-2 focus-visible:outline-none sm:px-2',
         event.isBooking && 'cal-chip-booking',
         isDragging || isResizing ? 'z-30 cursor-grabbing shadow-lg' : 'z-10 cursor-grab hover:z-20 hover:shadow-md',
       )}
       data-booking={event.isBooking || undefined}
       data-event-chip
       onClick={event => onSelect(event.currentTarget.getBoundingClientRect())}
+      onPointerCancel={onMoveCancel}
       onPointerDown={onMoveDown}
+      onPointerMove={onMoveMove}
+      onPointerUp={onMoveUp}
       style={{ ...chipStyle(event.color), height, left, top, width }}
       title={`${event.title} · ${event.start}`}
       type="button"
@@ -210,15 +220,6 @@ function EventChip({
       </span>
       {timeLabel ? (
         <span className="mt-0.5 hidden text-[11px] tabular-nums opacity-70 sm:block">{timeLabel}</span>
-      ) : null}
-      {showTouchDragHandle ? (
-        <span
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 hidden h-5 touch-none items-center justify-center opacity-55 [@media(pointer:coarse)]:flex"
-          data-drag-handle
-        >
-          <GripHorizontal className="size-3.5" />
-        </span>
       ) : null}
       <span
         className="absolute inset-x-0 bottom-0 z-10 hidden h-2.5 cursor-ns-resize touch-none items-end justify-center pb-0.5 opacity-0 transition-opacity group-hover:opacity-100 [@media(pointer:fine)]:flex"
