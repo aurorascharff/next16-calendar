@@ -7,7 +7,7 @@ import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { useCalendarEvents } from '@/providers/calendar-events-provider';
+import { useCalendarEvents, useCalendarEventsDispatch } from '@/providers/calendar-events-provider';
 import { formatDay } from '../calendar-utils';
 import { colorStyle } from '../utils/colors';
 import { EventFields, formatDuration } from './event-fields';
@@ -46,7 +46,8 @@ function getServerMobileSnapshot() {
 }
 
 export function EventPopover({ anchorRect, calendar, event, onClose }: EventPopoverProps) {
-  const { isPending, mutate } = useCalendarEvents();
+  const { isPending } = useCalendarEvents();
+  const mutate = useCalendarEventsDispatch();
   const formId = useId();
   const [mode, setMode] = useState<'details' | 'edit'>('details');
   const isMobile = useSyncExternalStore(subscribeToMobile, getMobileSnapshot, getServerMobileSnapshot);

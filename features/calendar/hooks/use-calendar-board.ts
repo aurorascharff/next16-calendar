@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { useEffect, useRef, useState } from 'react';
-import { useCalendarEvents } from '@/providers/calendar-events-provider';
+import { useCalendarEventsDispatch } from '@/providers/calendar-events-provider';
 import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { dateKey } from '../calendar-utils';
 import {
@@ -88,7 +88,7 @@ export function useCalendarBoard({
   days: string[];
   events: CalendarEvent[];
 }) {
-  const { mutate } = useCalendarEvents();
+  const mutate = useCalendarEventsDispatch();
   const { hidden } = useCalendarVisibility();
   const gridTemplate = `var(--calendar-time-column-width) repeat(${days.length}, minmax(var(--calendar-day-column-min-width), 1fr))`;
   const gridMinWidth = days.length > 1 ? 'var(--calendar-grid-min-width)' : undefined;
