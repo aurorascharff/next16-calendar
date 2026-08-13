@@ -2,6 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useCalendarEventsDispatch } from '@/providers/calendar-events-provider';
 import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { dateKey } from '../calendar-utils';
@@ -206,7 +207,7 @@ export function useCalendarBoard({
     }
     const target = targetMoveFromPointer(origin, pointerEvent);
     dragMoveRef.current = target;
-    setDragMove(target);
+    flushSync(() => setDragMove(target));
   }
 
   function handleMoveUp(pointerEvent: PointerEvent) {
