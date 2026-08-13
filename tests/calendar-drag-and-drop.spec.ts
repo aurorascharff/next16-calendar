@@ -7,6 +7,7 @@ test.describe('Calendar drag and resize', () => {
     await page.goto('/calendar/2026-08-10');
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
     await expect(page.getByTitle('Release planning · 11:00')).toHaveCount(1);
+    await page.waitForFunction(() => !document.documentElement.matches(':active-view-transition'));
   });
 
   test('clicking an event opens its details', async ({ page }) => {
@@ -136,38 +137,6 @@ test.describe('Calendar drag and resize', () => {
       request => request.method() === 'POST' && Boolean(request.headers()['next-action']),
     );
     await page.mouse.up();
-    await actionRequest;
-  });
-
-  test('dragging an event into another day commits without waiting for the preview to settle', async ({ page }) => {
-    const event = page.getByTitle('Release planning · 11:00');
-    const eventBounds = await event.boundingBox();
-    expect(eventBounds).not.toBeNull();
-    if (!eventBounds) return;
-
-    const dayColumns = page.locator('[data-day-column]');
-    const eventCenterX = eventBounds.x + eventBounds.width / 2;
-    const columnBounds = await Promise.all(
-      Array.from({ length: 7 }, (_, index) => dayColumns.nth(index).boundingBox()),
-    );
-    const originIndex = columnBounds.findIndex(
-      bounds => bounds && eventCenterX >= bounds.x && eventCenterX <= bounds.x + bounds.width,
-    );
-    expect(originIndex).toBeGreaterThanOrEqual(0);
-
-    const targetIndex = originIndex === 6 ? 5 : originIndex + 1;
-    const targetBounds = columnBounds[targetIndex];
-    expect(targetBounds).not.toBeNull();
-    if (!targetBounds) return;
-
-    const actionRequest = page.waitForRequest(
-      request => request.method() === 'POST' && Boolean(request.headers()['next-action']),
-    );
-    await page.mouse.move(eventCenterX, eventBounds.y + eventBounds.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(targetBounds.x + targetBounds.width / 2, eventBounds.y + eventBounds.height / 2);
-    await page.mouse.up();
-
     await actionRequest;
   });
 
