@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { useEffect, useRef, useState } from 'react';
-import { useCalendarEvents } from '@/providers/calendar-events-provider';
+import { useCalendarEventsDispatch } from '@/providers/calendar-events-provider';
 import { useCalendarVisibility } from '@/providers/calendar-visibility-provider';
 import { dateKey } from '../calendar-utils';
 import {
@@ -21,8 +21,9 @@ import {
 import { useNow } from './use-now';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 
+type DragMove = { day: string; id: string; startMin: number };
+
 type MoveOrigin = {
-  active: boolean;
   day: string;
   duration: number;
   grabOffsetMin: number;
@@ -88,12 +89,12 @@ export function useCalendarBoard({
   days: string[];
   events: CalendarEvent[];
 }) {
-  const { mutate } = useCalendarEvents();
+  const mutate = useCalendarEventsDispatch();
   const { hidden } = useCalendarVisibility();
   const gridTemplate = `var(--calendar-time-column-width) repeat(${days.length}, minmax(var(--calendar-day-column-min-width), 1fr))`;
   const gridMinWidth = days.length > 1 ? 'var(--calendar-grid-min-width)' : undefined;
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
-  const [dragMove, setDragMove] = useState<{ day: string; id: string; startMin: number } | null>(null);
+  const [dragMove, setDragMove] = useState<DragMove | null>(null);
   const [resize, setResize] = useState<ResizeTarget | null>(null);
   const [createSel, setCreateSel] = useState<{ aMin: number; bMin: number; day: string } | null>(null);
   const [createDraft, setCreateDraft] = useState<{
@@ -105,10 +106,9 @@ export function useCalendarBoard({
   } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const moveRef = useRef<MoveOrigin | null>(null);
-  const moveHoldRef = useRef<number | null>(null);
   const resizeRef = useRef<ResizeOrigin | null>(null);
   const resizeColTopRef = useRef(0);
-  const dragMoveRef = useRef<{ day: string; id: string; startMin: number } | null>(null);
+  const dragMoveRef = useRef<DragMove | null>(null);
   const createRef = useRef<CreateOrigin | null>(null);
   const createHoldRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
@@ -131,17 +131,10 @@ export function useCalendarBoard({
 
   useEffect(
     () => () => {
-      if (moveHoldRef.current !== null) window.clearTimeout(moveHoldRef.current);
       if (createHoldRef.current !== null) window.clearTimeout(createHoldRef.current);
     },
     [],
   );
-
-  function clearMoveHold() {
-    if (moveHoldRef.current === null) return;
-    window.clearTimeout(moveHoldRef.current);
-    moveHoldRef.current = null;
-  }
 
   function clearCreateHold() {
     if (createHoldRef.current === null) return;
@@ -174,12 +167,8 @@ export function useCalendarBoard({
   function handleMoveDown(calendarEvent: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) {
     if (pointerEvent.button !== 0) return;
     if ((pointerEvent.target as HTMLElement).closest('[data-resize-handle]')) return;
-    const touch = pointerEvent.pointerType === 'touch';
-    if (touch && !(pointerEvent.target as HTMLElement).closest('[data-drag-handle]')) return;
     pointerEvent.stopPropagation();
-    const captureTarget = gridRef.current ?? pointerEvent.currentTarget;
-    const origin: MoveOrigin = {
-      active: !touch,
+    moveRef.current = {
       day: calendarEvent.day,
       duration: calendarEvent.duration,
       grabOffsetMin: pointToMinutes(pointerEvent.clientY) - eventStartMinutes(calendarEvent.start),
@@ -191,23 +180,6 @@ export function useCalendarBoard({
       x0: pointerEvent.clientX,
       y0: pointerEvent.clientY,
     };
-    moveRef.current = origin;
-
-    if (!touch) return;
-
-    clearMoveHold();
-    moveHoldRef.current = window.setTimeout(() => {
-      const pending = moveRef.current;
-      if (!pending || pending.pointerId !== pointerEvent.pointerId) return;
-      pending.active = true;
-      try {
-        captureTarget.setPointerCapture(pointerEvent.pointerId);
-      } catch {}
-      const drag = { day: pending.day, id: pending.id, startMin: eventStartMinutes(pending.start) };
-      dragMoveRef.current = drag;
-      setDragMove(drag);
-      moveHoldRef.current = null;
-    }, TOUCH_HOLD_MS);
   }
 
   function targetMoveFromPointer(origin: MoveOrigin, pointerEvent: React.PointerEvent<HTMLElement>) {
@@ -221,22 +193,10 @@ export function useCalendarBoard({
   function handleMoveMove(pointerEvent: React.PointerEvent<HTMLElement>) {
     const origin = moveRef.current;
     if (!origin || origin.pointerId !== pointerEvent.pointerId) return;
-    if (!origin.active) {
-      if (
-        Math.abs(pointerEvent.clientX - origin.x0) >= TOUCH_SLOP_PX ||
-        Math.abs(pointerEvent.clientY - origin.y0) >= TOUCH_SLOP_PX
-      ) {
-        clearMoveHold();
-        moveRef.current = null;
-      }
-      return;
-    }
     if (!origin.moved) {
       if (Math.abs(pointerEvent.clientX - origin.x0) < 4 && Math.abs(pointerEvent.clientY - origin.y0) < 4) return;
       origin.moved = true;
-      try {
-        gridRef.current?.setPointerCapture(pointerEvent.pointerId);
-      } catch {}
+      gridRef.current?.setPointerCapture(pointerEvent.pointerId);
     }
     const target = targetMoveFromPointer(origin, pointerEvent);
     dragMoveRef.current = target;
@@ -246,9 +206,7 @@ export function useCalendarBoard({
   function handleMoveUp(pointerEvent: React.PointerEvent<HTMLElement>) {
     const origin = moveRef.current;
     moveRef.current = null;
-    clearMoveHold();
     if (!origin || origin.pointerId !== pointerEvent.pointerId) return;
-    const heldOnTouch = pointerEvent.pointerType === 'touch' && origin.active;
     try {
       pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId);
     } catch {}
@@ -258,13 +216,13 @@ export function useCalendarBoard({
     const target = origin.moved ? (dragMoveRef.current ?? targetMoveFromPointer(origin, pointerEvent)) : null;
     dragMoveRef.current = null;
     setDragMove(null);
-    if (heldOnTouch || origin.moved) {
+    if (origin.moved) {
       suppressClickRef.current = true;
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 120);
     }
-    if (!origin.active || !origin.moved || !target) return;
+    if (!origin.moved || !target) return;
     const start = minutesToTime(target.startMin);
     const { day, id } = target;
     if (day === origin.day && start === origin.start) return;
@@ -273,7 +231,6 @@ export function useCalendarBoard({
   }
 
   function handleMoveCancel() {
-    clearMoveHold();
     moveRef.current = null;
     dragMoveRef.current = null;
     setDragMove(null);

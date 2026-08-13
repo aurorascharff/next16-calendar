@@ -19,21 +19,17 @@ test.describe('Calendar page (/calendar/[date])', () => {
     );
   });
 
-  // Target after adopting Partial Prefetching: the destination calendar is
-  // available before dynamic work continues.
+  // Target after adding the lower page boundary: the next week can commit into
+  // the calendar fallback while its route-dependent data continues streaming.
   /*
-  test('switching to month keeps the navigation instant', async ({ page }) => {
-    await page.goto('/calendar/2026-08-10');
-    await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
+  test('switching weeks reveals the calendar fallback immediately', async ({ page }) => {
+    await page.goto('/calendar/2026-09-24');
 
     await instant(page, async () => {
-      await page.getByRole('link', { name: 'Month', exact: true }).click();
-      await page.waitForURL(url => url.searchParams.get('view') === 'month');
-      await expect(page.getByRole('link', { name: 'Month', exact: true })).toHaveAttribute('aria-current', 'page');
-      await expect(page.getByText('Focus time').first()).toBeVisible();
+      await page.getByRole('link', { name: 'Next week' }).click();
+      await page.waitForURL('/calendar/2026-10-01');
+      await expect(page.getByRole('status', { name: 'Loading calendar view' })).toBeVisible();
     });
-
-    await expect(page.getByText('Focus time').first()).toBeVisible();
   });
   */
 

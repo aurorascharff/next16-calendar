@@ -9,7 +9,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { useCalendarEvents } from '@/providers/calendar-events-provider';
+import { useCalendarEventsDispatch } from '@/providers/calendar-events-provider';
 import { formatDay } from '../calendar-utils';
 import { colorStyle } from '../utils/colors';
 import { EventFields } from './event-fields';
@@ -100,7 +100,7 @@ export function EventCreateDialog({
   defaultStart?: string;
   defaultDuration?: number;
 }) {
-  const { mutate } = useCalendarEvents();
+  const mutate = useCalendarEventsDispatch();
   const calendarOptions = calendars ?? [];
   const selectedCalendarId = defaultCalendarId ?? calendarOptions[0]?.id;
   const [selectedDay, setSelectedDay] = useState(day);
