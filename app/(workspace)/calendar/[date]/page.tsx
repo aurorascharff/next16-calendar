@@ -2,7 +2,12 @@ import { Suspense } from 'react';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { getCalendarDate } from '@/features/calendar/calendar-queries';
 import { formatMonth } from '@/features/calendar/calendar-utils';
-import { CalendarHeader, CalendarHeaderSkeleton } from '@/features/calendar/components/calendar-header';
+import {
+  CalendarHeader,
+  CalendarHeaderMonth,
+  CalendarHeaderMonthSkeleton,
+  CalendarHeaderSkeleton,
+} from '@/features/calendar/components/calendar-header';
 import {
   CalendarMonth,
   CalendarMonthEventsFallback,
@@ -29,9 +34,20 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
     <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
       <CalendarEventsProvider>
         <Suspense fallback={<CalendarHeaderSkeleton />}>
-          {Promise.all([params, searchParams]).then(([{ date }, { view }]) => (
-            <CalendarHeader date={date} view={toView(view)} />
-          ))}
+          {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
+            const calendarView = toView(view);
+            return (
+              <CalendarHeader
+                date={date}
+                month={
+                  <Suspense fallback={<CalendarHeaderMonthSkeleton />}>
+                    <CalendarHeaderMonth date={date} view={calendarView} />
+                  </Suspense>
+                }
+                view={calendarView}
+              />
+            );
+          })}
         </Suspense>
         <ErrorBoundary title="Calendar unavailable">
           {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {

@@ -12,14 +12,13 @@ A calendar and booking-link workspace that demonstrates [Instant Navigations](ht
 
 ---
 
-The architecture follows the [Next.js App Architecture](https://github.com/aurorascharff/nextjs-app-architeture-skill) skill and the [Component Architecture for React Server Components](https://aurorascharff.no/posts/component-architecture-for-react-server-components/) blog post.
+The architecture follows the [Next.js App Architecture](https://github.com/aurorascharff/nextjs-app-architecture-skill) skill and the [Component Architecture for React Server Components](https://aurorascharff.no/posts/component-architecture-for-react-server-components/) blog post.
 
 ## Features
 
 - **[Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents)** cache calendar weeks and booking-link data with `'use cache'`, name the data with `cacheTag`, and set its lifetime with `cacheLife`, so repeated reads come from the cache until a tag is invalidated.
-- **[Partial Prefetching](https://nextjs.org/docs/app/guides/adopting-partial-prefetching)** prefetches the shared app shell as links enter the viewport, so week-to-week navigation commits instantly and the schedule streams in behind it.
-- **[Runtime prefetching](https://nextjs.org/docs/app/guides/runtime-prefetching)** lets calendar and booking links prefetch URL-specific data with `<Link prefetch={true}>` before navigation.
-- **[Hover-triggered prefetch](https://nextjs.org/docs/app/guides/prefetching#hover-triggered-prefetch)** upgrades only the mini-calendar date reached by pointer, keyboard focus, or touch intent, so the full month does not runtime-prefetch every destination on render.
+- **[Partial Prefetching](https://nextjs.org/docs/app/guides/adopting-partial-prefetching)** prefetches one shared App Shell per route. Calendar and booking links with `prefetch={true}` also resolve their date or view, including the cached content behind it while uncached data streams after navigation.
+- **[Hover-triggered prefetch](https://nextjs.org/docs/app/guides/prefetching)** upgrades only the mini-calendar date reached by pointer, keyboard focus, or touch intent, avoiding a separate prefetch for every date in view.
 - **[Server Functions](https://nextjs.org/docs/app/getting-started/mutating-data)** run mutations — moving, creating, editing, and deleting events, and booking a slot — on the server and invalidate only the tags they change with [`updateTag`](https://nextjs.org/docs/app/api-reference/functions/updateTag).
 - **[React Compiler](https://react.dev/learn/react-compiler)** memoizes components automatically, so the code needs no manual `useMemo`/`useCallback`.
 - **[View Transitions](https://nextjs.org/docs/app/guides/view-transitions)** cross-fade booking content and keep persistent calendar chrome stable as data streams in from Suspense.

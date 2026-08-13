@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { DURATION_OPTIONS } from '../utils/grid';
+import type { Ref } from 'react';
 
 export type EventFieldValues = {
   description: string;
@@ -36,6 +37,7 @@ export function EventFields({
   controlHeight,
   date,
   onAllDayChange,
+  titleRef,
   titleInvalidMessage,
   values,
 }: {
@@ -44,6 +46,7 @@ export function EventFields({
   controlHeight: string;
   date?: { onChange: (value: string) => void; value: string };
   onAllDayChange: (allDay: boolean) => void;
+  titleRef?: Ref<HTMLInputElement>;
   titleInvalidMessage: string;
   values: EventFieldValues;
 }) {
@@ -61,6 +64,7 @@ export function EventFields({
           onInvalid={event => event.currentTarget.setCustomValidity(titleInvalidMessage)}
           pattern={titlePattern}
           placeholder="What's happening?"
+          ref={titleRef}
           required
         />
       </label>

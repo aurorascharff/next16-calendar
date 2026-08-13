@@ -2,7 +2,7 @@
 
 import * as Ariakit from '@ariakit/react';
 import { Check, ChevronDown, X } from 'lucide-react';
-import { useState, type KeyboardEvent } from 'react';
+import { useRef, useState, type KeyboardEvent } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
@@ -104,6 +104,7 @@ export function EventCreateDialog({
   const calendarOptions = calendars ?? [];
   const selectedCalendarId = defaultCalendarId ?? calendarOptions[0]?.id;
   const [selectedDay, setSelectedDay] = useState(day);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const weekday = WEEKDAY_NAMES[new Date(`${selectedDay}T00:00:00.000Z`).getUTCDay()];
 
   function submitAction(formData: FormData) {
@@ -166,6 +167,7 @@ export function EventCreateDialog({
     <Boundary label="EventCreateDialog" asChild>
       <Ariakit.Popover
         store={store}
+        initialFocus={titleInputRef}
         modal
         unmountOnHide
         fixed
@@ -211,6 +213,7 @@ export function EventCreateDialog({
               controlHeight={controlHeight}
               date={{ onChange: setSelectedDay, value: selectedDay }}
               onAllDayChange={setAllDay}
+              titleRef={titleInputRef}
               titleInvalidMessage="Add a title before saving the event."
               values={values}
             />
