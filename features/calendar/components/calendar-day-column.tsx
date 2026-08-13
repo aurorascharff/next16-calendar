@@ -41,7 +41,17 @@ export function CalendarEventLayer({
   events: CalendarEvent[];
   interaction: CalendarBoardInteractions;
 }) {
-  const layout = packDay(events);
+  const layout = packDay(
+    events.map(event => {
+      if (interaction.dragMove?.id === event.id) {
+        return { ...event, start: minutesToTime(interaction.dragMove.startMin) };
+      }
+      if (interaction.resize?.sourceId === event.sourceId) {
+        return { ...event, duration: interaction.resize.endMin - interaction.resize.startMin };
+      }
+      return event;
+    }),
+  );
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10">

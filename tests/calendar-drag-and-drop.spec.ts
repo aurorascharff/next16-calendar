@@ -124,6 +124,14 @@ test.describe('Calendar drag and resize', () => {
       })
       .toBe(true);
 
+    const overlappingBounds = await event.boundingBox();
+    expect(overlappingBounds).not.toBeNull();
+    if (!overlappingBounds) return;
+    expect(overlappingBounds.width).toBeLessThan(eventBounds.width);
+
+    await page.mouse.move(targetX, targetY + 2 * 72, { steps: 6 });
+    await expect.poll(async () => (await event.boundingBox())?.width ?? 0).toBeGreaterThan(overlappingBounds.width * 1.5);
+
     const actionRequest = page.waitForRequest(
       request => request.method() === 'POST' && Boolean(request.headers()['next-action']),
     );

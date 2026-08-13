@@ -67,10 +67,6 @@ export function CalendarBoard({
       <Crossfade>
         <div
           className="relative col-start-1 row-start-3 grid"
-          onLostPointerCapture={interactions.move.onLostPointerCapture}
-          onPointerCancel={interactions.move.onPointerCancel}
-          onPointerMove={interactions.move.onPointerMove}
-          onPointerUp={interactions.move.onPointerUp}
           ref={gridRef}
           style={{ gridTemplateColumns: gridTemplate, minWidth: gridMinWidth }}
         >
