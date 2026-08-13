@@ -6,6 +6,7 @@ test.describe('Calendar drag and resize', () => {
     await signIn(page);
     await page.goto('/calendar/2026-08-10');
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
+    await expect(page.getByTitle('Release planning · 11:00')).toHaveCount(1);
   });
 
   test('clicking an event opens its details', async ({ page }) => {
