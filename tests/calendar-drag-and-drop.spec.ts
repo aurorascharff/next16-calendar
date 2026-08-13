@@ -124,10 +124,50 @@ test.describe('Calendar drag and resize', () => {
       })
       .toBe(true);
 
+    const overlappingBounds = await event.boundingBox();
+    expect(overlappingBounds).not.toBeNull();
+    if (!overlappingBounds) return;
+    expect(overlappingBounds.width).toBeLessThan(eventBounds.width);
+
+    await page.mouse.move(targetX, targetY + 2 * 72, { steps: 6 });
+    await expect.poll(async () => (await event.boundingBox())?.width ?? 0).toBeGreaterThan(overlappingBounds.width * 1.5);
+
     const actionRequest = page.waitForRequest(
       request => request.method() === 'POST' && Boolean(request.headers()['next-action']),
     );
     await page.mouse.up();
+    await actionRequest;
+  });
+
+  test('dragging an event into another day commits without waiting for the preview to settle', async ({ page }) => {
+    const event = page.getByTitle('Release planning · 11:00');
+    const eventBounds = await event.boundingBox();
+    expect(eventBounds).not.toBeNull();
+    if (!eventBounds) return;
+
+    const dayColumns = page.locator('[data-day-column]');
+    const eventCenterX = eventBounds.x + eventBounds.width / 2;
+    const columnBounds = await Promise.all(
+      Array.from({ length: 7 }, (_, index) => dayColumns.nth(index).boundingBox()),
+    );
+    const originIndex = columnBounds.findIndex(
+      bounds => bounds && eventCenterX >= bounds.x && eventCenterX <= bounds.x + bounds.width,
+    );
+    expect(originIndex).toBeGreaterThanOrEqual(0);
+
+    const targetIndex = originIndex === 6 ? 5 : originIndex + 1;
+    const targetBounds = columnBounds[targetIndex];
+    expect(targetBounds).not.toBeNull();
+    if (!targetBounds) return;
+
+    const actionRequest = page.waitForRequest(
+      request => request.method() === 'POST' && Boolean(request.headers()['next-action']),
+    );
+    await page.mouse.move(eventCenterX, eventBounds.y + eventBounds.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(targetBounds.x + targetBounds.width / 2, eventBounds.y + eventBounds.height / 2);
+    await page.mouse.up();
+
     await actionRequest;
   });
 
