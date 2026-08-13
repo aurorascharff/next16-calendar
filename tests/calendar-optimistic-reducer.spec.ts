@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { CalendarEvent } from '@/features/calendar/types/calendar';
-import { applyEventActions } from '@/features/calendar/utils/event-optimistic-reducer';
+import { applyEventChanges } from '@/features/calendar/utils/event-optimistic-reducer';
 
 function recurringEvent(day: string, recurrence: string): CalendarEvent {
   return {
@@ -22,7 +22,7 @@ test('moving a weekday occurrence updates the whole series optimistically', () =
   const days = ['2026-08-10', '2026-08-11', '2026-08-12'];
   const events = days.map(day => recurringEvent(day, 'weekday'));
 
-  const moved = applyEventActions(
+  const moved = applyEventChanges(
     events,
     [
       {
@@ -51,7 +51,7 @@ test('moving a weekly occurrence changes every visible occurrence to the target 
   });
   const events = [recurringEvent('2026-08-10', 'monday'), recurringEvent('2026-08-17', 'monday')];
 
-  const moved = applyEventActions(
+  const moved = applyEventChanges(
     events,
     [
       {
