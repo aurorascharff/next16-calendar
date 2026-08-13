@@ -63,9 +63,6 @@ export function CalendarEventLayer({
             key={event.id}
             left={`calc(${place.col * widthPct}% + 2px)`}
             onMoveDown={pointerEvent => interaction.move.onPointerDown(event, pointerEvent)}
-            onMoveMove={interaction.move.onPointerMove}
-            onMoveUp={interaction.move.onPointerUp}
-            onMoveCancel={interaction.move.onPointerCancel}
             onResizeLostPointerCapture={interaction.resizeHandlers.onLostPointerCapture}
             onResizeCancel={interaction.resizeHandlers.onPointerCancel}
             onResizeDown={pointerEvent => interaction.resizeHandlers.onPointerDown(event, pointerEvent)}
@@ -150,9 +147,6 @@ function EventChip({
   isResizing,
   left,
   onMoveDown,
-  onMoveMove,
-  onMoveUp,
-  onMoveCancel,
   onResizeLostPointerCapture,
   onResizeCancel,
   onResizeDown,
@@ -169,9 +163,6 @@ function EventChip({
   isResizing: boolean;
   left: string;
   onMoveDown: PointerHandler;
-  onMoveMove: PointerHandler;
-  onMoveUp: PointerHandler;
-  onMoveCancel: PointerHandler;
   onResizeLostPointerCapture: PointerHandler;
   onResizeCancel: PointerHandler;
   onResizeDown: PointerHandler;
@@ -194,10 +185,7 @@ function EventChip({
       data-booking={event.isBooking || undefined}
       data-event-chip
       onClick={event => onSelect(event.currentTarget.getBoundingClientRect())}
-      onPointerCancel={onMoveCancel}
       onPointerDown={onMoveDown}
-      onPointerMove={onMoveMove}
-      onPointerUp={onMoveUp}
       style={{ ...chipStyle(event.color), height, left, top, width }}
       title={`${event.title} · ${event.start}`}
       type="button"

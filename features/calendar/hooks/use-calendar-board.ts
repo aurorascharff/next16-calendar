@@ -59,6 +59,7 @@ export type CalendarBoardInteractions = {
   dragMove: { day: string; id: string; startMin: number } | null;
   getSelection: (day: string) => { hi: number; lo: number } | null;
   move: {
+    onLostPointerCapture: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerCancel: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerDown: (event: CalendarEvent, pointerEvent: React.PointerEvent<HTMLElement>) => void;
     onPointerMove: (pointerEvent: React.PointerEvent<HTMLElement>) => void;
@@ -167,7 +168,6 @@ export function useCalendarBoard({
     if (pointerEvent.button !== 0) return;
     if ((pointerEvent.target as HTMLElement).closest('[data-resize-handle]')) return;
     pointerEvent.stopPropagation();
-    pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
     moveRef.current = {
       day: calendarEvent.day,
       duration: calendarEvent.duration,
@@ -196,6 +196,7 @@ export function useCalendarBoard({
     if (!origin.moved) {
       if (Math.abs(pointerEvent.clientX - origin.x0) < 4 && Math.abs(pointerEvent.clientY - origin.y0) < 4) return;
       origin.moved = true;
+      gridRef.current?.setPointerCapture(pointerEvent.pointerId);
     }
     const target = targetMoveFromPointer(origin, pointerEvent);
     dragMoveRef.current = target;
@@ -212,7 +213,7 @@ export function useCalendarBoard({
     if (!origin.moved) {
       origin.moved = Math.abs(pointerEvent.clientX - origin.x0) >= 4 || Math.abs(pointerEvent.clientY - origin.y0) >= 4;
     }
-    const target = origin.moved ? (dragMoveRef.current ?? targetMoveFromPointer(origin, pointerEvent)) : null;
+    const target = origin.moved ? targetMoveFromPointer(origin, pointerEvent) : null;
     dragMoveRef.current = null;
     setDragMove(null);
     if (origin.moved) {
@@ -400,6 +401,7 @@ export function useCalendarBoard({
       };
     },
     move: {
+      onLostPointerCapture: handleMoveCancel,
       onPointerCancel: handleMoveCancel,
       onPointerDown: handleMoveDown,
       onPointerMove: handleMoveMove,
