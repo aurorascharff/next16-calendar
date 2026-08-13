@@ -58,7 +58,7 @@ export type EventChange =
 
 export const noPendingChanges: EventChange[] = [];
 
-export function addPendingChange(changes: EventChange[], change: EventChange): EventChange[] {
+export function pendingChangesReducer(changes: EventChange[], change: EventChange): EventChange[] {
   return [...changes, change];
 }
 

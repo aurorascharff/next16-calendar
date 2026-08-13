@@ -11,20 +11,14 @@ import {
   type ReactNode,
 } from 'react';
 import { toast } from 'sonner';
-import {
-  createEvent,
-  deleteEvent,
-  moveEvent,
-  resizeEvent,
-  updateEvent,
-} from '@/features/calendar/calendar-actions';
+import { createEvent, deleteEvent, moveEvent, resizeEvent, updateEvent } from '@/features/calendar/calendar-actions';
 import type { CalendarEvent } from '@/features/calendar/types/calendar';
 import {
-  addPendingChange,
   applyEventChanges,
   noPendingChanges,
-} from '@/features/calendar/utils/event-optimistic-reducer';
-import type { EventChange } from '@/features/calendar/utils/event-optimistic-reducer';
+  pendingChangesReducer,
+} from '@/features/calendar/utils/pending-changes-reducer';
+import type { EventChange } from '@/features/calendar/utils/pending-changes-reducer';
 
 type CalendarEventsStateContextValue = {
   getEvents: (events: CalendarEvent[], days: string[]) => CalendarEvent[];
@@ -82,7 +76,7 @@ async function saveChange(_pending: EventChange[], change: EventChange): Promise
 
 export function CalendarEventsProvider({ children }: { children: ReactNode }) {
   const [changes, dispatch, isPending] = useActionState(saveChange, noPendingChanges);
-  const [optimisticChanges, addOptimisticChange] = useOptimistic(changes, addPendingChange);
+  const [optimisticChanges, addOptimisticChange] = useOptimistic(changes, pendingChangesReducer);
 
   const mutate = useCallback(
     (change: EventChange) => {
