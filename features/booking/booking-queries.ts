@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { DEMO_DELAYS, isSlowEnabled } from '@/components/demo/demo-slow';
+import { isSlowEnabled } from '@/components/demo/demo-slow';
 import { calendarCache } from '@/features/calendar/calendar-queries';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { verifyAuth } from '@/features/user/user-queries';
@@ -53,7 +53,7 @@ async function getBookingAvailabilityCached(handle: string, date: string, slow: 
   cacheLife({ stale: 30 });
   cacheTag(bookingCache.tag(handle));
 
-  await delay(DEMO_DELAYS.bookingAvailability, slow);
+  await delay(900, slow);
   const bookingPage = await prisma.bookingPage.findUnique({
     include: { user: { select: { id: true, name: true } } },
     where: { handle },
@@ -131,7 +131,7 @@ async function getMyBookingProfileForUser(handle: string, slow: boolean) {
   cacheLife('hours');
   cacheTag(bookingCache.tag(handle), calendarCache.calendarsTag);
 
-  await delay(DEMO_DELAYS.bookingProfile, slow);
+  await delay(650, slow);
   const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
   if (!bookingPage) return null;
 
@@ -179,7 +179,7 @@ async function getMyBookingSettingsForUser(userId: string, handle: string, slow:
   cacheLife('hours');
   cacheTag(bookingCache.tag(handle), calendarCache.calendarsTag);
 
-  await delay(DEMO_DELAYS.bookingSettings, slow);
+  await delay(1100, slow);
   const calendars = await getWritableCalendars(userId);
   const bookingPage = await prisma.bookingPage.findFirst({ where: { handle, userId } });
   if (!bookingPage) {

@@ -13,6 +13,8 @@ test.describe('Calendar page (/calendar/[date])', () => {
       async () => {
         await page.goto('/calendar/2026-08-10');
         await expect(page.getByRole('navigation').getByText('Calendar')).toBeVisible();
+        await expect(page.locator('[data-calendar-header-loading]')).toBeVisible();
+        await expect(page.getByRole('status', { name: 'Loading calendar controls' })).toBeVisible();
         await expect(page.getByRole('status', { name: 'Loading calendar view' })).toBeVisible();
       },
       { baseURL },
@@ -21,17 +23,18 @@ test.describe('Calendar page (/calendar/[date])', () => {
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
   });
 
-  test('switching to month keeps the navigation instant', async ({ page }) => {
+  test('switching to month reveals the calendar fallbacks immediately', async ({ page }) => {
     await page.goto('/calendar/2026-08-10');
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
 
     await instant(page, async () => {
       await page.getByRole('link', { name: 'Month', exact: true }).click();
       await page.waitForURL(url => url.searchParams.get('view') === 'month');
-      await expect(page.getByRole('link', { name: 'Month', exact: true })).toHaveAttribute('aria-current', 'page');
-      await expect(page.getByText('Focus time').first()).toBeVisible();
+      await expect(page.getByRole('status', { name: 'Loading calendar controls' })).toBeVisible();
+      await expect(page.getByRole('status', { name: 'Loading calendar view' })).toBeVisible();
     });
 
+    await expect(page.getByRole('link', { name: 'Month', exact: true })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByText('Focus time').first()).toBeVisible();
   });
 

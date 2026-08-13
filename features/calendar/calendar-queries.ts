@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { DEMO_DELAYS, isSlowEnabled } from '@/components/demo/demo-slow';
+import { isSlowEnabled } from '@/components/demo/demo-slow';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { delay } from '@/lib/utils';
@@ -65,7 +65,7 @@ async function getCalendarsForUser(userId: string, slow: boolean): Promise<Calen
   cacheLife('hours');
   cacheTag(calendarCache.calendarsTag);
 
-  await delay(DEMO_DELAYS.calendarList, slow);
+  await delay(400, slow);
   const rows = await prisma.calendar.findMany({
     orderBy: [{ isDemo: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }],
     where: { OR: [{ userId }, { userId: null }] },
@@ -107,7 +107,7 @@ async function getCalendarRangeForUser(
   cacheLife('hours');
   cacheTag(calendarCache.tag, rangeTag);
 
-  await delay(DEMO_DELAYS.calendarEvents, slow);
+  await delay(1100, slow);
   const eventDays = includeFollowingDay ? [...days, shiftDay(days.at(-1)!, 1)] : days;
   const rangeEnd = new Date(`${eventDays.at(-1)}T00:00:00.000Z`);
   rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
