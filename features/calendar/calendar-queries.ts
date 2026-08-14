@@ -7,6 +7,7 @@ import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { delay } from '@/lib/utils';
 import { dateKey, getMonthDays, getWeekDays, isDateKey, shiftDay } from './calendar-utils';
+import { matchesRecurrence } from './utils/recurrence';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarRange } from './types/calendar';
 
 type StoredEvent = {
@@ -33,7 +34,6 @@ type BookingMatch = {
   startsAt: Date;
 };
 
-const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const DEMO_CALENDAR_COLORS: Record<string, CalendarColor> = {
   Personal: 'cyan',
   'Side project': 'violet',
@@ -180,11 +180,6 @@ function expandEvent(event: StoredEvent, days: string[], bookingMatches: Set<str
         ]
       : [],
   );
-}
-
-function matchesRecurrence(recurrence: string, day: string) {
-  const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
-  return recurrence === 'weekday' ? weekday >= 1 && weekday <= 5 : recurrence === WEEKDAY_NAMES[weekday];
 }
 
 function toCalendarEvent(event: StoredEvent, day: string, bookingMatches: Set<string>): CalendarEvent {
