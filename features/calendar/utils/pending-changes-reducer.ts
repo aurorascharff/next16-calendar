@@ -1,4 +1,4 @@
-import type { CalendarEvent } from '../types/calendar';
+import type { CalendarEvent, EventChange } from '../types/calendar';
 
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
@@ -45,16 +45,6 @@ export function expandOptimisticEvent(event: CalendarEvent, days: string[]) {
       recurring: true,
     }));
 }
-
-export type EventChange =
-  | { event: CalendarEvent; type: 'create' }
-  | { day: string; id: string; sourceId: string; start: string; type: 'move' }
-  | { sourceId: string; type: 'delete' }
-  | { duration: number; sourceId: string; type: 'resize' }
-  | {
-      event: Pick<CalendarEvent, 'allDay' | 'description' | 'duration' | 'sourceId' | 'start' | 'title'>;
-      type: 'update';
-    };
 
 export function pendingChangesReducer(changes: EventChange[], change: EventChange): EventChange[] {
   return [...changes, change];

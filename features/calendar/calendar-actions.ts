@@ -1,11 +1,11 @@
 'use server';
 
 import { updateTag } from 'next/cache';
+import type { EventChange } from '@/features/calendar/types/calendar';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { isDateKey } from './calendar-utils';
 import { isCalendarColor } from './utils/colors';
-import type { EventChange } from './utils/pending-changes-reducer';
 
 type MoveEventInput = {
   day: string;

@@ -12,9 +12,8 @@ import {
 } from 'react';
 import { toast } from 'sonner';
 import { saveEventChange } from '@/features/calendar/calendar-actions';
-import type { CalendarEvent } from '@/features/calendar/types/calendar';
+import type { CalendarEvent, EventChange } from '@/features/calendar/types/calendar';
 import { applyEventChanges, pendingChangesReducer } from '@/features/calendar/utils/pending-changes-reducer';
-import type { EventChange } from '@/features/calendar/utils/pending-changes-reducer';
 
 type CalendarEventsStateContextValue = {
   getEvents: (events: CalendarEvent[], days: string[]) => CalendarEvent[];
