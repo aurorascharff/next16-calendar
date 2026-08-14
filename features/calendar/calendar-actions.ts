@@ -4,8 +4,8 @@ import { updateTag } from 'next/cache';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { dateKey, getWeekDays, isDateKey } from './calendar-utils';
-import type { EventChange } from './utils/pending-changes-reducer';
 import { isCalendarColor } from './utils/colors';
+import type { EventChange } from './utils/pending-changes-reducer';
 
 type MoveEventInput = {
   day: string;
