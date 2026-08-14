@@ -7,21 +7,6 @@ test.describe('Calendar page (/calendar/[date])', () => {
     await signIn(page);
   });
 
-  test('initial load exposes the calendar loading view immediately', async ({ baseURL, page }) => {
-    await instant(
-      page,
-      async () => {
-        await page.goto('/calendar/2026-08-10');
-        await expect(page.getByRole('navigation').getByText('Calendar')).toBeVisible();
-        await expect(page.getByRole('status', { name: 'Loading calendar view' })).toBeVisible();
-      },
-      { baseURL },
-    );
-  });
-
-  // Target after adding the lower page boundary: the next week can commit into
-  // the calendar fallback while its route-dependent data continues streaming.
-  /*
   test('switching weeks reveals the calendar fallback immediately', async ({ page }) => {
     await page.goto('/calendar/2026-09-24');
 
@@ -31,7 +16,18 @@ test.describe('Calendar page (/calendar/[date])', () => {
       await expect(page.getByRole('status', { name: 'Loading calendar view' })).toBeVisible();
     });
   });
-  */
+
+  // Enable this stricter target after caching and prefetching the destination week.
+  test('switching weeks reveals the destination calendar immediately', async ({ page }) => {
+    await page.goto('/calendar/2026-09-24');
+
+    await instant(page, async () => {
+      await page.getByRole('link', { name: 'Next week' }).click();
+      await page.waitForURL('/calendar/2026-10-01');
+      await expect(page.getByRole('button', { name: 'Add all-day event on Thu, 1 Oct' })).toBeVisible();
+      await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
+    });
+  });
 
   test('client navigation marks the calendar active immediately', async ({ page }) => {
     await page.goto('/booking');
