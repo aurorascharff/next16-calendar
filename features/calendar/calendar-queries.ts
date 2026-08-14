@@ -1,18 +1,11 @@
 import 'server-only';
 
-import { cacheLife } from 'next/cache';
-import { cacheTag } from 'next/dist/server/use-cache/cache-tag';
+import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { dateKey, getMonthDays, getWeekDays, isDateKey, shiftDay } from './calendar-utils';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarRange } from './types/calendar';
-
-export const calendarCache = {
-  calendarsTag: 'calendars',
-  tag: 'calendar-events',
-  weekTag: (start: string) => `calendar-week:${start}`,
-};
 
 type StoredEvent = {
   allDay: boolean;
@@ -62,7 +55,7 @@ export function getCalendarDate(date: string) {
 async function getCalendarsForUser(userId: string): Promise<Calendar[]> {
   'use cache';
   cacheLife('hours');
-  cacheTag(calendarCache.calendarsTag);
+  cacheTag('calendars');
 
   const [, rows] = await Promise.all([
     prisma.$queryRaw`SELECT pg_sleep(0.4) IS NULL AS slept`,

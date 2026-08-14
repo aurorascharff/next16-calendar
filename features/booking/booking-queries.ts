@@ -2,7 +2,6 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { calendarCache } from '@/features/calendar/calendar-queries';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
@@ -28,14 +27,10 @@ function occursOn(event: { day: Date; recurrence: string | null }, day: string) 
 
 export type BookingSlot = { reason: 'booked' | 'calendar' | null; taken: boolean; time: string };
 
-export const bookingCache = {
-  tag: (handle: string) => `booking:${handle}`,
-};
-
 export async function getPublicBookingMetadata(handle: string) {
   'use cache';
   cacheLife('hours');
-  cacheTag(bookingCache.tag(handle));
+  cacheTag(`booking:${handle}`);
 
   return prisma.bookingPage.findFirst({
     select: { active: true, duration: true, title: true },
@@ -50,7 +45,7 @@ export async function getBookingAvailability(handle: string, date: string) {
 async function getBookingAvailabilityCached(handle: string, date: string) {
   'use cache';
   cacheLife({ stale: 30 });
-  cacheTag(bookingCache.tag(handle));
+  cacheTag(`booking:${handle}`);
 
   await delay(900);
   const bookingPage = await prisma.bookingPage.findUnique({
@@ -128,7 +123,7 @@ export async function getMyBookingProfile() {
 async function getMyBookingProfileForUser(handle: string) {
   'use cache';
   cacheLife('hours');
-  cacheTag(bookingCache.tag(handle), calendarCache.calendarsTag);
+  cacheTag(`booking:${handle}`, 'calendars');
 
   await delay(650);
   const bookingPage = await prisma.bookingPage.findUnique({ where: { handle } });
@@ -159,7 +154,7 @@ async function getMyBookingProfileForUser(handle: string) {
 async function getWritableCalendars(userId: string) {
   'use cache';
   cacheLife('hours');
-  cacheTag(calendarCache.calendarsTag);
+  cacheTag('calendars');
 
   return prisma.calendar.findMany({
     orderBy: { createdAt: 'desc' },
@@ -176,7 +171,7 @@ export async function getMyBookingSettings() {
 async function getMyBookingSettingsForUser(userId: string, handle: string) {
   'use cache';
   cacheLife('hours');
-  cacheTag(bookingCache.tag(handle), calendarCache.calendarsTag);
+  cacheTag(`booking:${handle}`, 'calendars');
 
   await delay(1100);
   const calendars = await getWritableCalendars(userId);

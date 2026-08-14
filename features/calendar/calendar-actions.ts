@@ -1,7 +1,6 @@
 'use server';
 
 import { updateTag } from 'next/cache';
-import { bookingCache } from '@/features/booking/booking-queries';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { isDateKey } from './calendar-utils';
@@ -41,14 +40,6 @@ async function findEvent(id: string) {
   return prisma.calendarEvent.findUnique({ where: { id } });
 }
 
-function invalidateWeek(_day: Date | string, handle: string) {
-  updateTag(bookingCache.tag(handle));
-}
-
-function invalidateCalendars(handle: string) {
-  updateTag(bookingCache.tag(handle));
-}
-
 function validTimedDuration(duration: number) {
   return duration >= 15 && duration <= 24 * 60;
 }
@@ -69,19 +60,17 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
       data.recurrence = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
     }
     const updated = await prisma.calendarEvent.update({ data, where: { id: sourceId } });
-    invalidateWeek(event.day, user.handle);
+    updateTag(`booking:${user.handle}`);
     return { data: updated };
   }
 
   if (!isDateKey(day)) return { error: 'Choose a valid date.' };
 
-  const previousDay = event.day;
   const updated = await prisma.calendarEvent.update({
     data: { day: new Date(`${day}T00:00:00.000Z`), start: eventStart },
     where: { id: sourceId },
   });
-  invalidateWeek(previousDay, user.handle);
-  invalidateWeek(day, user.handle);
+  updateTag(`booking:${user.handle}`);
   return { data: updated };
 }
 
@@ -123,7 +112,7 @@ export async function createEvent(input: CreateEventInput) {
       userId: user.id,
     },
   });
-  invalidateWeek(input.day, user.handle);
+  updateTag(`booking:${user.handle}`);
   return { data: event };
 }
 
@@ -151,7 +140,7 @@ export async function updateEvent(input: UpdateEventInput) {
     },
     where: { id: input.eventId },
   });
-  invalidateWeek(event.day, user.handle);
+  updateTag(`booking:${user.handle}`);
   return { data: updated };
 }
 
@@ -166,7 +155,7 @@ export async function resizeEvent({ duration, sourceId }: { duration: number; so
   if (event.allDay) return { error: 'All-day events do not resize.' };
 
   const updated = await prisma.calendarEvent.update({ data: { duration }, where: { id: sourceId } });
-  invalidateWeek(event.day, user.handle);
+  updateTag(`booking:${user.handle}`);
   return { data: updated };
 }
 
@@ -178,7 +167,7 @@ export async function deleteEvent(eventId: string) {
   if (event.userId !== user.id) return { error: 'This event is not available.' };
 
   await prisma.calendarEvent.delete({ where: { id: eventId } });
-  invalidateWeek(event.day, user.handle);
+  updateTag(`booking:${user.handle}`);
   return { data: { id: eventId } };
 }
 
@@ -190,7 +179,7 @@ export async function createCalendar({ color, name }: { color: string; name: str
   const user = await verifyAuth();
 
   const calendar = await prisma.calendar.create({ data: { color, name: trimmed, userId: user.id } });
-  invalidateCalendars(user.handle);
+  updateTag(`booking:${user.handle}`);
   return { data: calendar };
 }
 
@@ -206,7 +195,7 @@ export async function updateCalendar({ color, id, name }: { color: string; id: s
   if (calendar.userId !== user.id) return { error: 'This calendar is not available.' };
 
   const updated = await prisma.calendar.update({ data: { color, name: trimmed }, where: { id } });
-  invalidateCalendars(user.handle);
+  updateTag(`booking:${user.handle}`);
   return { data: updated };
 }
 
@@ -218,6 +207,6 @@ export async function deleteCalendar(id: string) {
   if (calendar.userId !== user.id) return { error: 'This calendar is not available.' };
 
   await prisma.calendar.delete({ where: { id } });
-  invalidateCalendars(user.handle);
+  updateTag(`booking:${user.handle}`);
   return { data: { id } };
 }
