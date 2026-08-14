@@ -1,7 +1,6 @@
 import 'server-only';
 
 import { notFound } from 'next/navigation';
-import { isSlowEnabled } from '@/components/demo/demo-slow';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { dateKey, getMonthDays, getWeekDays, isDateKey, shiftDay } from './calendar-utils';
@@ -50,7 +49,7 @@ function calendarColor(calendar: { color: string; isDemo: boolean; name: string 
 
 export async function getCalendars(): Promise<Calendar[]> {
   const { id: userId } = await verifyAuth();
-  return getCalendarsForUser(userId, await isSlowEnabled());
+  return getCalendarsForUser(userId);
 }
 
 export function getCalendarDate(date: string) {
@@ -58,9 +57,9 @@ export function getCalendarDate(date: string) {
   return date;
 }
 
-async function getCalendarsForUser(userId: string, slow: boolean): Promise<Calendar[]> {
+async function getCalendarsForUser(userId: string): Promise<Calendar[]> {
   const [, rows] = await Promise.all([
-    slow ? prisma.$queryRaw`SELECT pg_sleep(0.4) IS NULL AS slept` : undefined,
+    prisma.$queryRaw`SELECT pg_sleep(0.4) IS NULL AS slept`,
     prisma.calendar.findMany({
       orderBy: [{ isDemo: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }],
       where: { OR: [{ userId }, { userId: null }] },
@@ -79,7 +78,7 @@ export async function getCalendarWeek(date: string): Promise<CalendarRange> {
 
   const { id: userId } = await verifyAuth();
   const days = getWeekDays(date);
-  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), true);
+  return getCalendarRangeForUser(days, userId, true);
 }
 
 export async function getCalendarMonth(date: string): Promise<CalendarRange> {
@@ -87,13 +86,12 @@ export async function getCalendarMonth(date: string): Promise<CalendarRange> {
 
   const { id: userId } = await verifyAuth();
   const days = getMonthDays(date);
-  return getCalendarRangeForUser(days, userId, await isSlowEnabled());
+  return getCalendarRangeForUser(days, userId);
 }
 
 async function getCalendarRangeForUser(
   days: string[],
   userId: string,
-  slow: boolean,
   includeFollowingDay = false,
 ): Promise<CalendarRange> {
   const start = days[0];
@@ -101,7 +99,7 @@ async function getCalendarRangeForUser(
   const rangeEnd = new Date(`${eventDays.at(-1)}T00:00:00.000Z`);
   rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
   const [, rows, bookingRows] = await Promise.all([
-    slow ? prisma.$queryRaw`SELECT pg_sleep(1.1) IS NULL AS slept` : undefined,
+    prisma.$queryRaw`SELECT pg_sleep(1.1) IS NULL AS slept`,
     prisma.calendarEvent.findMany({
       include: { calendar: { select: { color: true, isDemo: true, name: true } } },
       orderBy: [{ start: 'asc' }, { title: 'asc' }],
