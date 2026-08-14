@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cacheLife } from 'next/cache';
+import { cacheTag } from 'next/dist/server/use-cache/cache-tag';
 import { notFound } from 'next/navigation';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
@@ -58,6 +60,10 @@ export function getCalendarDate(date: string) {
 }
 
 async function getCalendarsForUser(userId: string): Promise<Calendar[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(calendarCache.calendarsTag);
+
   const [, rows] = await Promise.all([
     prisma.$queryRaw`SELECT pg_sleep(0.4) IS NULL AS slept`,
     prisma.calendar.findMany({
