@@ -5,6 +5,7 @@ import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { isDateKey } from './calendar-utils';
 import { isCalendarColor } from './utils/colors';
+import type { EventChange } from './utils/pending-changes-reducer';
 
 type MoveEventInput = {
   day: string;
@@ -38,6 +39,37 @@ const RECURRENCE_VALUES = new Set(['weekday', ...WEEKDAY_NAMES]);
 
 async function findEvent(id: string) {
   return prisma.calendarEvent.findUnique({ where: { id } });
+}
+
+export async function saveEventChange(change: EventChange) {
+  switch (change.type) {
+    case 'create':
+      return createEvent({
+        allDay: change.event.allDay,
+        calendarId: change.event.calendarId || undefined,
+        day: change.event.day,
+        description: change.event.description ?? undefined,
+        duration: change.event.duration,
+        recurrence: change.event.recurrence,
+        start: change.event.start,
+        title: change.event.title,
+      });
+    case 'delete':
+      return deleteEvent(change.sourceId);
+    case 'move':
+      return moveEvent({ day: change.day, sourceId: change.sourceId, start: change.start });
+    case 'resize':
+      return resizeEvent({ duration: change.duration, sourceId: change.sourceId });
+    case 'update':
+      return updateEvent({
+        allDay: change.event.allDay,
+        description: change.event.description ?? undefined,
+        duration: change.event.duration,
+        eventId: change.event.sourceId,
+        start: change.event.start,
+        title: change.event.title,
+      });
+  }
 }
 
 function validTimedDuration(duration: number) {

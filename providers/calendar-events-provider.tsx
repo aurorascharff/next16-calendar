@@ -11,13 +11,9 @@ import {
   type ReactNode,
 } from 'react';
 import { toast } from 'sonner';
-import { createEvent, deleteEvent, moveEvent, resizeEvent, updateEvent } from '@/features/calendar/calendar-actions';
+import { saveEventChange } from '@/features/calendar/calendar-actions';
 import type { CalendarEvent } from '@/features/calendar/types/calendar';
-import {
-  applyEventChanges,
-  noPendingChanges,
-  pendingChangesReducer,
-} from '@/features/calendar/utils/pending-changes-reducer';
+import { applyEventChanges, pendingChangesReducer } from '@/features/calendar/utils/pending-changes-reducer';
 import type { EventChange } from '@/features/calendar/utils/pending-changes-reducer';
 
 type CalendarEventsStateContextValue = {
@@ -30,53 +26,18 @@ type CalendarEventsDispatchContextValue = (change: EventChange) => void;
 const CalendarEventsStateContext = createContext<CalendarEventsStateContextValue | null>(null);
 const CalendarEventsDispatchContext = createContext<CalendarEventsDispatchContextValue | null>(null);
 
-function save(change: EventChange) {
-  switch (change.type) {
-    case 'create':
-      return createEvent({
-        allDay: change.event.allDay,
-        calendarId: change.event.calendarId || undefined,
-        day: change.event.day,
-        description: change.event.description ?? undefined,
-        duration: change.event.duration,
-        recurrence: change.event.recurrence,
-        start: change.event.start,
-        title: change.event.title,
-      });
-    case 'delete':
-      return deleteEvent(change.sourceId);
-    case 'move':
-      return moveEvent({ day: change.day, sourceId: change.sourceId, start: change.start });
-    case 'resize':
-      return resizeEvent({ duration: change.duration, sourceId: change.sourceId });
-    case 'update':
-      return updateEvent({
-        allDay: change.event.allDay,
-        description: change.event.description ?? undefined,
-        duration: change.event.duration,
-        eventId: change.event.sourceId,
-        start: change.event.start,
-        title: change.event.title,
-      });
-  }
-}
-
-async function saveChange(_pending: EventChange[], change: EventChange): Promise<EventChange[]> {
-  const result = await save(change);
-  if (result.error) {
-    toast.error(result.error);
-  } else if (change.type === 'delete') {
-    toast.success('Event removed.');
-  } else if (change.type === 'update') {
-    toast.success('Event updated.');
-  }
-
-  return noPendingChanges;
-}
-
 export function CalendarEventsProvider({ children }: { children: ReactNode }) {
-  const [changes, dispatch, isPending] = useActionState(saveChange, noPendingChanges);
-  const [optimisticChanges, addOptimisticChange] = useOptimistic(changes, pendingChangesReducer);
+  const [, dispatch, isPending] = useActionState(async (_: void, change: EventChange) => {
+    const result = await saveEventChange(change);
+    if (result.error) {
+      toast.error(result.error);
+    } else if (change.type === 'delete') {
+      toast.success('Event removed.');
+    } else if (change.type === 'update') {
+      toast.success('Event updated.');
+    }
+  }, undefined);
+  const [optimisticChanges, addOptimisticChange] = useOptimistic([], pendingChangesReducer);
 
   const mutate = useCallback(
     (change: EventChange) => {

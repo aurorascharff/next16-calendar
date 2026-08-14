@@ -56,8 +56,6 @@ export type EventChange =
       type: 'update';
     };
 
-export const noPendingChanges: EventChange[] = [];
-
 export function pendingChangesReducer(changes: EventChange[], change: EventChange): EventChange[] {
   return [...changes, change];
 }
