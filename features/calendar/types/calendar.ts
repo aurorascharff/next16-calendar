@@ -36,6 +36,16 @@ export type CalendarEvent = {
   title: string;
 };
 
+export type EventChange =
+  | { event: CalendarEvent; type: 'create' }
+  | { day: string; id: string; sourceId: string; start: string; type: 'move' }
+  | { sourceId: string; type: 'delete' }
+  | { duration: number; sourceId: string; type: 'resize' }
+  | {
+      event: Pick<CalendarEvent, 'allDay' | 'description' | 'duration' | 'sourceId' | 'start' | 'title'>;
+      type: 'update';
+    };
+
 export type CalendarRange = {
   days: string[];
   events: CalendarEvent[];
