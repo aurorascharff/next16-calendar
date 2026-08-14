@@ -1,7 +1,6 @@
 'use server';
 
 import { updateTag } from 'next/cache';
-import { bookingCache } from '@/features/booking/booking-queries';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { dateKey, getWeekDays, isDateKey } from './calendar-utils';

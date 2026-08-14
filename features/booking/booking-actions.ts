@@ -2,11 +2,9 @@
 
 import { updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { calendarCache } from '@/features/calendar/calendar-queries';
 import { dateKey, getWeekDays, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
-import { bookingCache } from './booking-queries';
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -144,10 +142,10 @@ export async function bookSlot({
     return { error: 'That time was just booked. Choose another slot.' };
   }
 
-  updateTag(bookingCache.tag(handle));
-  updateTag(calendarCache.calendarsTag);
-  updateTag(calendarCache.tag);
-  updateTag(calendarCache.weekTag(getWeekDays(day)[0]));
+  updateTag(`booking:${handle}`);
+  updateTag('calendars');
+  updateTag('calendar-events');
+  updateTag(`calendar-week:${getWeekDays(day)[0]}`);
   return { data: { slot, startsAt } };
 }
 
@@ -196,6 +194,6 @@ export async function updateBookingAvailability(input: AvailabilityInput) {
     where: { handle: user.handle },
   });
 
-  updateTag(bookingCache.tag(user.handle));
+  updateTag(`booking:${user.handle}`);
   return { data: page };
 }
