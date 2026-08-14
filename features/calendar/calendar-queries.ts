@@ -7,7 +7,7 @@ import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { delay } from '@/lib/utils';
 import { dateKey, getMonthDays, getWeekDays, isDateKey, shiftDay } from './calendar-utils';
-import { matchesRecurrence } from './utils/recurrence';
+import { matchesRecurrence, occurrenceId } from './utils/recurrence';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarRange } from './types/calendar';
 
 type StoredEvent = {
@@ -174,7 +174,7 @@ function expandEvent(event: StoredEvent, days: string[], bookingMatches: Set<str
       ? [
           {
             ...toCalendarEvent(event, day, bookingMatches),
-            id: `${event.id}:${day}`,
+            id: occurrenceId(event.id, day),
             recurring: Boolean(event.recurrence),
           },
         ]

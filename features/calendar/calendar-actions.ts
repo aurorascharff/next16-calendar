@@ -6,6 +6,7 @@ import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { dateKey, getWeekDays, isDateKey } from './calendar-utils';
 import { isCalendarColor } from './utils/colors';
+import { recurrenceAfterMove, WEEKDAY_NAMES } from './utils/recurrence';
 
 type MoveEventInput = {
   day: string;
@@ -34,7 +35,6 @@ type UpdateEventInput = {
 };
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
-const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const RECURRENCE_VALUES = new Set(['weekday', ...WEEKDAY_NAMES]);
 
 async function findEvent(id: string) {
@@ -89,7 +89,7 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
   if (event.recurrence) {
     const data: { recurrence?: string; start: string } = { start: eventStart };
     if (event.recurrence !== 'weekday' && isDateKey(day)) {
-      data.recurrence = WEEKDAY_NAMES[new Date(`${day}T00:00:00.000Z`).getUTCDay()];
+      data.recurrence = recurrenceAfterMove(event.recurrence, day);
     }
     const updated = await prisma.calendarEvent.update({ data, where: { id: sourceId } });
     updateTag('calendar-events');

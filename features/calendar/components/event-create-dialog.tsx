@@ -12,13 +12,13 @@ import { cn } from '@/lib/utils';
 import { useCalendarEventsDispatch } from '@/providers/calendar-events-provider';
 import { formatDay } from '../calendar-utils';
 import { colorStyle } from '../utils/colors';
+import { weekdayName } from '../utils/recurrence';
 import { EventFields } from './event-fields';
 import type { Calendar, CalendarColor, CalendarEvent } from '../types/calendar';
 
 const fieldLabel = 'text-muted mb-1.5 block text-xs font-medium';
 const controlHeight = 'h-12';
 
-const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const weekdayLabel = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'long' });
 
 type FormValues = {
@@ -105,7 +105,7 @@ export function EventCreateDialog({
   const selectedCalendarId = defaultCalendarId ?? calendarOptions[0]?.id;
   const [selectedDay, setSelectedDay] = useState(day);
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const weekday = WEEKDAY_NAMES[new Date(`${selectedDay}T00:00:00.000Z`).getUTCDay()];
+  const weekday = weekdayName(selectedDay);
 
   function submitAction(formData: FormData) {
     const eventDay = String(formData.get('day') ?? selectedDay);
@@ -120,7 +120,7 @@ export function EventCreateDialog({
       start: String(formData.get('start')),
       title: String(formData.get('title')),
     };
-    const eventWeekday = WEEKDAY_NAMES[new Date(`${eventDay}T00:00:00.000Z`).getUTCDay()];
+    const eventWeekday = weekdayName(eventDay);
     const recurrence = repeat === 'weekday' ? 'weekday' : repeat === 'weekly' ? eventWeekday : null;
     if (values.title.trim()) {
       const tempId = optimisticEventId(eventDay, values);

@@ -3,11 +3,11 @@
 import { updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { dateKey, getWeekDays, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
+import { matchesRecurrence } from '@/features/calendar/utils/recurrence';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
-const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 type AvailabilityInput = {
   active: boolean;
@@ -24,9 +24,7 @@ export type BookSlotState = {
 
 function occursOn(event: { day: Date; recurrence: string | null }, day: string) {
   if (!event.recurrence) return dateKey(event.day) === day;
-  const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
-  if (event.recurrence === 'weekday') return weekday >= 1 && weekday <= 5;
-  return event.recurrence === WEEKDAY_NAMES[weekday];
+  return matchesRecurrence(event.recurrence, day);
 }
 
 export async function bookSlotAction(_state: BookSlotState, formData: FormData): Promise<BookSlotState> {

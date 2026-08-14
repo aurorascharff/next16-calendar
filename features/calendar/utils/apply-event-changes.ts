@@ -1,5 +1,5 @@
 import { eventChangeReducer } from './event-change-reducer';
-import { matchesRecurrence, WEEKDAY_NAMES } from './recurrence';
+import { matchesRecurrence, occurrenceId, recurrenceAfterMove } from './recurrence';
 import type { CalendarEvent, EventChange } from '../types/calendar';
 
 export function applyEventChanges(events: CalendarEvent[], changes: EventChange[], days: string[]) {
@@ -18,19 +18,21 @@ function moveRecurringEvent(events: CalendarEvent[], change: Extract<EventChange
   const event = events.find(candidate => candidate.id === change.id);
   if (!event?.recurrence) return eventChangeReducer(events, change);
 
-  if (event.recurrence === 'weekday') {
+  const recurrence = recurrenceAfterMove(event.recurrence, change.day);
+
+  // A weekday pattern keeps its days, so only the time moves.
+  if (recurrence === 'weekday') {
     return events.map(candidate =>
       candidate.sourceId === change.sourceId ? { ...candidate, start: change.start } : candidate,
     );
   }
 
-  const recurrence = WEEKDAY_NAMES[new Date(`${change.day}T00:00:00.000Z`).getUTCDay()];
   const occurrences = days
     .filter(day => matchesRecurrence(recurrence, day))
     .map(day => ({
       ...event,
       day,
-      id: `${change.sourceId}:${day}`,
+      id: occurrenceId(change.sourceId, day),
       recurrence,
       recurring: true,
       start: change.start,
@@ -47,7 +49,7 @@ function expandOptimisticEvent(event: CalendarEvent, days: string[]) {
     .map(day => ({
       ...event,
       day,
-      id: `${event.sourceId}:${day}`,
+      id: occurrenceId(event.sourceId, day),
       recurring: true,
     }));
 }

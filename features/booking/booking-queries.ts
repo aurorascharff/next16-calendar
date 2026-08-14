@@ -4,11 +4,10 @@ import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { isSlowEnabled } from '@/components/demo/demo-slow';
 import { dateKey, isDateKey, timeToMinutes } from '@/features/calendar/calendar-utils';
+import { matchesRecurrence } from '@/features/calendar/utils/recurrence';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { delay } from '@/lib/utils';
-
-const WEEKDAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 function slotsBetween(startTime: string, endTime: string, duration: number) {
   const start = timeToMinutes(startTime);
@@ -21,9 +20,7 @@ function slotsBetween(startTime: string, endTime: string, duration: number) {
 
 function occursOn(event: { day: Date; recurrence: string | null }, day: string) {
   if (!event.recurrence) return dateKey(event.day) === day;
-  const weekday = new Date(`${day}T00:00:00.000Z`).getUTCDay();
-  if (event.recurrence === 'weekday') return weekday >= 1 && weekday <= 5;
-  return event.recurrence === WEEKDAY_NAMES[weekday];
+  return matchesRecurrence(event.recurrence, day);
 }
 
 export type BookingSlot = { reason: 'booked' | 'calendar' | null; taken: boolean; time: string };
