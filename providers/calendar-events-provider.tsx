@@ -13,7 +13,7 @@ import {
 import { toast } from 'sonner';
 import { saveEventChange } from '@/features/calendar/calendar-actions';
 import type { CalendarEvent, EventChange } from '@/features/calendar/types/calendar';
-import { applyEventChanges, pendingChangesReducer } from '@/features/calendar/utils/pending-changes-reducer';
+import { applyEventChanges, pendingChangesReducer } from '@/features/calendar/utils/event-change-reducers';
 
 type CalendarEventsStateContextValue = {
   getEvents: (events: CalendarEvent[], days: string[]) => CalendarEvent[];

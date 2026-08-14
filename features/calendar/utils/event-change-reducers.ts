@@ -10,7 +10,7 @@ function matchesRecurrence(recurrence: string | null | undefined, day: string) {
 
 function moveRecurringEvent(events: CalendarEvent[], change: Extract<EventChange, { type: 'move' }>, days: string[]) {
   const event = events.find(candidate => candidate.id === change.id);
-  if (!event?.recurrence) return applyEventChange(events, change);
+  if (!event?.recurrence) return eventChangeReducer(events, change);
 
   if (event.recurrence === 'weekday') {
     return events.map(candidate =>
@@ -50,7 +50,7 @@ export function pendingChangesReducer(changes: EventChange[], change: EventChang
   return [...changes, change];
 }
 
-export function applyEventChange(events: CalendarEvent[], change: EventChange) {
+export function eventChangeReducer(events: CalendarEvent[], change: EventChange) {
   switch (change.type) {
     case 'create':
       return [change.event, ...events.filter(event => event.id !== change.event.id)];
@@ -70,10 +70,10 @@ export function applyEventChange(events: CalendarEvent[], change: EventChange) {
 export function applyEventChanges(events: CalendarEvent[], changes: EventChange[], days: string[]) {
   return changes.reduce((current, change) => {
     if (change.type === 'move') return moveRecurringEvent(current, change, days);
-    if (change.type !== 'create') return applyEventChange(current, change);
+    if (change.type !== 'create') return eventChangeReducer(current, change);
 
     return expandOptimisticEvent(change.event, days).reduce(
-      (created, event) => applyEventChange(created, { event, type: 'create' }),
+      (created, event) => eventChangeReducer(created, { event, type: 'create' }),
       current,
     );
   }, events);
