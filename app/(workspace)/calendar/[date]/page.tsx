@@ -56,9 +56,7 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
             return calendarView === 'month' ? (
               <CalendarMonthScroll date={date}>
                 <CalendarMonthSurface date={date}>
-                  <Suspense fallback={<CalendarMonthEventsFallback />}>
-                    <CalendarMonth date={date} />
-                  </Suspense>
+                  <CalendarMonth date={date} />
                 </CalendarMonthSurface>
               </CalendarMonthScroll>
             ) : (
