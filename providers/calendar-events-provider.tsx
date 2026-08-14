@@ -11,52 +11,85 @@ import {
   type ReactNode,
 } from 'react';
 import { toast } from 'sonner';
-import { calendarEventsReducer } from '@/features/calendar/calendar-actions';
+import { createEvent, deleteEvent, moveEvent, resizeEvent, updateEvent } from '@/features/calendar/calendar-actions';
 import type { CalendarEvent } from '@/features/calendar/types/calendar';
 import {
-  applyEventActions,
-  applyOptimisticEventAction,
-  initialEventMutationState,
-} from '@/features/calendar/utils/event-optimistic-reducer';
-import type { EventAction } from '@/features/calendar/utils/event-optimistic-reducer';
-import type { EventMutationState } from '@/features/calendar/utils/event-optimistic-reducer';
+  applyEventChanges,
+  noPendingChanges,
+  pendingChangesReducer,
+} from '@/features/calendar/utils/pending-changes-reducer';
+import type { EventChange } from '@/features/calendar/utils/pending-changes-reducer';
 
 type CalendarEventsStateContextValue = {
   getEvents: (events: CalendarEvent[], days: string[]) => CalendarEvent[];
   isPending: boolean;
 };
 
-type CalendarEventsDispatchContextValue = (action: EventAction) => void;
+type CalendarEventsDispatchContextValue = (change: EventChange) => void;
 
 const CalendarEventsStateContext = createContext<CalendarEventsStateContextValue | null>(null);
 const CalendarEventsDispatchContext = createContext<CalendarEventsDispatchContextValue | null>(null);
 
-async function reduceCalendarEvents(state: EventMutationState, action: EventAction) {
-  const next = await calendarEventsReducer(state, action);
-  if (next.notification?.type === 'error') {
-    toast.error(next.notification.message);
-  } else if (next.notification) {
-    toast.success(next.notification.message);
+function save(change: EventChange) {
+  switch (change.type) {
+    case 'create':
+      return createEvent({
+        allDay: change.event.allDay,
+        calendarId: change.event.calendarId || undefined,
+        day: change.event.day,
+        description: change.event.description ?? undefined,
+        duration: change.event.duration,
+        recurrence: change.event.recurrence,
+        start: change.event.start,
+        title: change.event.title,
+      });
+    case 'delete':
+      return deleteEvent(change.sourceId);
+    case 'move':
+      return moveEvent({ day: change.day, sourceId: change.sourceId, start: change.start });
+    case 'resize':
+      return resizeEvent({ duration: change.duration, sourceId: change.sourceId });
+    case 'update':
+      return updateEvent({
+        allDay: change.event.allDay,
+        description: change.event.description ?? undefined,
+        duration: change.event.duration,
+        eventId: change.event.sourceId,
+        start: change.event.start,
+        title: change.event.title,
+      });
   }
-  return next;
+}
+
+async function saveChange(_pending: EventChange[], change: EventChange): Promise<EventChange[]> {
+  const result = await save(change);
+  if (result.error) {
+    toast.error(result.error);
+  } else if (change.type === 'delete') {
+    toast.success('Event removed.');
+  } else if (change.type === 'update') {
+    toast.success('Event updated.');
+  }
+
+  return noPendingChanges;
 }
 
 export function CalendarEventsProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch, isPending] = useActionState(reduceCalendarEvents, initialEventMutationState);
-  const [optimisticState, applyOptimisticAction] = useOptimistic(state, applyOptimisticEventAction);
+  const [changes, dispatch, isPending] = useActionState(saveChange, noPendingChanges);
+  const [optimisticChanges, addOptimisticChange] = useOptimistic(changes, pendingChangesReducer);
 
   const mutate = useCallback(
-    (action: EventAction) => {
+    (change: EventChange) => {
       startTransition(() => {
-        applyOptimisticAction(action);
-        dispatch(action);
+        addOptimisticChange(change);
+        dispatch(change);
       });
     },
-    [applyOptimisticAction, dispatch],
+    [addOptimisticChange, dispatch],
   );
   const getEvents = useCallback(
-    (events: CalendarEvent[], days: string[]) => applyEventActions(events, optimisticState.actions, days),
-    [optimisticState.actions],
+    (events: CalendarEvent[], days: string[]) => applyEventChanges(events, optimisticChanges, days),
+    [optimisticChanges],
   );
   const contextValue = useMemo(() => ({ getEvents, isPending }), [getEvents, isPending]);
 

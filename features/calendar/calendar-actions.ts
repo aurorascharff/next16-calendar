@@ -6,7 +6,6 @@ import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { isDateKey } from './calendar-utils';
 import { isCalendarColor } from './utils/colors';
-import type { EventAction, EventMutationState } from './utils/event-optimistic-reducer';
 
 type MoveEventInput = {
   day: string;
@@ -181,56 +180,6 @@ export async function deleteEvent(eventId: string) {
   await prisma.calendarEvent.delete({ where: { id: eventId } });
   invalidateWeek(event.day, user.handle);
   return { data: { id: eventId } };
-}
-
-export async function calendarEventsReducer(
-  _state: EventMutationState,
-  action: EventAction,
-): Promise<EventMutationState> {
-  const result = await saveEventAction(action);
-  if (result.error) {
-    return {
-      actions: [],
-      notification: { message: result.error, type: 'error' },
-    };
-  }
-
-  const message = action.type === 'delete' ? 'Event removed.' : action.type === 'update' ? 'Event updated.' : null;
-  return {
-    actions: [],
-    notification: message ? { message, type: 'success' } : null,
-  };
-}
-
-function saveEventAction(action: EventAction) {
-  switch (action.type) {
-    case 'create':
-      return createEvent({
-        allDay: action.event.allDay,
-        calendarId: action.event.calendarId || undefined,
-        day: action.event.day,
-        description: action.event.description ?? undefined,
-        duration: action.event.duration,
-        recurrence: action.event.recurrence,
-        start: action.event.start,
-        title: action.event.title,
-      });
-    case 'delete':
-      return deleteEvent(action.sourceId);
-    case 'move':
-      return moveEvent({ day: action.day, sourceId: action.sourceId, start: action.start });
-    case 'resize':
-      return resizeEvent({ duration: action.duration, sourceId: action.sourceId });
-    case 'update':
-      return updateEvent({
-        allDay: action.event.allDay,
-        description: action.event.description ?? undefined,
-        duration: action.event.duration,
-        eventId: action.event.sourceId,
-        start: action.event.start,
-        title: action.event.title,
-      });
-  }
 }
 
 export async function createCalendar({ color, name }: { color: string; name: string }) {
