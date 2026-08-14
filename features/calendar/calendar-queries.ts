@@ -9,12 +9,6 @@ import { delay } from '@/lib/utils';
 import { dateKey, getMonthDays, getWeekDays, isDateKey, shiftDay } from './calendar-utils';
 import type { Calendar, CalendarColor, CalendarEvent, CalendarRange } from './types/calendar';
 
-export const calendarCache = {
-  calendarsTag: 'calendars',
-  tag: 'calendar-events',
-  weekTag: (start: string) => `calendar-week:${start}`,
-};
-
 type StoredEvent = {
   allDay: boolean;
   calendar: { color: string; isDemo: boolean; name: string };
@@ -63,7 +57,7 @@ export function getCalendarDate(date: string) {
 async function getCalendarsForUser(userId: string, slow: boolean): Promise<Calendar[]> {
   'use cache';
   cacheLife('hours');
-  cacheTag(calendarCache.calendarsTag);
+  cacheTag('calendars');
 
   await delay(400, slow);
   const rows = await prisma.calendar.findMany({
@@ -83,7 +77,7 @@ export async function getCalendarWeek(date: string): Promise<CalendarRange> {
 
   const { id: userId } = await verifyAuth();
   const days = getWeekDays(date);
-  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), calendarCache.weekTag(days[0]), true);
+  return getCalendarRangeForUser(days, userId, await isSlowEnabled(), `calendar-week:${days[0]}`, true);
 }
 
 export async function getCalendarMonth(date: string): Promise<CalendarRange> {
@@ -105,7 +99,7 @@ async function getCalendarRangeForUser(
   const start = days[0];
 
   cacheLife('hours');
-  cacheTag(calendarCache.tag, rangeTag);
+  cacheTag('calendar-events', rangeTag);
 
   await delay(1100, slow);
   const eventDays = includeFollowingDay ? [...days, shiftDay(days.at(-1)!, 1)] : days;
