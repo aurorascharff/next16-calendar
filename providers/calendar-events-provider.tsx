@@ -4,9 +4,7 @@ import {
   createContext,
   startTransition,
   useActionState,
-  useCallback,
   useContext,
-  useMemo,
   useOptimistic,
   type ReactNode,
 } from 'react';
@@ -38,20 +36,18 @@ export function CalendarEventsProvider({ children }: { children: ReactNode }) {
   }, undefined);
   const [optimisticChanges, addOptimisticChange] = useOptimistic([], pendingChangesReducer);
 
-  const mutate = useCallback(
-    (change: EventChange) => {
-      startTransition(() => {
-        addOptimisticChange(change);
-        dispatch(change);
-      });
-    },
-    [addOptimisticChange, dispatch],
-  );
-  const getEvents = useCallback(
-    (events: CalendarEvent[], days: string[]) => applyEventChanges(events, optimisticChanges, days),
-    [optimisticChanges],
-  );
-  const contextValue = useMemo(() => ({ getEvents, isPending }), [getEvents, isPending]);
+  function mutate(change: EventChange) {
+    startTransition(() => {
+      addOptimisticChange(change);
+      dispatch(change);
+    });
+  }
+
+  function getEvents(events: CalendarEvent[], days: string[]) {
+    return applyEventChanges(events, optimisticChanges, days);
+  }
+
+  const contextValue = { getEvents, isPending };
 
   return (
     <CalendarEventsStateContext.Provider value={contextValue}>
