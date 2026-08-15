@@ -1,24 +1,17 @@
-import { matchesRecurrence, occurrenceId, recurrenceAfterMove } from './recurrence';
+'use client';
+
+import { useCalendarEvents } from '@/providers/calendar-events-provider';
+import { eventChangeReducer } from '../utils/event-change-reducer';
+import { matchesRecurrence, occurrenceId, recurrenceAfterMove } from '../utils/recurrence';
 import type { CalendarEvent, EventChange } from '../types/calendar';
 
-export function eventChangeReducer(events: CalendarEvent[], change: EventChange) {
-  switch (change.type) {
-    case 'create':
-      return [change.event, ...events.filter(event => event.id !== change.event.id)];
-    case 'delete':
-      return events.filter(event => event.sourceId !== change.sourceId);
-    case 'resize':
-      return events.map(event =>
-        event.sourceId === change.sourceId ? { ...event, duration: change.duration } : event,
-      );
-    case 'update':
-      return events.map(event => (event.sourceId === change.event.sourceId ? { ...event, ...change.event } : event));
-    case 'move':
-      return events.map(event => (event.id === change.id ? { ...event, day: change.day, start: change.start } : event));
-  }
+// The events from the server, with the changes whose saves are still running replayed over them.
+export function useOptimisticEvents(events: CalendarEvent[], days: string[]) {
+  const { pendingChanges } = useCalendarEvents();
+  return applyEventChanges(events, pendingChanges, days);
 }
 
-export function applyEventChanges(events: CalendarEvent[], changes: EventChange[], days: string[]) {
+function applyEventChanges(events: CalendarEvent[], changes: EventChange[], days: string[]) {
   return changes.reduce((current, change) => {
     if (change.type === 'move') return moveRecurringEvent(current, change, days);
     if (change.type !== 'create') return eventChangeReducer(current, change);

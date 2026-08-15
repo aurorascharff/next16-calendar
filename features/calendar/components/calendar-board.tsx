@@ -6,11 +6,10 @@ import { useState } from 'react';
 import { Crossfade } from '@/components/ui/crossfade';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { formatDay, formatDayParts, shiftDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { useTodayKey } from '../hooks/use-now';
-import { applyEventChanges } from '../utils/event-changes';
+import { useOptimisticEvents } from '../hooks/use-optimistic-events';
 import { GRID_HEIGHT, HOURS, START_MINUTES } from '../utils/grid';
 import { CalendarBoardHeader } from './calendar-board-header';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
@@ -28,8 +27,8 @@ export function CalendarBoard({
   days: string[];
   events: CalendarEvent[];
 }) {
-  const { pendingChanges } = useCalendarEvents();
   const eventDays = [...days, shiftDay(days.at(-1)!, 1)];
+  const optimisticEvents = useOptimisticEvents(events, eventDays);
   const {
     allDayEvents,
     createDraft,
@@ -48,7 +47,7 @@ export function CalendarBoard({
   } = useCalendarBoard({
     calendars,
     days,
-    events: applyEventChanges(events, pendingChanges, eventDays),
+    events: optimisticEvents,
   });
 
   const currentGridDay = todayKey && nowMinutes < START_MINUTES ? shiftDay(todayKey, -1) : todayKey;
