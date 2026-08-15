@@ -12,6 +12,7 @@ import { useCalendarVisibility } from '@/providers/calendar-visibility-provider'
 import { calendarHref, formatDay } from '../calendar-utils';
 import { useTodayKey } from '../hooks/use-now';
 import { chipStyle, colorStyle } from '../utils/colors';
+import { applyEventChanges } from '../utils/event-changes';
 import { EventCreateDialog } from './event-create-dialog';
 import { EventPopover } from './event-popover';
 import type { Calendar, CalendarEvent } from '../types/calendar';
@@ -75,9 +76,9 @@ export function CalendarMonthBoard({
   events: CalendarEvent[];
 }) {
   const { hidden } = useCalendarVisibility();
-  const { getEvents } = useCalendarEvents();
+  const { pendingChanges } = useCalendarEvents();
   const [selectedEvent, setSelectedEvent] = useState<{ anchorRect: DOMRect; event: CalendarEvent } | null>(null);
-  const visibleEvents = getEvents(events, days).filter(event => !hidden.has(event.calendarId));
+  const visibleEvents = applyEventChanges(events, pendingChanges, days).filter(event => !hidden.has(event.calendarId));
 
   return (
     <>

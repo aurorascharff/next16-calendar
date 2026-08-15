@@ -3,12 +3,11 @@
 import { createContext, startTransition, useActionState, useContext, useOptimistic, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { saveEventChange } from '@/features/calendar/calendar-actions';
-import type { CalendarEvent, EventChange } from '@/features/calendar/types/calendar';
-import { applyEventChanges } from '@/features/calendar/utils/apply-event-changes';
+import type { EventChange } from '@/features/calendar/types/calendar';
 
 type CalendarEventsStateContextValue = {
-  getEvents: (events: CalendarEvent[], days: string[]) => CalendarEvent[];
   isPending: boolean;
+  pendingChanges: EventChange[];
 };
 
 type CalendarEventsDispatchContextValue = (change: EventChange) => void;
@@ -39,11 +38,7 @@ export function CalendarEventsProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  function getEvents(events: CalendarEvent[], days: string[]) {
-    return applyEventChanges(events, pendingChanges, days);
-  }
-
-  const contextValue = { getEvents, isPending };
+  const contextValue = { isPending, pendingChanges };
 
   return (
     <CalendarEventsStateContext.Provider value={contextValue}>

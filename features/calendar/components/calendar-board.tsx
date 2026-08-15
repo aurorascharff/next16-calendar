@@ -10,6 +10,7 @@ import { useCalendarEvents } from '@/providers/calendar-events-provider';
 import { formatDay, formatDayParts, shiftDay } from '../calendar-utils';
 import { useCalendarBoard } from '../hooks/use-calendar-board';
 import { useTodayKey } from '../hooks/use-now';
+import { applyEventChanges } from '../utils/event-changes';
 import { GRID_HEIGHT, HOURS, START_MINUTES } from '../utils/grid';
 import { CalendarBoardHeader } from './calendar-board-header';
 import { CalendarEventLayer, DayColumn } from './calendar-day-column';
@@ -27,7 +28,7 @@ export function CalendarBoard({
   days: string[];
   events: CalendarEvent[];
 }) {
-  const { getEvents } = useCalendarEvents();
+  const { pendingChanges } = useCalendarEvents();
   const eventDays = [...days, shiftDay(days.at(-1)!, 1)];
   const {
     allDayEvents,
@@ -47,7 +48,7 @@ export function CalendarBoard({
   } = useCalendarBoard({
     calendars,
     days,
-    events: getEvents(events, eventDays),
+    events: applyEventChanges(events, pendingChanges, eventDays),
   });
 
   const currentGridDay = todayKey && nowMinutes < START_MINUTES ? shiftDay(todayKey, -1) : todayKey;
