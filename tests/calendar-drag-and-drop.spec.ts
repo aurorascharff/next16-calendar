@@ -1,10 +1,13 @@
 import { expect, test } from '@playwright/test';
+import { dateKey, formatDay, getWeekDays } from '../features/calendar/calendar-utils';
 import { signIn } from './helpers';
+
+const seededWeekMonday = getWeekDays(dateKey(new Date()))[0];
 
 test.describe('Calendar drag and resize', () => {
   test.beforeEach(async ({ page }) => {
     await signIn(page);
-    await page.goto('/calendar/2026-08-10');
+    await page.goto(`/calendar/${seededWeekMonday}`);
     await expect(page.getByTitle('Focus time · 08:30').first()).toBeVisible();
     await expect(page.getByTitle('Release planning · 11:00')).toHaveCount(1);
   });
@@ -17,7 +20,7 @@ test.describe('Calendar drag and resize', () => {
   });
 
   test('opening an all-day event focuses the title', async ({ page }) => {
-    await page.getByRole('button', { name: 'Add all-day event on Mon 10 Aug' }).click();
+    await page.getByRole('button', { name: `Add all-day event on ${formatDay(seededWeekMonday)}` }).click();
 
     const dialog = page.getByRole('dialog', { name: 'New event' });
     await expect(dialog.getByRole('textbox', { name: 'Title' })).toBeFocused();
