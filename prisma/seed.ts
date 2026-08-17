@@ -3,6 +3,10 @@ import { config } from 'dotenv';
 import { PrismaClient } from '../generated/prisma/client';
 import { normalizeDatabaseUrl } from '../lib/database-url';
 
+// The demo events below are authored against this Monday-start week; seeding shifts them
+// by whole weeks onto the current week so the calendar always opens on populated days.
+const anchorWeekMonday = '2026-08-10';
+
 const demoCalendars = [
   { color: 'blue', key: 'work', name: 'Work' },
   { color: 'cyan', key: 'personal', name: 'Personal' },
@@ -263,6 +267,26 @@ const demoEvents = [
   },
 ] satisfies DemoEvent[];
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function utcDay(day: string) {
+  return new Date(`${day}T00:00:00.000Z`);
+}
+
+function currentWeekMonday() {
+  const now = new Date();
+  const monday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
+  return monday;
+}
+
+function shiftToCurrentWeek(day: string, weekMonday: Date) {
+  const offset = Math.round((utcDay(day).getTime() - utcDay(anchorWeekMonday).getTime()) / DAY_MS);
+  const shifted = new Date(weekMonday);
+  shifted.setUTCDate(shifted.getUTCDate() + offset);
+  return shifted;
+}
+
 config({ path: '.env.local' });
 
 const prisma = new PrismaClient({
@@ -284,11 +308,13 @@ async function main() {
     calendarIds[calendar.key] = created.id;
   }
 
+  const weekMonday = currentWeekMonday();
+
   await prisma.calendarEvent.createMany({
     data: demoEvents.map(event => ({
       allDay: event.allDay,
       calendarId: calendarIds[event.calendar],
-      day: new Date(`${event.day}T00:00:00.000Z`),
+      day: shiftToCurrentWeek(event.day, weekMonday),
       demo: true,
       description: event.description,
       duration: event.duration,

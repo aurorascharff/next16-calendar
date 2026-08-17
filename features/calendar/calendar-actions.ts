@@ -76,7 +76,7 @@ function validTimedDuration(duration: number) {
   return duration >= 15 && duration <= 24 * 60;
 }
 
-export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
+async function moveEvent({ day, sourceId, start }: MoveEventInput) {
   const user = await verifyAuth();
   const event = await findEvent(sourceId);
   if (!event) return { error: 'This event no longer exists.' };
@@ -112,7 +112,7 @@ export async function moveEvent({ day, sourceId, start }: MoveEventInput) {
   return { data: updated };
 }
 
-export async function createEvent(input: CreateEventInput) {
+async function createEvent(input: CreateEventInput) {
   const title = input.title.trim();
   const allDay = Boolean(input.allDay);
   if (!title) return { error: 'Add a title before saving the event.' };
@@ -156,7 +156,7 @@ export async function createEvent(input: CreateEventInput) {
   return { data: event };
 }
 
-export async function updateEvent(input: UpdateEventInput) {
+async function updateEvent(input: UpdateEventInput) {
   const title = input.title.trim();
   const allDay = Boolean(input.allDay);
   if (!title || (!allDay && !timePattern.test(input.start))) {
@@ -186,7 +186,7 @@ export async function updateEvent(input: UpdateEventInput) {
   return { data: updated };
 }
 
-export async function resizeEvent({ duration, sourceId }: { duration: number; sourceId: string }) {
+async function resizeEvent({ duration, sourceId }: { duration: number; sourceId: string }) {
   if (!validTimedDuration(duration)) return { error: 'Choose a valid duration.' };
 
   const user = await verifyAuth();
@@ -203,7 +203,7 @@ export async function resizeEvent({ duration, sourceId }: { duration: number; so
   return { data: updated };
 }
 
-export async function deleteEvent(eventId: string) {
+async function deleteEvent(eventId: string) {
   const user = await verifyAuth();
   const event = await findEvent(eventId);
   if (!event) return { error: 'This event no longer exists.' };
