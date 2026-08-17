@@ -151,7 +151,7 @@ function MiniMonthCalendar({
                   className={cn(
                     'grid size-7 place-items-center rounded-full',
                     isToday && 'bg-action font-semibold text-white',
-                    !isToday && isSelected && 'bg-action/15 text-action font-semibold dark:bg-action/25',
+                    !isToday && isSelected && 'bg-action/15 text-action dark:bg-action/25 font-semibold',
                     !isToday && !isSelected && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
                     !isToday && isOutside && 'text-muted/40',
                   )}
