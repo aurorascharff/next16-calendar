@@ -254,10 +254,10 @@
 }
 
 ::view-transition-old(.nav-crossfade) {
-  animation: var(--duration-enter) ease-in-out both opacity-fade reverse;
+  animation: var(--duration-exit) ease-out both opacity-fade reverse;
 }
 ::view-transition-new(.nav-crossfade) {
-  animation: var(--duration-enter) ease-in-out both opacity-fade;
+  animation: var(--duration-exit) ease-out both opacity-fade;
 }
 
 ::view-transition-old(.nav-forward) {
