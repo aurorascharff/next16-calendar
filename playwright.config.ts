@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
+const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL;
+const baseURL = externalBaseURL ?? 'http://localhost:3100';
 
 export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
@@ -18,11 +19,13 @@ export default defineConfig({
     baseURL,
     trace: 'on-first-retry',
   },
-  webServer: {
-    command: 'pnpm dev',
-    reuseExistingServer: true,
-    stdout: 'pipe',
-    url: baseURL,
-  },
+  webServer: externalBaseURL
+    ? undefined
+    : {
+        command: 'pnpm dev --port 3100',
+        reuseExistingServer: false,
+        stdout: 'pipe',
+        url: baseURL,
+      },
   workers: 1,
 });
