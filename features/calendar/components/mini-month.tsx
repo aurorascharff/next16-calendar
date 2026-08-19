@@ -129,16 +129,39 @@ function MiniMonthCalendar({
             const key = dateKey(day);
             const isToday = key === today;
             const inWeek = calendarView === 'week' && weekSet?.has(key);
-            const isSelected = calendarView === 'month' && key === optimisticSelected;
+            const inCurrentRange =
+              calendarView === 'week' ? inWeek : key.slice(0, 7) === optimisticSelected?.slice(0, 7);
             const isOutside = day.getUTCMonth() !== view.month;
+            const className = cn(
+              'relative grid h-7 w-full place-items-center text-xs tabular-nums',
+              inWeek && 'bg-divider/70 dark:bg-divider-dark/80',
+              inWeek && key === firstKey && 'rounded-l-full',
+              inWeek && key === lastKey && 'rounded-r-full',
+            );
+            const dateLabel = (
+              <span
+                className={cn(
+                  'grid size-7 place-items-center rounded-full',
+                  isToday && 'bg-action font-semibold text-white',
+                  !isToday && !inCurrentRange && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
+                  !isToday && isOutside && 'text-muted/40',
+                )}
+              >
+                {day.getUTCDate()}
+              </span>
+            );
+
+            if (inCurrentRange) {
+              return (
+                <span className={className} key={key}>
+                  {dateLabel}
+                </span>
+              );
+            }
+
             return (
               <HoverPrefetchLink
-                className={cn(
-                  'relative grid h-7 w-full place-items-center text-xs tabular-nums',
-                  inWeek && 'bg-divider/70 dark:bg-divider-dark/80',
-                  inWeek && key === firstKey && 'rounded-l-full',
-                  inWeek && key === lastKey && 'rounded-r-full',
-                )}
+                className={className}
                 href={calendarHref(key, calendarView)}
                 key={key}
                 onNavigate={() => {
@@ -147,17 +170,7 @@ function MiniMonthCalendar({
                 }}
                 transitionTypes={['nav-crossfade']}
               >
-                <span
-                  className={cn(
-                    'grid size-7 place-items-center rounded-full',
-                    isToday && 'bg-action font-semibold text-white',
-                    !isToday && isSelected && 'bg-action/15 text-action dark:bg-action/25 font-semibold',
-                    !isToday && !isSelected && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
-                    !isToday && isOutside && 'text-muted/40',
-                  )}
-                >
-                  {day.getUTCDate()}
-                </span>
+                {dateLabel}
               </HoverPrefetchLink>
             );
           })}

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { calendarHref, shiftMonth, shiftWeek } from '../calendar-utils';
+import { calendarHref, getWeekDays, shiftMonth, shiftWeek } from '../calendar-utils';
 import { useTodayKey } from './use-now';
 import type { CalendarView } from '../types/calendar';
 
@@ -58,7 +58,10 @@ export function useCalendarShortcuts({ date, view }: { date: string; view: Calen
           transitionType = 'nav-forward';
           break;
         case 't':
-          destination = today ? calendarHref(today, view) : null;
+          destination =
+            today && !(view === 'week' ? getWeekDays(date).includes(today) : date.slice(0, 7) === today.slice(0, 7))
+              ? calendarHref(today, view)
+              : null;
           break;
       }
 

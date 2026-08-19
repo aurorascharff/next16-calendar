@@ -7,7 +7,7 @@ import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { IconButton } from '@/components/ui/icon-button';
 import { cn } from '@/lib/utils';
-import { calendarHref, shiftMonth, shiftWeek } from '../calendar-utils';
+import { calendarHref, getWeekDays, shiftMonth, shiftWeek } from '../calendar-utils';
 import { useCalendarShortcuts } from '../hooks/use-calendar-shortcuts';
 import { useTodayKey } from '../hooks/use-now';
 import type { CalendarView } from '../types/calendar';
@@ -17,11 +17,16 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
   const previous = view === 'month' ? shiftMonth(date, -1) : shiftWeek(date, -1);
   const next = view === 'month' ? shiftMonth(date, 1) : shiftWeek(date, 1);
   const period = view === 'month' ? 'month' : 'week';
+  const todayIsInCurrentRange = today
+    ? view === 'week'
+      ? getWeekDays(date).includes(today)
+      : date.slice(0, 7) === today.slice(0, 7)
+    : false;
 
   return (
     <Boundary label="CalendarControls" asChild>
       <div className="flex items-center gap-1">
-        {today ? (
+        {today && !todayIsInCurrentRange ? (
           <Button
             aria-keyshortcuts="T"
             className="h-8 px-3"
