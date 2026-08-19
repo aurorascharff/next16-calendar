@@ -129,9 +129,9 @@ function MiniMonthCalendar({
             const key = dateKey(day);
             const isToday = key === today;
             const inWeek = calendarView === 'week' && weekSet?.has(key);
-            const inCurrentRange =
-              calendarView === 'week' ? inWeek : key.slice(0, 7) === optimisticSelected?.slice(0, 7);
             const isOutside = day.getUTCMonth() !== view.month;
+            const inCurrentRange =
+              !isOutside && (calendarView === 'week' ? inWeek : key.slice(0, 7) === optimisticSelected?.slice(0, 7));
             const className = cn(
               'relative grid h-7 w-full place-items-center text-xs tabular-nums',
               inWeek && 'bg-divider/70 dark:bg-divider-dark/80',

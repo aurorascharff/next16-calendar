@@ -36,7 +36,11 @@ export function CalendarControls({ date, view }: { date: string; view: CalendarV
             Today
           </Button>
         ) : (
-          <Button className="h-8 px-3" disabled variant="ghost">
+          <Button
+            className="h-8 px-3 hover:bg-transparent hover:text-muted dark:hover:bg-transparent dark:hover:text-muted"
+            render={<span />}
+            variant="ghost"
+          >
             Today
           </Button>
         )}
