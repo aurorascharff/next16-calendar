@@ -11,7 +11,7 @@ export type CurrentUser = { handle: string; id: string; name: string };
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   'use cache: private';
-  cacheLife('hours');
+  cacheLife({ stale: Infinity });
 
   const store = await cookies();
   const id = store.get(SESSION_COOKIE)?.value;
