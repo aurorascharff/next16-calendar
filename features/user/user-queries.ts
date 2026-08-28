@@ -5,7 +5,6 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { SESSION_COOKIE } from './session';
-import type { Route } from 'next';
 
 export type CurrentUser = { handle: string; id: string; name: string };
 
@@ -21,6 +20,6 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
 export async function verifyAuth(): Promise<CurrentUser> {
   const user = await getCurrentUser();
-  if (!user) redirect('/logout' as Route);
+  if (!user) redirect('/login');
   return user;
 }

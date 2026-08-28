@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublic = pathname === '/login' || pathname === '/logout' || pathname.startsWith('/book');
+  const isPublic = pathname === '/login' || pathname.startsWith('/book');
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
   if (!hasSession && !isPublic) return NextResponse.redirect(new URL('/login', request.url));
