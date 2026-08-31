@@ -68,9 +68,7 @@ function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
         <div className="relative min-h-0 flex-1 overflow-hidden">
           <ErrorBoundary compact title="Calendars unavailable">
             <AnimatedSuspense fallback={<CalendarListFallback expanded={expanded} />}>
-              <div className="h-full [scrollbar-gutter:stable] overflow-y-auto overscroll-contain pb-6">
-                <CalendarList expanded={expanded} />
-              </div>
+              <CalendarList expanded={expanded} />
             </AnimatedSuspense>
           </ErrorBoundary>
           <div
