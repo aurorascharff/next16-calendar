@@ -150,7 +150,7 @@ export function CalendarMonthFrame({ children, date, days }: { children: ReactNo
           return (
             <div
               className={cn(
-                'group border-divider dark:border-divider-dark relative overflow-hidden border-r border-b p-1 sm:p-1.5',
+                'group border-divider dark:border-divider-dark relative overflow-hidden border-r border-b p-1 transition-colors duration-200 ease-out motion-reduce:transition-none sm:p-1.5',
                 day === today && 'bg-action/[0.07] dark:bg-action/10',
                 outside && day !== today && 'bg-card/25 dark:bg-card-dark/20',
               )}
@@ -166,7 +166,7 @@ export function CalendarMonthFrame({ children, date, days }: { children: ReactNo
               <div className="pointer-events-none relative z-10 mb-0.5 flex h-7 items-center justify-between pl-1">
                 <span
                   className={cn(
-                    'grid size-6 place-items-center rounded-full text-xs font-medium tabular-nums',
+                    'grid size-6 place-items-center rounded-full text-xs font-medium tabular-nums transition-colors duration-200 ease-out motion-reduce:transition-none',
                     day === today && 'bg-action font-semibold text-white',
                     outside && day !== today && 'text-muted/45',
                   )}

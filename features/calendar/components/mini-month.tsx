@@ -141,7 +141,7 @@ function MiniMonthCalendar({
             const dateLabel = (
               <span
                 className={cn(
-                  'grid size-7 place-items-center rounded-full',
+                  'grid size-7 place-items-center rounded-full transition-colors duration-200 ease-out motion-reduce:transition-none',
                   isToday && 'bg-action font-semibold text-white',
                   !isToday && !inCurrentRange && 'hover:bg-divider/80 dark:hover:bg-divider-dark',
                   !isToday && isOutside && 'text-muted/40',

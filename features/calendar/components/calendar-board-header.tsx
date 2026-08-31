@@ -65,7 +65,7 @@ function CalendarAllDayRow({
         return (
           <div
             className={cn(
-              'border-divider dark:border-divider-dark flex min-w-0 flex-col gap-0.5 border-r p-1',
+              'border-divider dark:border-divider-dark flex min-w-0 flex-col gap-0.5 border-r p-1 transition-colors duration-200 ease-out motion-reduce:transition-none',
               day === todayKey && 'bg-action/[0.07] dark:bg-action/10',
             )}
             key={day}

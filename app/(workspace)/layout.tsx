@@ -70,7 +70,7 @@ function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
           />
         </div>
       </div>
-      <div className="mt-2">
+      <div className="mt-2 shrink-0">
         <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t">
           <AnimatedSuspense fallback={<div className={expanded ? 'h-[60px]' : 'h-[92px] lg:h-[60px]'} />}>
             <CurrentUserFooter expanded={expanded} />

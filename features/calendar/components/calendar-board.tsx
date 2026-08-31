@@ -160,7 +160,7 @@ export function CalendarBoardFrame({
             return (
               <div
                 className={cn(
-                  'border-divider dark:border-divider-dark h-12 border-r px-0.5 py-1.5 sm:h-10 sm:px-3',
+                  'border-divider dark:border-divider-dark h-12 border-r px-0.5 py-1.5 transition-colors duration-200 ease-out motion-reduce:transition-none sm:h-10 sm:px-3',
                   isToday && 'bg-action/[0.07] dark:bg-action/10',
                 )}
                 key={index}
@@ -169,7 +169,7 @@ export function CalendarBoardFrame({
                   <div className="flex min-w-0 flex-col items-center justify-center gap-0.5 sm:flex-row sm:justify-start sm:gap-1.5">
                     <span
                       className={cn(
-                        'text-[9px] leading-none font-medium uppercase sm:text-[11px] sm:leading-normal',
+                        'text-[9px] leading-none font-medium uppercase transition-colors duration-200 ease-out motion-reduce:transition-none sm:text-[11px] sm:leading-normal',
                         isToday ? 'text-black dark:text-white' : 'text-muted',
                       )}
                     >
@@ -177,7 +177,7 @@ export function CalendarBoardFrame({
                     </span>
                     <span
                       className={cn(
-                        'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-semibold tabular-nums sm:h-7 sm:min-w-7 sm:px-1.5 sm:text-base',
+                        'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-semibold tabular-nums transition-colors duration-200 ease-out motion-reduce:transition-none sm:h-7 sm:min-w-7 sm:px-1.5 sm:text-base',
                         isToday && 'bg-action text-white',
                       )}
                     >
