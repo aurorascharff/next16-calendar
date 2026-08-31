@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { getCalendarDate } from '@/features/calendar/calendar-queries';
 import { formatMonth } from '@/features/calendar/calendar-utils';
@@ -39,24 +40,24 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
   return (
     <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
       <CalendarEventsProvider>
-        <Suspense fallback={<CalendarHeaderSkeleton />}>
+        <AnimatedSuspense fallback={<CalendarHeaderSkeleton />}>
           {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
             const calendarView = toView(view);
             return (
               <CalendarHeader
                 date={date}
                 month={
-                  <Suspense fallback={<CalendarHeaderMonthSkeleton />}>
+                  <AnimatedSuspense fallback={<CalendarHeaderMonthSkeleton />}>
                     <CalendarHeaderMonth date={date} view={calendarView} />
-                  </Suspense>
+                  </AnimatedSuspense>
                 }
                 view={calendarView}
               />
             );
           })}
-        </Suspense>
+        </AnimatedSuspense>
         <ErrorBoundary title="Calendar unavailable">
-          <Suspense fallback={<CalendarViewFallback />}>
+          <AnimatedSuspense fallback={<CalendarViewFallback />}>
             {Promise.all([params, searchParams]).then(([{ date }, { view }]) => {
               const calendarView = toView(view);
               return calendarView === 'month' ? (
@@ -77,7 +78,7 @@ export default function CalendarPage({ params, searchParams }: PageProps<'/calen
                 </CalendarWeekScroll>
               );
             })}
-          </Suspense>
+          </AnimatedSuspense>
         </ErrorBoundary>
       </CalendarEventsProvider>
     </main>

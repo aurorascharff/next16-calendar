@@ -1,4 +1,3 @@
-import { ViewTransition } from 'react';
 import { CalendarSidebarBrand, WorkspaceNavigationLinks } from '@/components/calendar-navigation';
 import { MobileCalendarSidebar } from '@/components/mobile-calendar-sidebar';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
@@ -14,12 +13,22 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   return (
     <CalendarVisibilityProvider>
       <div className="bg-surface dark:bg-surface-dark flex min-h-svh md:h-dvh md:min-h-0">
-        <ViewTransition name="sidebar" default="none">
-          <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-[4.5rem] shrink-0 flex-col items-center border-r p-3 md:flex lg:w-64 lg:items-stretch">
+        <div className="hidden h-dvh w-[4.5rem] shrink-0 flex-col md:flex lg:w-64">
+          <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark flex min-h-0 flex-1 flex-col items-center border-r p-3 lg:items-stretch">
             <CalendarSidebarContent />
           </aside>
-        </ViewTransition>
-        <MobileCalendarSidebar sidebar={<CalendarSidebarContent expanded />}>{children}</MobileCalendarSidebar>
+          <CalendarSidebarFooter />
+        </div>
+        <MobileCalendarSidebar
+          sidebar={
+            <>
+              <CalendarSidebarContent expanded />
+              <CalendarSidebarFooter expanded />
+            </>
+          }
+        >
+          {children}
+        </MobileCalendarSidebar>
       </div>
     </CalendarVisibilityProvider>
   );
@@ -70,13 +79,23 @@ function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
           />
         </div>
       </div>
-      <div className="mt-2 shrink-0">
-        <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t">
-          <AnimatedSuspense fallback={<div className={expanded ? 'h-[60px]' : 'h-[92px] lg:h-[60px]'} />}>
-            <CurrentUserFooter expanded={expanded} />
-          </AnimatedSuspense>
-        </div>
-      </div>
     </>
+  );
+}
+
+function CalendarSidebarFooter({ expanded = false }: { expanded?: boolean }) {
+  return (
+    <div
+      className={
+        expanded
+          ? 'border-divider dark:border-divider-dark -mx-3 mt-2 -mb-3 flex-none border-t'
+          : 'border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark flex-none border-t border-r'
+      }
+      style={expanded ? undefined : { viewTransitionName: 'sidebar' }}
+    >
+      <AnimatedSuspense fallback={<div className={expanded ? 'h-[60px]' : 'h-[92px] lg:h-[60px]'} />}>
+        <CurrentUserFooter expanded={expanded} />
+      </AnimatedSuspense>
+    </div>
   );
 }

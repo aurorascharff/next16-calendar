@@ -111,7 +111,7 @@ export function DayColumn({
   return (
     <div
       className={cn(
-        'relative transition-colors duration-200 ease-out motion-reduce:transition-none [-webkit-touch-callout:none]',
+        'relative transition-[background-color] duration-200 ease-out [-webkit-touch-callout:none] motion-reduce:transition-none',
         renderGrid && 'border-divider dark:border-divider-dark border-r',
         isToday && 'bg-action/[0.07] dark:bg-action/10',
       )}

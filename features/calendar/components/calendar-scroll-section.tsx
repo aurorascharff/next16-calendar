@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, ViewTransition } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { FlowMark } from '@/components/ui/flow-mark';
 import { DEFAULT_SCROLL_TOP } from '../utils/grid';
@@ -16,13 +16,11 @@ export function CalendarBoardViewport({ children }: { children: ReactNode }) {
 
 export function CalendarViewFallback() {
   return (
-    <ViewTransition enter="auto" exit="auto" default="none">
-      <CalendarBoardViewport>
-        <div className="grid min-h-0 flex-1 place-items-center" role="status" aria-label="Loading calendar view">
-          <FlowMark animated className="size-28 opacity-70 drop-shadow-[0_12px_28px_rgb(27_80_255/0.16)]" />
-        </div>
-      </CalendarBoardViewport>
-    </ViewTransition>
+    <CalendarBoardViewport>
+      <div className="grid min-h-0 flex-1 place-items-center" role="status" aria-label="Loading calendar view">
+        <FlowMark animated className="size-28 opacity-70 drop-shadow-[0_12px_28px_rgb(27_80_255/0.16)]" />
+      </div>
+    </CalendarBoardViewport>
   );
 }
 
