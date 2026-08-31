@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, ViewTransition } from 'react';
 import { CalendarSidebarBrand, WorkspaceNavigationLinks } from '@/components/calendar-navigation';
 import { MobileCalendarSidebar } from '@/components/mobile-calendar-sidebar';
 import { Crossfade } from '@/components/ui/crossfade';
@@ -14,12 +14,11 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   return (
     <CalendarVisibilityProvider>
       <div className="bg-surface dark:bg-surface-dark flex min-h-svh md:h-dvh md:min-h-0">
-        <aside
-          className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-[4.5rem] shrink-0 flex-col items-center border-r p-3 md:flex lg:w-64 lg:items-stretch"
-          style={{ viewTransitionName: 'sidebar' }}
-        >
-          <CalendarSidebarContent />
-        </aside>
+        <ViewTransition name="sidebar" default="none">
+          <aside className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark hidden h-dvh w-[4.5rem] shrink-0 flex-col items-center border-r p-3 md:flex lg:w-64 lg:items-stretch">
+            <CalendarSidebarContent />
+          </aside>
+        </ViewTransition>
         <MobileCalendarSidebar sidebar={<CalendarSidebarContent expanded />}>{children}</MobileCalendarSidebar>
       </div>
     </CalendarVisibilityProvider>
@@ -34,7 +33,9 @@ function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
       <div className={expanded ? 'mt-6 px-1' : 'mt-6 hidden px-1 lg:block'}>
         <ErrorBoundary compact title="Mini calendar unavailable">
           <Suspense fallback={<MiniMonthSkeleton />}>
-            <MiniMonth />
+            <Crossfade>
+              <MiniMonth />
+            </Crossfade>
           </Suspense>
         </ErrorBoundary>
       </div>

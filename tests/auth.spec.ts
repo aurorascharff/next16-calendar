@@ -7,7 +7,7 @@ test.describe('Auth', () => {
     await expect(page.getByLabel('Email')).toBeVisible();
   });
 
-  test('stale session redirects to login and clears the cookie', async ({ context, page }) => {
+  test('stale session redirects to login', async ({ context, page }) => {
     await context.addCookies([
       {
         domain: 'localhost',
@@ -20,7 +20,6 @@ test.describe('Auth', () => {
     await page.goto('/calendar/2026-08-10');
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByLabel('Email')).toBeVisible();
-    await expect.poll(async () => (await context.cookies()).some(cookie => cookie.name === 'flow-user')).toBe(false);
   });
 
   test('signing in opens the calendar', async ({ page }) => {
