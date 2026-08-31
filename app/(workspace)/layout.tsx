@@ -1,7 +1,7 @@
-import { Suspense, ViewTransition } from 'react';
+import { ViewTransition } from 'react';
 import { CalendarSidebarBrand, WorkspaceNavigationLinks } from '@/components/calendar-navigation';
 import { MobileCalendarSidebar } from '@/components/mobile-calendar-sidebar';
-import { Crossfade } from '@/components/ui/crossfade';
+import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { CalendarList } from '@/features/calendar/components/calendar-list';
 import { CalendarManagerSkeleton, NewCalendarButton } from '@/features/calendar/components/calendar-manager';
@@ -32,11 +32,9 @@ function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
       <WorkspaceNavigationLinks expanded={expanded} />
       <div className={expanded ? 'mt-6 px-1' : 'mt-6 hidden px-1 lg:block'}>
         <ErrorBoundary compact title="Mini calendar unavailable">
-          <Suspense fallback={<MiniMonthSkeleton />}>
-            <Crossfade>
-              <MiniMonth />
-            </Crossfade>
-          </Suspense>
+          <AnimatedSuspense fallback={<MiniMonthSkeleton />}>
+            <MiniMonth />
+          </AnimatedSuspense>
         </ErrorBoundary>
       </div>
       <div className="mt-6 flex min-h-0 w-full flex-1 flex-col">
@@ -61,11 +59,9 @@ function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
         <div className="relative min-h-0 flex-1 overflow-hidden">
           <div className="h-full [scrollbar-gutter:stable] overflow-y-auto overscroll-contain pb-6">
             <ErrorBoundary compact title="Calendars unavailable">
-              <Suspense fallback={<CalendarManagerSkeleton expanded={expanded} />}>
-                <Crossfade>
-                  <CalendarList expanded={expanded} />
-                </Crossfade>
-              </Suspense>
+              <AnimatedSuspense fallback={<CalendarManagerSkeleton expanded={expanded} />}>
+                <CalendarList expanded={expanded} />
+              </AnimatedSuspense>
             </ErrorBoundary>
           </div>
           <div
@@ -76,9 +72,9 @@ function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
       </div>
       <div className="mt-2">
         <div className="border-divider dark:border-divider-dark -mx-3 -mb-3 border-t">
-          <Suspense fallback={<div className={expanded ? 'h-[60px]' : 'h-[92px] lg:h-[60px]'} />}>
+          <AnimatedSuspense fallback={<div className={expanded ? 'h-[60px]' : 'h-[92px] lg:h-[60px]'} />}>
             <CurrentUserFooter expanded={expanded} />
-          </Suspense>
+          </AnimatedSuspense>
         </div>
       </div>
     </>

@@ -1,6 +1,5 @@
-import { Suspense } from 'react';
 import { MobileCalendarSidebarTrigger } from '@/components/mobile-calendar-sidebar';
-import { Crossfade } from '@/components/ui/crossfade';
+import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import {
   BookingLinkCard,
@@ -27,19 +26,15 @@ export default function BookingPage() {
       </header>
       <section className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-8 sm:px-6">
         <BookingLinkCard>
-          <Suspense fallback={<BookingSectionSkeleton />}>
-            <Crossfade>
-              <BookingLinkDetails />
-            </Crossfade>
-          </Suspense>
+          <AnimatedSuspense fallback={<BookingSectionSkeleton />}>
+            <BookingLinkDetails />
+          </AnimatedSuspense>
         </BookingLinkCard>
         <BookingSettingsCard>
           <ErrorBoundary title="Settings unavailable">
-            <Suspense fallback={<BookingSectionSkeleton />}>
-              <Crossfade>
-                <BookingSettings />
-              </Crossfade>
-            </Suspense>
+            <AnimatedSuspense fallback={<BookingSectionSkeleton />}>
+              <BookingSettings />
+            </AnimatedSuspense>
           </ErrorBoundary>
         </BookingSettingsCard>
       </section>
