@@ -2,8 +2,8 @@ import { CalendarSidebarBrand, WorkspaceNavigationLinks } from '@/components/cal
 import { MobileCalendarSidebar } from '@/components/mobile-calendar-sidebar';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import ErrorBoundary from '@/components/ui/error-boundary';
-import { CalendarList } from '@/features/calendar/components/calendar-list';
-import { CalendarManagerSkeleton, NewCalendarButton } from '@/features/calendar/components/calendar-manager';
+import { CalendarList, CalendarListFallback } from '@/features/calendar/components/calendar-list';
+import { NewCalendarButton } from '@/features/calendar/components/calendar-manager';
 import { MiniMonth, MiniMonthSkeleton } from '@/features/calendar/components/mini-month';
 import { CurrentUserFooter } from '@/features/user/components/current-user-footer';
 import { CalendarVisibilityProvider } from '@/providers/calendar-visibility-provider';
@@ -66,13 +66,13 @@ function CalendarSidebarContent({ expanded = false }: { expanded?: boolean }) {
           <NewCalendarButton />
         </div>
         <div className="relative min-h-0 flex-1 overflow-hidden">
-          <div className="h-full [scrollbar-gutter:stable] overflow-y-auto overscroll-contain pb-6">
-            <ErrorBoundary compact title="Calendars unavailable">
-              <AnimatedSuspense fallback={<CalendarManagerSkeleton expanded={expanded} />}>
+          <ErrorBoundary compact title="Calendars unavailable">
+            <AnimatedSuspense fallback={<CalendarListFallback expanded={expanded} />}>
+              <div className="h-full [scrollbar-gutter:stable] overflow-y-auto overscroll-contain pb-6">
                 <CalendarList expanded={expanded} />
-              </AnimatedSuspense>
-            </ErrorBoundary>
-          </div>
+              </div>
+            </AnimatedSuspense>
+          </ErrorBoundary>
           <div
             aria-hidden
             className="from-surface dark:from-surface-dark pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t to-transparent"
