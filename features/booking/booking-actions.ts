@@ -6,6 +6,7 @@ import { dateKey, getWeekDays, isDateKey, timeToMinutes } from '@/features/calen
 import { matchesRecurrence } from '@/features/calendar/utils/recurrence';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
+import { moderateText } from '@/lib/moderation';
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -94,6 +95,9 @@ export async function bookSlot({
     return { error: 'That time is no longer free. Choose another slot.' };
   }
 
+  const flagged = await moderateText([name, meetingTitle].join('\n'));
+  if (flagged) return { error: flagged };
+
   const startsAt = new Date(`${day}T${slot}:00.000Z`);
   try {
     await prisma.$transaction(async tx => {
@@ -169,6 +173,9 @@ export async function updateBookingAvailability(input: AvailabilityInput) {
     where: { id: calendarId, isDemo: false, userId: user.id },
   });
   if (!calendar) return { error: 'Choose one of your calendars for bookings.' };
+
+  const flagged = await moderateText(title);
+  if (flagged) return { error: flagged };
 
   const page = await prisma.bookingPage.upsert({
     create: {

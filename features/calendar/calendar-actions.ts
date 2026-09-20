@@ -4,6 +4,7 @@ import { updateTag } from 'next/cache';
 import type { EventChange } from '@/features/calendar/types/calendar';
 import { verifyAuth } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
+import { moderateText } from '@/lib/moderation';
 import { dateKey, getWeekDays, isDateKey } from './calendar-utils';
 import { isCalendarColor } from './utils/colors';
 import { recurrenceAfterMove, WEEKDAY_NAMES } from './utils/recurrence';
@@ -137,6 +138,9 @@ async function createEvent(input: CreateEventInput) {
   const recurrence = input.recurrence && RECURRENCE_VALUES.has(input.recurrence) ? input.recurrence : null;
   const description = input.description?.trim() || null;
 
+  const flagged = await moderateText([title, description].filter(Boolean).join('\n'));
+  if (flagged) return { error: flagged };
+
   const event = await prisma.calendarEvent.create({
     data: {
       calendarId: calendar.id,
@@ -169,6 +173,9 @@ async function updateEvent(input: UpdateEventInput) {
   if (!event) return { error: 'This event no longer exists.' };
   if (event.demo) return { error: 'Create your own calendar to make changes.' };
   if (event.userId !== user.id) return { error: 'This event is not available.' };
+
+  const flagged = await moderateText([title, input.description].filter(Boolean).join('\n'));
+  if (flagged) return { error: flagged };
 
   const updated = await prisma.calendarEvent.update({
     data: {
@@ -224,6 +231,9 @@ export async function createCalendar({ color, name }: { color: string; name: str
 
   const user = await verifyAuth();
 
+  const flagged = await moderateText(trimmed);
+  if (flagged) return { error: flagged };
+
   const calendar = await prisma.calendar.create({ data: { color, name: trimmed, userId: user.id } });
   updateTag('calendars');
   updateTag('calendar-events');
@@ -241,6 +251,9 @@ export async function updateCalendar({ color, id, name }: { color: string; id: s
   if (!calendar) return { error: 'This calendar no longer exists.' };
   if (calendar.isDemo) return { error: 'Create your own calendar to make changes.' };
   if (calendar.userId !== user.id) return { error: 'This calendar is not available.' };
+
+  const flagged = await moderateText(trimmed);
+  if (flagged) return { error: flagged };
 
   const updated = await prisma.calendar.update({ data: { color, name: trimmed }, where: { id } });
   updateTag('calendars');

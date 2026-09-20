@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   typedRoutes: true,
   experimental: {
+    agentFeedback: true,
     inlineCss: true,
     useOffline: true,
   },
